@@ -1,0 +1,875 @@
+<!doctype html>
+<html lang="en" data-lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SwabodhiniCare Role Flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Mockup only: production self-hosts these fonts (no Google Fonts). -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@500;600&family=Mukta+Malar:wght@600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="mockups.css">
+<link rel="stylesheet" href="flow.css">
+</head>
+<body>
+
+<!-- Icon sprite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17v.5"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/></symbol>
+  <symbol id="i-sig" viewBox="0 0 170 60"><path d="M8 44c10-30 22-36 20-10s-6 22 4 4 16-26 18-6 6 14 14-2 10-14 14 0 8 8 16-6c6-6 10-4 12 4M40 52c30-4 70-6 110-8"/></symbol>
+  <symbol id="i-sig2" viewBox="0 0 170 60"><path d="M10 40c8-18 18-24 22-12s-10 20 2 14 12-22 20-10-2 16 8 8 10-18 18-6 6 10 14 2 12-10 18-2M30 50c40-2 80-4 120-2"/></symbol>
+</svg>
+
+<div class="page">
+
+  <header class="page-head">
+    <div>
+      <h1>One application, start to finish</h1>
+      <p>Follow Arjun Karthik's application (<span class="mono">APP-2026-0042</span>) from the first meeting with his mother to the Director's signature. Each step shows who acts, what they enter, what the app does by itself, and the screen they use.</p>
+    </div>
+    <div class="page-tools">
+      <div class="page-links"><a class="btn btn-outline" href="index.html"><svg class="icon" aria-hidden="true"><use href="#i-left"/></svg>All screens</a></div>
+      <span class="sample-chip">Sample data</span>
+      <div class="choices two" role="group" aria-label="Language">
+        <button class="choice" type="button" data-set-lang="ta">தமிழ்</button>
+        <button class="choice" type="button" data-set-lang="en">English</button>
+      </div>
+      <div class="choices two" role="group" aria-label="Appearance">
+        <button class="choice" type="button" data-set-theme="light">Light</button>
+        <button class="choice" type="button" data-set-theme="dark">Dark</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============ WHO DOES WHAT ============ -->
+  <h2 class="section-title">Who does what</h2>
+  <p class="section-lead">Five roles. One person can hold more than one (for example, a Centre Head who also fills in applications). Nobody can approve an application they filled in themselves.</p>
+
+  <div class="roles">
+    <article class="role-card">
+      <span class="role-chip"><span class="ini">AD</span><span class="en">Admin</span><span class="ta">நிர்வாகி</span></span>
+      <dl>
+        <div><dt>Does</dt><dd>Sets up staff accounts, resets forgotten passwords, checks backups and storage.</dd></div>
+        <div><dt>Enters</dt><dd>Staff name, email, mobile, role(s), centre.</dd></div>
+        <div><dt>Does not</dt><dd>Approve applications (unless they also hold an approver role).</dd></div>
+      </dl>
+    </article>
+    <article class="role-card">
+      <span class="role-chip"><span class="ini">TH</span><span class="en">Therapist</span><span class="ta">சிகிச்சையாளர்</span></span>
+      <dl>
+        <div><dt>Does</dt><dd>Meets the parent, fills in the 11-step application, takes the photo and documents, gets the parent's signature, sends it on.</dd></div>
+        <div><dt>Enters</dt><dd>Everything about the applicant, plus their own observations and recommendation.</dd></div>
+        <div><dt>Also</dt><dd>Fixes and resends applications that were sent back.</dd></div>
+      </dl>
+    </article>
+    <article class="role-card">
+      <span class="role-chip"><span class="ini">TY</span><span class="en">Therapy Head</span><span class="ta">சிகிச்சைத் தலைவர்</span></span>
+      <dl>
+        <div><dt>Checks</dt><dd>Clinical fit: is our program right for this person?</dd></div>
+        <div><dt>Enters</dt><dd>Approve, Send back or Reject, with a comment.</dd></div>
+        <div><dt>Also</dt><dd>Sees reports for all centres.</dd></div>
+      </dl>
+    </article>
+    <article class="role-card">
+      <span class="role-chip"><span class="ini">CH</span><span class="en">Centre Head</span><span class="ta">மையத் தலைவர்</span></span>
+      <dl>
+        <div><dt>Checks</dt><dd>Capacity: is there a seat, a batch and staff at this centre?</dd></div>
+        <div><dt>Enters</dt><dd>Approve, Send back or Reject, with a comment.</dd></div>
+        <div><dt>Also</dt><dd>Sees reports; can fill in applications too.</dd></div>
+      </dl>
+    </article>
+    <article class="role-card">
+      <span class="role-chip"><span class="ini">DR</span><span class="en">Director</span><span class="ta">இயக்குநர்</span></span>
+      <dl>
+        <div><dt>Decides</dt><dd>Admit, Waitlist or Reject, then signs with their password.</dd></div>
+        <div><dt>Enters</dt><dd>Decision, optional comment, password. Their signature is uploaded once and stamped automatically.</dd></div>
+        <div><dt>Also</dt><dd>Can reopen a locked application, with a reason.</dd></div>
+      </dl>
+    </article>
+  </div>
+
+  <!-- ============ MAIN PATH ============ -->
+  <h2 class="section-title">The main path</h2>
+  <p class="section-lead">The status an application moves through when every reviewer approves. Each status tells staff whose turn it is.</p>
+  <div class="status-strip">
+    <span class="stamp en">Draft</span><span class="stamp ta">வரைவு</span>
+    <span class="arrow" aria-hidden="true">→</span>
+    <span class="stamp stamp-turn en">Waiting: Therapy Head</span><span class="stamp stamp-turn ta">காத்திருப்பு: சிகிச்சைத் தலைவர்</span>
+    <span class="arrow" aria-hidden="true">→</span>
+    <span class="stamp stamp-turn en">Waiting: Centre Head</span><span class="stamp stamp-turn ta">காத்திருப்பு: மையத் தலைவர்</span>
+    <span class="arrow" aria-hidden="true">→</span>
+    <span class="stamp stamp-turn en">Waiting: Director</span><span class="stamp stamp-turn ta">காத்திருப்பு: இயக்குநர்</span>
+    <span class="arrow" aria-hidden="true">→</span>
+    <span class="stamp stamp-ok en">Admitted</span><span class="stamp stamp-ok ta">சேர்க்கப்பட்டது</span>
+  </div>
+
+  <ol class="journey">
+
+    <!-- ===== STAGE 0: ADMIN ===== -->
+    <li class="stage">
+      <span class="stage-node">0</span>
+      <div class="stage-body">
+        <div class="stage-head">
+          <span class="role-chip"><span class="ini">AD</span><span class="en">Admin · Anand K</span><span class="ta">நிர்வாகி · Anand K</span></span>
+          <h3>Before any application: set up the staff</h3>
+          <span class="stage-when">Once per staff member · 1 Sep 2026</span>
+        </div>
+        <div class="stage-grid">
+          <div class="io">
+            <div class="io-block">
+              <h4>Admin enters</h4>
+              <ul>
+                <li>Full name, email, mobile</li>
+                <li>Role(s): one or more</li>
+                <li>Centre</li>
+              </ul>
+            </div>
+            <div class="io-block">
+              <h4>The app does by itself</h4>
+              <ul>
+                <li>Creates the account and shows a <b>temporary password once</b></li>
+                <li>Makes the person choose their own password at first sign-in</li>
+                <li>Records who created the account (audit log)</li>
+              </ul>
+            </div>
+            <div class="io-block">
+              <h4>The staff member enters</h4>
+              <ul><li>Their new password, typed twice</li></ul>
+            </div>
+          </div>
+          <div class="phones">
+
+            <!-- A1 Add staff + temp password sheet -->
+            <figure>
+              <figcaption><b>A1 · Add a staff member</b>After Create, the temporary password appears once.</figcaption>
+              <div class="phone">
+                <div class="app-bar">
+                  <span class="wordmark">Swabodhini<b>Care</b></span>
+                  <button class="lang-btn" type="button" data-toggle-lang><span class="en">தமிழ்</span><span class="ta">English</span></button>
+                </div>
+                <div class="screen">
+                  <h2><span class="en">Add a staff member</span><span class="ta">பணியாளரைச் சேர்</span></h2>
+                  <div class="field">
+                    <label for="a1-name"><span class="en">Full name</span><span class="ta">முழுப் பெயர்</span></label>
+                    <input class="input" id="a1-name" type="text" value="Priya S">
+                  </div>
+                  <div class="field">
+                    <label for="a1-email"><span class="en">Email</span><span class="ta">மின்னஞ்சல்</span></label>
+                    <input class="input" id="a1-email" type="email" value="priya.s@example.com">
+                  </div>
+                  <div class="field">
+                    <span class="label"><span class="en">Roles (choose one or more)</span><span class="ta">பணிப் பொறுப்புகள் (ஒன்று அல்லது அதற்கு மேல்)</span></span>
+                    <div class="choices list multi">
+                      <button class="choice" type="button" aria-pressed="true"><span class="tick"></span><span class="en">Therapist</span><span class="ta">சிகிச்சையாளர்</span></button>
+                      <button class="choice" type="button" aria-pressed="false"><span class="tick"></span><span class="en">Therapy Head</span><span class="ta">சிகிச்சைத் தலைவர்</span></button>
+                    </div>
+                  </div>
+                </div>
+                <div class="scrim">
+                  <div class="sheet" role="dialog" aria-label="Account created">
+                    <h3><span class="en">Account created for Priya S</span><span class="ta">Priya S-க்குக் கணக்கு உருவாக்கப்பட்டது</span></h3>
+                    <p><span class="en">Temporary password</span><span class="ta">தற்காலிகக் கடவுச்சொல்</span></p>
+                    <span class="temp-pw">kite-4821-mango</span>
+                    <div class="note"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><span><span class="en">This is shown only once. Give it to Priya in person. She will choose her own password when she first signs in.</span><span class="ta">இது ஒருமுறை மட்டுமே காட்டப்படும். Priya-விடம் நேரில் கொடுங்கள். முதல் முறை உள்நுழையும்போது அவர் சொந்தக் கடவுச்சொல்லைத் தேர்ந்தெடுப்பார்.</span></span></div>
+                    <div class="btns"><button class="btn btn-primary" type="button"><span class="en">Done</span><span class="ta">முடிந்தது</span></button></div>
+                  </div>
+                </div>
+              </div>
+            </figure>
+
+            <!-- A2 First sign-in -->
+            <figure>
+              <figcaption><b>A2 · First sign-in (Priya)</b>The temporary password only works once.</figcaption>
+              <div class="phone">
+                <div class="app-bar">
+                  <span class="wordmark">Swabodhini<b>Care</b></span>
+                  <button class="lang-btn" type="button" data-toggle-lang><span class="en">தமிழ்</span><span class="ta">English</span></button>
+                </div>
+                <div class="screen">
+                  <h2><span class="en">Set your own password</span><span class="ta">உங்கள் சொந்தக் கடவுச்சொல்லை அமைக்கவும்</span></h2>
+                  <p class="muted" style="margin:0"><span class="en">Welcome, Priya. You signed in with a temporary password. Choose a new one that only you know.</span><span class="ta">வருக, Priya. நீங்கள் தற்காலிகக் கடவுச்சொல்லுடன் உள்நுழைந்தீர்கள். உங்களுக்கு மட்டும் தெரிந்த புதிய கடவுச்சொல்லைத் தேர்ந்தெடுங்கள்.</span></p>
+                  <div class="field">
+                    <label for="a2-pw"><span class="en">New password</span><span class="ta">புதிய கடவுச்சொல்</span></label>
+                    <div class="with-action">
+                      <input class="input" id="a2-pw" type="password" value="sample-password" autocomplete="new-password">
+                      <button class="btn btn-outline" type="button" data-show-pw="a2-pw" aria-pressed="false"><svg class="icon" aria-hidden="true"><use href="#i-eye"/></svg><span class="en">Show</span><span class="ta">காட்டு</span></button>
+                    </div>
+                    <span class="hint"><span class="en">At least 8 letters or numbers. Don't use your name or phone number.</span><span class="ta">குறைந்தது 8 எழுத்துகள் அல்லது எண்கள். உங்கள் பெயர் அல்லது தொலைபேசி எண்ணைப் பயன்படுத்த வேண்டாம்.</span></span>
+                  </div>
+                  <div class="field">
+                    <label for="a2-pw2"><span class="en">Type it again</span><span class="ta">மீண்டும் தட்டச்சு செய்யவும்</span></label>
+                    <input class="input" id="a2-pw2" type="password" value="sample-password" autocomplete="new-password">
+                  </div>
+                </div>
+                <div class="action-bar single">
+                  <button class="btn btn-primary" type="button"><span class="en">Save password</span><span class="ta">கடவுச்சொல்லைச் சேமி</span></button>
+                </div>
+              </div>
+            </figure>
+
+          </div>
+        </div>
+      </div>
+    </li>
+
+    <!-- ===== STAGE 1: THERAPIST ===== -->
+    <li class="stage">
+      <span class="stage-node">1</span>
+      <div class="stage-body">
+        <div class="stage-head">
+          <span class="role-chip"><span class="ini">TH</span><span class="en">Therapist · Priya S · Velachery</span><span class="ta">சிகிச்சையாளர் · Priya S · வேளச்சேரி</span></span>
+          <h3>Meet the parent and fill in the application</h3>
+          <span class="stage-when">12 Sep 2026 · with Arjun's mother, Anitha K · about 30–40 minutes</span>
+        </div>
+        <div class="stage-grid">
+          <div class="io">
+            <div class="io-block">
+              <h4>Therapist enters (11 steps)</h4>
+              <ul>
+                <li><b>1</b> Centre, enquiry date, how they heard, programs of interest</li>
+                <li><b>2</b> Applicant: name, date of birth, gender, <b>photo</b>, UDID card</li>
+                <li><b>3</b> Parent / guardian: names, phones, address, income band</li>
+                <li><b>4</b> Diagnosis &amp; medical, <b>diagnosis report PDF</b></li>
+                <li><b>5–7</b> Development, current abilities, behaviour (tap choices)</li>
+                <li><b>8–9</b> School and therapy history; parent's concerns</li>
+                <li><b>10</b> Their own observations, suitability, recommended programs</li>
+                <li><b>11</b> Parent's consent and <b>signature on screen</b></li>
+              </ul>
+            </div>
+            <div class="io-block">
+              <h4>The app does by itself</h4>
+              <ul>
+                <li>Gives the number <span class="mono">APP-2026-0042</span> when the form is started</li>
+                <li>Saves every 20 seconds and at every step</li>
+                <li>Works out age from date of birth; shrinks photos</li>
+                <li>Shows which steps still need answers; checks required answers before sending</li>
+                <li>Puts the file in the Therapy Head's queue</li>
+              </ul>
+            </div>
+            <div class="io-block">
+              <h4>Status</h4>
+              <div class="status-change">
+                <span class="stamp en">Draft</span><span class="stamp ta">வரைவு</span>
+                <span class="arrow" aria-hidden="true">→</span>
+                <span class="stamp stamp-turn en">Waiting: Therapy Head</span><span class="stamp stamp-turn ta">காத்திருப்பு: சிகிச்சைத் தலைவர்</span>
+              </div>
+            </div>
+            <p class="ref-note">Steps 2 and 6 are shown in full on the screens page: <a href="index.html">S3 and S4</a>.</p>
+          </div>
+          <div class="phones">
+
+            <!-- T1 Step 1 -->
+            <figure>
+              <figcaption><b>T1 · Step 1: Centre &amp; enquiry</b>The application number exists from the first tap.</figcaption>
+              <div class="phone">
+                <div class="app-bar">
+                  <span class="wordmark">Swabodhini<b>Care</b></span>
+                  <button class="lang-btn" type="button" data-toggle-lang><span class="en">தமிழ்</span><span class="ta">English</span></button>
+                  <button class="menu-btn" type="button"><svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg><span class="en">Menu</span><span class="ta">மெனு</span></button>
+                </div>
+                <div class="screen">
+                  <div class="progress">
+                    <div class="progress-top">
+                      <span class="progress-label"><span class="en">Step 1 of 11</span><span class="ta">படி 1 / 11</span></span>
+                      <span class="app-ref mono">APP-2026-0042</span>
+                    </div>
+                    <div class="ticks" aria-hidden="true"><span class="now"></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+                  </div>
+                  <h2><span class="en">Centre &amp; enquiry</span><span class="ta">மையம் மற்றும் விசாரணை</span></h2>
+                  <div class="field">
+                    <span class="label"><span class="en">Centre <span class="req">(required)</span></span><span class="ta">மையம் <span class="req">(அவசியம்)</span></span></span>
+                    <div class="choices two">
+                      <button class="choice" type="button" aria-pressed="false"><span class="en">Thiruvanmiyur</span><span class="ta">திருவான்மியூர்</span></button>
+                      <button class="choice" type="button" aria-pressed="true"><span class="en">Velachery</span><span class="ta">வேளச்சேரி</span></button>
+                      <button class="choice" type="button" aria-pressed="false"><span class="en">Tondiarpet</span><span class="ta">தண்டையார்பேட்டை</span></button>
+                      <button class="choice" type="button" aria-pressed="false"><span class="en">Selaiyur</span><span class="ta">சேலையூர்</span></button>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <span class="label"><span class="en">Enquiry date</span><span class="ta">விசாரணை தேதி</span></span>
+                    <span class="derived"><span class="en">Today · 12 Sep 2026</span><span class="ta">இன்று · 12 செப் 2026</span></span>
+                  </div>
+                  <div class="field">
+                    <span class="label"><span class="en">How did you hear about us?</span><span class="ta">எங்களைப் பற்றி எப்படித் தெரிந்துகொண்டீர்கள்?</span></span>
+                    <div class="choices list">
+                      <button class="choice" type="button" aria-pressed="true"><span class="tick"></span><span class="en">Doctor</span><span class="ta">மருத்துவர்</span></button>
+                      <button class="choice" type="button" aria-pressed="false"><span class="tick"></span><span class="en">School</span><span class="ta">பள்ளி</span></button>
+                      <button class="choice" type="button" aria-pressed="false"><span class="tick"></span><span class="en">Another parent</span><span class="ta">மற்றொரு பெற்றோர்</span></button>
+                      <button class="choice" type="button" aria-pressed="false"><span class="tick"></span><span class="en">Internet</span><span class="ta">இணையம்</span></button>
+                    </div>
+                  </div>
+                </div>
+                <div class="action-bar">
+                  <button class="btn btn-outline" type="button"><span class="en">Close</span><span class="ta">மூடு</span></button>
+                  <button class="btn btn-primary" type="button"><span class="en">Save &amp; Next</span><span class="ta">சேமித்து அடுத்து</span><svg class="icon" aria-hidden="true"><use href="#i-right"/></svg></button>
+                </div>
+              </div>
+            </figure>
+
+            <!-- T2 All steps -->
+            <figure>
+              <figcaption><b>T2 · All steps</b>Opened from Menu. Shows what's done and jumps to any step.</figcaption>
+              <div class="phone">
+                <div class="app-bar">
+                  <span class="wordmark">Swabodhini<b>Care</b></span>
+                  <button class="lang-btn" type="button" data-toggle-lang><span class="en">தமிழ்</span><span class="ta">English</span></button>
+                </div>
+                <div class="screen">
+                  <div>
+                    <h2>Arjun Karthik</h2>
+                    <p class="app-sub" style="margin:4px 0 0"><span class="mono">APP-2026-0042</span> · <span class="en">10 of 11 steps done</span><span class="ta">11-இல் 10 படிகள் முடிந்தன</span></p>
+                  </div>
+                  <ol class="sec-list">
+                    <li class="done"><a href="#"><span class="node">1</span><span><span class="en">Centre &amp; enquiry</span><span class="ta">மையம் மற்றும் விசாரணை</span></span><span class="sec-state"><span class="en">Done</span><span class="ta">முடிந்தது</span></span></a></li>
+                    <li class="done"><a href="#"><span class="node">2</span><span><span class="en">Applicant details</span><span class="ta">விண்ணப்பதாரர் விவரங்கள்</span></span><span class="sec-state"><span class="en">Done</span><span class="ta">முடிந்தது</span></span></a></li>
+                    <li class="done"><a href="#"><span class="node">3</span><span><span class="en">Parent / guardian</span><span class="ta">பெற்றோர் / பாதுகாவலர்</span></span><span class="sec-state"><span class="en">Done</span><span class="ta">முடிந்தது</span></span></a></li>
+                    <li class="done"><a href="#"><span class="node">4</span><span><span class="en">Diagnosis &amp; medical</span><span class="ta">நோயறிதல் மற்றும் மருத்துவம்</span></span><span class="sec-state"><span class="en">Done</span><span class="ta">முடிந்தது</span></span></a></li>
+                    <li class="done"><a href="#"><span class="node">5</span><span><span class="en">Development</span><span class="ta">வளர்ச்சி வரலாறு</span></span><span class="sec-state"><span class="en">Done</span><span class="ta">முடிந்தது</span></span></a></li>
+                    <li class="done"><a href="#"><span class="node">6</span><span><span class="en">Current abilities</span><span class="ta">தற்போதைய திறன்கள்</span></span><span class="sec-state"><span class="en">Done</span><span class="ta">முடிந்தது</span></span></a></li>
+                    <li class="done"><a href="#"><span class="node">7</span><span><span class="en">Behaviour &amp; senses</span><span class="ta">நடத்தை மற்றும் புலன் உணர்வுகள்</span></span><span class="sec-state"><span class="en">Done</span><span class="ta">முடிந்தது</span></span></a></li>
+                    <li class="done"><a href="#"><span class="node">8</span><span><span class="en">School &amp; therapy</span><span class="ta">கல்வி மற்றும் சிகிச்சை</span></span><span class="sec-state"><span class="en">Done</span><span class="ta">முடிந்தது</span></span></a></li>
+                    <li class="done"><a href="#"><span class="node">9</span><span><span class="en">Parent's concerns</span><span class="ta">பெற்றோரின் கவலைகள்</span></span><span class="sec-state"><span class="en">Done</span><span class="ta">முடிந்தது</span></span></a></li>
+                    <li class="done"><a href="#"><span class="node">10</span><span><span class="en">Therapist's recommendation</span><span class="ta">சிகிச்சையாளர் பரிந்துரை</span></span><span class="sec-state"><span class="en">Done</span><span class="ta">முடிந்தது</span></span></a></li>
+                    <li class="now"><a href="#"><span class="node">11</span><span><span class="en">Consent</span><span class="ta">ஒப்புதல்</span></span><span class="sec-state"><span class="en">Next</span><span class="ta">அடுத்து</span></span></a></li>
+                  </ol>
+                </div>
+                <div class="action-bar single">
+                  <button class="btn btn-primary" type="button"><span class="en">Continue to step 11</span><span class="ta">படி 11-க்குச் செல்</span><svg class="icon" aria-hidden="true"><use href="#i-right"/></svg></button>
+                </div>
+              </div>
+            </figure>
+
+            <!-- T3 Consent -->
+            <figure>
+              <figcaption><b>T3 · Step 11: Consent</b>The parent reads (or is read) the consent and signs with a finger.</figcaption>
+              <div class="phone">
+                <div class="app-bar">
+                  <span class="wordmark">Swabodhini<b>Care</b></span>
+                  <button class="lang-btn" type="button" data-toggle-lang><span class="en">தமிழ்</span><span class="ta">English</span></button>
+                  <button class="menu-btn" type="button"><svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg><span class="en">Menu</span><span class="ta">மெனு</span></button>
+                </div>
+                <div class="screen">
+                  <div class="progress">
+                    <div class="progress-top">
+                      <span class="progress-label"><span class="en">Step 11 of 11</span><span class="ta">படி 11 / 11</span></span>
+                      <span class="saved"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span class="en">Saved 11:14</span><span class="ta">சேமிக்கப்பட்டது 11:14</span></span>
+                    </div>
+                    <div class="ticks" aria-hidden="true"><span class="done"></span><span class="done"></span><span class="done"></span><span class="done"></span><span class="done"></span><span class="done"></span><span class="done"></span><span class="done"></span><span class="done"></span><span class="done"></span><span class="now"></span></div>
+                  </div>
+                  <h2><span class="en">Consent</span><span class="ta">ஒப்புதல்</span></h2>
+                  <p class="consent"><span class="en">I agree that Swabodhini may keep my child's details, photos and reports to assess and support my child. Only Swabodhini staff can see them. I can ask for them to be deleted.</span><span class="ta">என் குழந்தையை மதிப்பீடு செய்யவும் ஆதரிக்கவும், அவரது விவரங்கள், புகைப்படங்கள் மற்றும் அறிக்கைகளை ஸ்வபோதினி வைத்திருக்க நான் ஒப்புக்கொள்கிறேன். ஸ்வபோதினி பணியாளர்கள் மட்டுமே இவற்றைப் பார்க்க முடியும். இவற்றை நீக்கச் சொல்லும் உரிமை எனக்கு உண்டு.</span></p>
+                  <div class="field">
+                    <label for="t3-parent"><span class="en">Parent / guardian name</span><span class="ta">பெற்றோர் / பாதுகாவலர் பெயர்</span></label>
+                    <input class="input" id="t3-parent" type="text" value="Anitha K">
+                  </div>
+                  <div class="field">
+                    <span class="label"><span class="en">Relationship</span><span class="ta">உறவு</span></span>
+                    <div class="choices">
+                      <button class="choice" type="button" aria-pressed="true"><span class="en">Mother</span><span class="ta">தாய்</span></button>
+                      <button class="choice" type="button" aria-pressed="false"><span class="en">Father</span><span class="ta">தந்தை</span></button>
+                      <button class="choice" type="button" aria-pressed="false"><span class="en">Guardian</span><span class="ta">பாதுகாவலர்</span></button>
+                    </div>
+                  </div>
+                  <div class="field">
+                    <span class="label"><span class="en">Parent's signature</span><span class="ta">பெற்றோரின் கையொப்பம்</span></span>
+                    <div class="sigpad">
+                      <svg class="sig" viewBox="0 0 170 60" aria-label="Parent signature"><use href="#i-sig2"/></svg>
+                      <span class="baseline" aria-hidden="true"></span>
+                    </div>
+                    <div class="sigpad-foot">
+                      <span class="hint"><span class="en">Sign with your finger · 12 Sep 2026</span><span class="ta">விரலால் கையொப்பமிடுங்கள் · 12 செப் 2026</span></span>
+                      <button class="btn btn-outline" type="button"><span class="en">Clear</span><span class="ta">அழி</span></button>
+                    </div>
+                  </div>
+                </div>
+                <div class="action-bar">
+                  <button class="btn btn-outline" type="button"><svg class="icon" aria-hidden="true"><use href="#i-left"/></svg><span class="en">Back</span><span class="ta">பின் செல்</span></button>
+                  <button class="btn btn-primary" type="button"><span class="en">Send to Therapy Head</span><span class="ta">சிகிச்சைத் தலைவருக்கு அனுப்பு</span></button>
+                </div>
+              </div>
+            </figure>
+
+            <!-- T4 Confirm send -->
+            <figure>
+              <figcaption><b>T4 · Confirm before sending</b>Plain words about what happens next, and a way back.</figcaption>
+              <div class="phone">
+                <div class="app-bar">
+                  <span class="wordmark">Swabodhini<b>Care</b></span>
+                  <button class="lang-btn" type="button" data-toggle-lang><span class="en">தமிழ்</span><span class="ta">English</span></button>
+                </div>
+                <div class="screen">
+                  <h2><span class="en">Consent</span><span class="ta">ஒப்புதல்</span></h2>
+                  <div class="sigpad"><svg class="sig" viewBox="0 0 170 60" aria-hidden="true"><use href="#i-sig2"/></svg><span class="baseline" aria-hidden="true"></span></div>
+                </div>
+                <div class="scrim">
+                  <div class="sheet" role="dialog" aria-label="Send to Therapy Head">
+                    <h3><span class="en">Send to the Therapy Head?</span><span class="ta">சிகிச்சைத் தலைவருக்கு அனுப்பவா?</span></h3>
+                    <p><span class="en">Lakshmi R will review Arjun's application. You can't edit it after sending, unless it is sent back to you.</span><span class="ta">Lakshmi R அர்ஜுனின் விண்ணப்பத்தைப் பரிசீலிப்பார். அனுப்பிய பிறகு, உங்களுக்குத் திருப்பி அனுப்பப்பட்டால் தவிர, இதைத் திருத்த முடியாது.</span></p>
+                    <div class="btns">
+                      <button class="btn btn-primary" type="button"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span class="en">Yes, send</span><span class="ta">ஆம், அனுப்பு</span></button>
+                      <button class="btn btn-outline" type="button"><span class="en">No, go back</span><span class="ta">இல்லை, பின் செல்</span></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </figure>
+
+          </div>
+        </div>
+      </div>
+    </li>
+
+    <!-- ===== STAGE 2: THERAPY HEAD ===== -->
+    <li class="stage">
+      <span class="stage-node">2</span>
+      <div class="stage-body">
+        <div class="stage-head">
+          <span class="role-chip"><span class="ini">TY</span><span class="en">Therapy Head · Lakshmi R</span><span class="ta">சிகிச்சைத் தலைவர் · Lakshmi R</span></span>
+          <h3>Clinical check</h3>
+          <span class="stage-when">13 Sep 2026 · starts from My Queue (<a class="ref-note" href="index.html">screen S2</a>)</span>
+          <p class="stage-question">“Is our program right for Arjun?”</p>
+        </div>
+        <div class="stage-grid">
+          <div class="io">
+            <div class="io-block">
+              <h4>Therapy Head enters</h4>
+              <ul>
+                <li><b>Approve</b>, <b>Send back</b> or <b>Reject</b></li>
+                <li>Comment: optional to approve, <b>required</b> to send back or reject</li>
+              </ul>
+            </div>
+            <div class="io-block">
+              <h4>The app does by itself</h4>
+              <ul>
+                <li>Records the decision, name, time and a fingerprint of the form</li>
+                <li>Shows it on the routing slip for everyone after</li>
+                <li>Puts the file in the Centre Head's queue</li>
+              </ul>
+            </div>
+            <div class="io-block">
+              <h4>Status</h4>
+              <div class="status-change">
+                <span class="stamp stamp-turn en">Waiting: Therapy Head</span><span class="stamp stamp-turn ta">காத்திருப்பு: சிகிச்சைத் தலைவர்</span>
+                <span class="arrow" aria-hidden="true">→</span>
+                <span class="stamp stamp-turn en">Waiting: Centre Head</span><span class="stamp stamp-turn ta">காத்திருப்பு: மையத் தலைவர்</span>
+              </div>
+            </div>
+          </div>
+          <div class="phones">
+
+            <!-- H1 Review stage 2 -->
+            <figure>
+              <figcaption><b>H1 · Review</b>Key facts first; the routing slip shows it's the Therapy Head's turn.</figcaption>
+              <div class="phone">
+                <div class="app-bar">
+                  <span class="wordmark">Swabodhini<b>Care</b></span>
+                  <button class="lang-btn" type="button" data-toggle-lang><span class="en">தமிழ்</span><span class="ta">English</span></button>
+                  <button class="menu-btn" type="button"><svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg><span class="en">Menu</span><span class="ta">மெனு</span></button>
+                </div>
+                <div class="screen">
+                  <div class="applicant">
+                    <div class="thumb" aria-hidden="true">AK</div>
+                    <div>
+                      <div class="app-name">Arjun Karthik</div>
+                      <div class="app-sub"><span class="en">6 yrs 6 mths · Male · Velachery</span><span class="ta">6 வயது 6 மாதம் · ஆண் · வேளச்சேரி</span></div>
+                      <div class="app-ref mono">APP-2026-0042</div>
+                    </div>
+                  </div>
+                  <div class="panel">
+                    <dl class="facts">
+                      <div><dt><span class="en">Therapist's view</span><span class="ta">சிகிச்சையாளர் கருத்து</span></dt><dd><span class="stamp stamp-ok en">Suitable</span><span class="stamp stamp-ok ta">பொருத்தமானவர்</span></dd></div>
+                      <div><dt><span class="en">Recommended</span><span class="ta">பரிந்துரை</span></dt><dd><span class="en">Special Education, Speech Therapy</span><span class="ta">சிறப்புக் கல்வி, பேச்சு சிகிச்சை</span></dd></div>
+                      <div><dt><span class="en">Safety</span><span class="ta">பாதுகாப்பு</span></dt><dd><span class="flag flag-warn"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><span class="en">Often wanders off</span><span class="ta">அடிக்கடி வெளியே சென்றுவிடுவார்</span></span></dd></div>
+                    </dl>
+                    <button class="btn btn-outline btn-block" type="button"><svg class="icon" aria-hidden="true"><use href="#i-doc"/></svg><span class="en">Read full application</span><span class="ta">முழு விண்ணப்பத்தைப் படிக்கவும்</span></button>
+                  </div>
+                  <ol class="slip">
+                    <li class="is-done">
+                      <span class="node"><svg class="icon" aria-hidden="true" style="width:18px;height:18px"><use href="#i-check"/></svg></span>
+                      <div class="slip-body"><span class="slip-role"><span class="en">Therapist · Priya S</span><span class="ta">சிகிச்சையாளர் · Priya S</span></span><span class="slip-meta"><span class="en">Sent · 12 Sep</span><span class="ta">அனுப்பப்பட்டது · 12 செப்</span></span></div>
+                    </li>
+                    <li class="is-now">
+                      <span class="node">2</span>
+                      <div class="slip-body"><span class="slip-role"><span class="en">Therapy Head · You</span><span class="ta">சிகிச்சைத் தலைவர் · நீங்கள்</span></span></div>
+                    </li>
+                    <li><span class="node">3</span><div class="slip-body"><span class="slip-role"><span class="en">Centre Head</span><span class="ta">மையத் தலைவர்</span></span></div></li>
+                    <li><span class="node">4</span><div class="slip-body"><span class="slip-role"><span class="en">Director</span><span class="ta">இயக்குநர்</span></span></div></li>
+                  </ol>
+                  <div class="field">
+                    <label for="h1-comment"><span class="en">Comment</span><span class="ta">கருத்து</span></label>
+                    <textarea class="input" id="h1-comment" rows="3">Good fit for the morning batch. Review speech again in 3 months.</textarea>
+                  </div>
+                </div>
+                <div class="action-bar stack">
+                  <button class="btn btn-ok full" type="button"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span class="en">Approve</span><span class="ta">ஒப்புதல் அளி</span></button>
+                  <button class="btn btn-warn" type="button"><span class="en">Send back</span><span class="ta">திருப்பி அனுப்பு</span></button>
+                  <button class="btn btn-bad" type="button"><span class="en">Reject</span><span class="ta">நிராகரி</span></button>
+                </div>
+              </div>
+            </figure>
+
+          </div>
+        </div>
+      </div>
+    </li>
+
+    <!-- ===== STAGE 3: CENTRE HEAD ===== -->
+    <li class="stage">
+      <span class="stage-node">3</span>
+      <div class="stage-body">
+        <div class="stage-head">
+          <span class="role-chip"><span class="ini">CH</span><span class="en">Centre Head · Suresh M · Velachery</span><span class="ta">மையத் தலைவர் · Suresh M · வேளச்சேரி</span></span>
+          <h3>Seat and centre check</h3>
+          <span class="stage-when">14 Sep 2026 · the review screen is <a class="ref-note" href="index.html">S6</a></span>
+          <p class="stage-question">“Do we have a seat, a batch and staff for Arjun at Velachery?”</p>
+        </div>
+        <div class="stage-grid">
+          <div class="io">
+            <div class="io-block">
+              <h4>Centre Head enters</h4>
+              <ul>
+                <li><b>Approve</b>, <b>Send back</b> or <b>Reject</b></li>
+                <li>Comment: “Seat available from October.”</li>
+              </ul>
+            </div>
+            <div class="io-block">
+              <h4>The app does by itself</h4>
+              <ul>
+                <li>Asks for confirmation in plain words</li>
+                <li>Records the decision, name, time and form fingerprint</li>
+                <li>Puts the file in the Director's queue</li>
+              </ul>
+            </div>
+            <div class="io-block">
+              <h4>Status</h4>
+              <div class="status-change">
+                <span class="stamp stamp-turn en">Waiting: Centre Head</span><span class="stamp stamp-turn ta">காத்திருப்பு: மையத் தலைவர்</span>
+                <span class="arrow" aria-hidden="true">→</span>
+                <span class="stamp stamp-turn en">Waiting: Director</span><span class="stamp stamp-turn ta">காத்திருப்பு: இயக்குநர்</span>
+              </div>
+            </div>
+          </div>
+          <div class="phones">
+
+            <!-- C1 Approve confirm -->
+            <figure>
+              <figcaption><b>C1 · Confirm approval</b>Shows their comment back to them before it goes to the Director.</figcaption>
+              <div class="phone">
+                <div class="app-bar">
+                  <span class="wordmark">Swabodhini<b>Care</b></span>
+                  <button class="lang-btn" type="button" data-toggle-lang><span class="en">தமிழ்</span><span class="ta">English</span></button>
+                </div>
+                <div class="screen">
+                  <div class="applicant">
+                    <div class="thumb" aria-hidden="true">AK</div>
+                    <div><div class="app-name">Arjun Karthik</div><div class="app-ref mono">APP-2026-0042</div></div>
+                  </div>
+                  <ol class="slip">
+                    <li class="is-done"><span class="node"><svg class="icon" aria-hidden="true" style="width:18px;height:18px"><use href="#i-check"/></svg></span><div class="slip-body"><span class="slip-role">Priya S</span></div></li>
+                    <li class="is-done"><span class="node"><svg class="icon" aria-hidden="true" style="width:18px;height:18px"><use href="#i-check"/></svg></span><div class="slip-body"><span class="slip-role">Lakshmi R</span></div></li>
+                    <li class="is-now"><span class="node">3</span><div class="slip-body"><span class="slip-role"><span class="en">You</span><span class="ta">நீங்கள்</span></span></div></li>
+                  </ol>
+                </div>
+                <div class="scrim">
+                  <div class="sheet" role="dialog" aria-label="Approve and send to the Director">
+                    <h3><span class="en">Approve and send to the Director?</span><span class="ta">ஒப்புதல் அளித்து இயக்குநருக்கு அனுப்பவா?</span></h3>
+                    <p class="muted"><span class="en">Your comment</span><span class="ta">உங்கள் கருத்து</span></p>
+                    <p class="slip-note">“Seat available from October.”</p>
+                    <p><span class="en">Dr. Revathi N will make the final decision.</span><span class="ta">Dr. Revathi N இறுதி முடிவை எடுப்பார்.</span></p>
+                    <div class="btns">
+                      <button class="btn btn-ok" type="button"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span class="en">Yes, approve</span><span class="ta">ஆம், ஒப்புதல் அளி</span></button>
+                      <button class="btn btn-outline" type="button"><span class="en">No, go back</span><span class="ta">இல்லை, பின் செல்</span></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </figure>
+
+          </div>
+        </div>
+      </div>
+    </li>
+
+    <!-- ===== STAGE 4: DIRECTOR ===== -->
+    <li class="stage">
+      <span class="stage-node">4</span>
+      <div class="stage-body">
+        <div class="stage-head">
+          <span class="role-chip"><span class="ini">DR</span><span class="en">Director · Dr. Revathi N</span><span class="ta">இயக்குநர் · Dr. Revathi N</span></span>
+          <h3>Final decision and signature</h3>
+          <span class="stage-when">15 Sep 2026 · the decision screen is <a class="ref-note" href="index.html">S7</a></span>
+          <p class="stage-question">“Do we admit Arjun now, or put him on the waitlist?”</p>
+        </div>
+        <div class="stage-grid">
+          <div class="io">
+            <div class="io-block">
+              <h4>Director enters</h4>
+              <ul>
+                <li><b>Admit</b>, <b>Waitlist</b> or <b>Reject</b> (reason required)</li>
+                <li>Optional comment</li>
+                <li>Their password, to sign</li>
+              </ul>
+            </div>
+            <div class="io-block">
+              <h4>The app does by itself</h4>
+              <ul>
+                <li>Issues registration number <span class="mono">SWB/VLC/2026/0013</span></li>
+                <li>Stamps the Director's stored signature, name and time on the report</li>
+                <li><b>Locks</b> the application: no more edits</li>
+                <li>Records everything in the audit log</li>
+              </ul>
+            </div>
+            <div class="io-block">
+              <h4>Status</h4>
+              <div class="status-change">
+                <span class="stamp stamp-turn en">Waiting: Director</span><span class="stamp stamp-turn ta">காத்திருப்பு: இயக்குநர்</span>
+                <span class="arrow" aria-hidden="true">→</span>
+                <span class="stamp stamp-ok en">Admitted</span><span class="stamp stamp-ok ta">சேர்க்கப்பட்டது</span>
+              </div>
+            </div>
+          </div>
+          <div class="phones">
+
+            <!-- D1 Admitted -->
+            <figure>
+              <figcaption><b>D1 · Admitted</b>What the Director sees straight after signing.</figcaption>
+              <div class="phone">
+                <div class="app-bar">
+                  <span class="wordmark">Swabodhini<b>Care</b></span>
+                  <button class="lang-btn" type="button" data-toggle-lang><span class="en">தமிழ்</span><span class="ta">English</span></button>
+                  <button class="menu-btn" type="button"><svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg><span class="en">Menu</span><span class="ta">மெனு</span></button>
+                </div>
+                <div class="screen success">
+                  <div class="big-check"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></div>
+                  <h2><span class="en">Arjun Karthik is admitted</span><span class="ta">அர்ஜுன் கார்த்திக் சேர்க்கப்பட்டார்</span></h2>
+                  <div class="field" style="justify-items:center">
+                    <span class="label"><span class="en">Registration number</span><span class="ta">பதிவு எண்</span></span>
+                    <span class="mono" style="font-size:1.4rem;font-weight:600;color:var(--primary)">SWB/VLC/2026/0013</span>
+                  </div>
+                  <div class="sig-box" style="justify-items:center; width:100%">
+                    <svg class="sig" viewBox="0 0 170 60" aria-label="Your signature"><use href="#i-sig"/></svg>
+                    <span class="hint"><span class="en">Signed by you · 15 Sep 2026, 10:52</span><span class="ta">உங்களால் கையொப்பமிடப்பட்டது · 15 செப் 2026, 10:52</span></span>
+                  </div>
+                  <div class="note" style="text-align:left"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg><span><span class="en">The application is now locked. Priya S and Suresh M can see your decision.</span><span class="ta">விண்ணப்பம் இப்போது பூட்டப்பட்டது. Priya S மற்றும் Suresh M உங்கள் முடிவைப் பார்க்கலாம்.</span></span></div>
+                  <div class="btns">
+                    <button class="btn btn-primary" type="button"><svg class="icon" aria-hidden="true"><use href="#i-print"/></svg><span class="en">Print the report</span><span class="ta">அறிக்கையை அச்சிடு</span></button>
+                    <button class="btn btn-outline" type="button"><span class="en">Back to queue</span><span class="ta">வரிசைக்குத் திரும்பு</span></button>
+                  </div>
+                </div>
+              </div>
+            </figure>
+
+          </div>
+        </div>
+      </div>
+    </li>
+
+    <!-- ===== STAGE 5: AFTER ===== -->
+    <li class="stage">
+      <span class="stage-node">5</span>
+      <div class="stage-body">
+        <div class="stage-head">
+          <span class="role-chip"><span class="ini">ALL</span><span class="en">Heads, Director, Admin</span><span class="ta">தலைவர்கள், இயக்குநர், நிர்வாகி</span></span>
+          <h3>Records and reports</h3>
+          <span class="stage-when">From 15 Sep 2026 onwards</span>
+        </div>
+        <div class="stage-grid">
+          <div class="io">
+            <div class="io-block">
+              <h4>People enter</h4>
+              <ul><li>Nothing new: only filters (centre, month, status) and Print</li></ul>
+            </div>
+            <div class="io-block">
+              <h4>The app does by itself</h4>
+              <ul>
+                <li>Counts the application in the register and monthly numbers</li>
+                <li>Keeps the Individual Assessment Report ready to print or save as PDF</li>
+                <li>Includes it in the automatic monthly backup on 1 Oct</li>
+              </ul>
+            </div>
+            <div class="io-block">
+              <h4>Status</h4>
+              <div class="status-change"><span class="stamp stamp-ok en">Admitted · locked</span><span class="stamp stamp-ok ta">சேர்க்கப்பட்டது · பூட்டப்பட்டது</span></div>
+            </div>
+          </div>
+          <div class="paths">
+            <a class="path-card" href="index.html#s10" style="color:inherit;text-decoration:none">
+              <h3>S10 · Individual Assessment Report</h3>
+              <p class="muted">A4 report with every step, the approval trail and the Director's signature.</p>
+              <span class="open-link">Open <svg class="icon" aria-hidden="true"><use href="#i-right"/></svg></span>
+            </a>
+            <a class="path-card" href="index.html#s9" style="color:inherit;text-decoration:none">
+              <h3>S9 · Application register</h3>
+              <p class="muted">Counts by centre and every application, with Download Excel.</p>
+              <span class="open-link">Open <svg class="icon" aria-hidden="true"><use href="#i-right"/></svg></span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </li>
+
+  </ol>
+
+  <!-- ============ OTHER PATHS ============ -->
+  <h2 class="section-title">Other paths</h2>
+  <p class="section-lead">Not every application goes straight through. These are the other ways a file can move.</p>
+
+  <div class="alt-row">
+    <div class="paths">
+      <article class="path-card">
+        <h3>Sent back, fixed, sent again</h3>
+        <div class="path-seq">
+          <span class="stamp stamp-turn en">Waiting: Centre Head</span><span class="stamp stamp-turn ta">காத்திருப்பு: மையத் தலைவர்</span>
+          <span class="path-step">→ Send back + comment →</span>
+          <span class="stamp stamp-warn en">Sent back</span><span class="stamp stamp-warn ta">திருப்பி அனுப்பப்பட்டது</span>
+          <span class="path-step">→ therapist fixes →</span>
+          <span class="stamp stamp-turn en">Waiting: Therapy Head</span><span class="stamp stamp-turn ta">காத்திருப்பு: சிகிச்சைத் தலைவர்</span>
+        </div>
+        <p>Any reviewer can send it back. It always <b>starts again at the Therapy Head</b>, so the clinical check sees the changes. Earlier comments stay on the routing slip. See B1.</p>
+      </article>
+
+      <article class="path-card">
+        <h3>Rejected</h3>
+        <div class="path-seq">
+          <span class="path-step">Any review stage → Reject + reason →</span>
+          <span class="stamp stamp-bad en">Rejected</span><span class="stamp stamp-bad ta">நிராகரிக்கப்பட்டது</span>
+        </div>
+        <p>Final. The reason is required and shown to the therapist, who tells the family in person. (No automatic messages to parents in the first version.)</p>
+      </article>
+
+      <article class="path-card">
+        <h3>Waitlisted, admitted later</h3>
+        <div class="path-seq">
+          <span class="path-step">Director → Waitlist →</span>
+          <span class="stamp en">Waitlisted</span><span class="stamp ta">காத்திருப்புப் பட்டியலில்</span>
+          <span class="path-step">→ seat frees up → Director → Admit →</span>
+          <span class="stamp stamp-ok en">Admitted</span><span class="stamp stamp-ok ta">சேர்க்கப்பட்டது</span>
+        </div>
+        <p>The waitlist report shows everyone waiting, by centre and program.</p>
+      </article>
+
+      <article class="path-card">
+        <h3>Withdrawn</h3>
+        <div class="path-seq">
+          <span class="stamp en">Draft</span><span class="stamp ta">வரைவு</span>
+          <span class="path-step">or</span>
+          <span class="stamp stamp-warn en">Sent back</span><span class="stamp stamp-warn ta">திருப்பி அனுப்பப்பட்டது</span>
+          <span class="path-step">→ family decides not to continue →</span>
+          <span class="stamp en">Withdrawn</span><span class="stamp ta">திரும்பப் பெறப்பட்டது</span>
+        </div>
+        <p>The therapist or Admin marks it withdrawn. Nothing is deleted straight away.</p>
+      </article>
+
+      <article class="path-card">
+        <h3>Reopened after signing</h3>
+        <div class="path-seq">
+          <span class="stamp stamp-ok en">Admitted</span><span class="stamp stamp-ok ta">சேர்க்கப்பட்டது</span>
+          <span class="path-step">→ Director or Admin reopens with a reason →</span>
+          <span class="stamp stamp-warn en">Sent back</span><span class="stamp stamp-warn ta">திருப்பி அனுப்பப்பட்டது</span>
+        </div>
+        <p>For corrections after signing. The old signature and fingerprint stay in the history.</p>
+        <span class="assume">To confirm: should a reopened application go through all approvals again?</span>
+      </article>
+    </div>
+
+    <div class="phones">
+      <!-- B1 Sent back -->
+      <figure>
+        <figcaption><b>B1 · Sent back (therapist's view)</b>The reviewer's comment comes first, with the steps to fix.</figcaption>
+        <div class="phone">
+          <div class="app-bar">
+            <span class="wordmark">Swabodhini<b>Care</b></span>
+            <button class="lang-btn" type="button" data-toggle-lang><span class="en">தமிழ்</span><span class="ta">English</span></button>
+            <button class="menu-btn" type="button"><svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg><span class="en">Menu</span><span class="ta">மெனு</span></button>
+          </div>
+          <div class="screen">
+            <div class="applicant">
+              <div class="thumb" aria-hidden="true">NM</div>
+              <div>
+                <div class="app-name">Nila M</div>
+                <div class="app-sub"><span class="en">7 yrs · Female · Velachery</span><span class="ta">7 வயது · பெண் · வேளச்சேரி</span></div>
+                <div class="app-ref mono">APP-2026-0040</div>
+              </div>
+            </div>
+            <div><span class="stamp stamp-warn en">Sent back</span><span class="stamp stamp-warn ta">திருப்பி அனுப்பப்பட்டது</span></div>
+            <div class="banner">
+              <span class="banner-title"><svg class="icon" aria-hidden="true"><use href="#i-alert"/></svg><span class="en">Suresh M (Centre Head) · 11 Sep</span><span class="ta">Suresh M (மையத் தலைவர்) · 11 செப்</span></span>
+              <p>“Please add the diagnosis report (PDF). The photo is blurred, please take it again.”</p>
+            </div>
+            <h3><span class="en">Steps to fix</span><span class="ta">சரிசெய்ய வேண்டிய படிகள்</span></h3>
+            <ol class="sec-list">
+              <li class="fix"><a href="#"><span class="node">2</span><span><span class="en">Applicant details (photo)</span><span class="ta">விண்ணப்பதாரர் விவரங்கள் (புகைப்படம்)</span></span><span class="sec-state"><span class="en">Fix</span><span class="ta">சரிசெய்</span></span></a></li>
+              <li class="fix"><a href="#"><span class="node">4</span><span><span class="en">Diagnosis &amp; medical</span><span class="ta">நோயறிதல் மற்றும் மருத்துவம்</span></span><span class="sec-state"><span class="en">Fix</span><span class="ta">சரிசெய்</span></span></a></li>
+            </ol>
+            <div class="note"><svg class="icon" aria-hidden="true"><use href="#i-right"/></svg><span><span class="en">When you resend, it goes to the Therapy Head again.</span><span class="ta">மீண்டும் அனுப்பும்போது, இது மீண்டும் சிகிச்சைத் தலைவரிடம் செல்லும்.</span></span></div>
+          </div>
+          <div class="action-bar single">
+            <button class="btn btn-primary" type="button"><span class="en">Fix and resend</span><span class="ta">சரிசெய்து மீண்டும் அனுப்பு</span></button>
+          </div>
+        </div>
+      </figure>
+    </div>
+  </div>
+
+  <!-- ============ SUMMARY ============ -->
+  <h2 class="section-title">Summary: inputs at each stage</h2>
+  <p class="section-lead">The whole cycle on one page. Use it to check that nothing is asked twice and nothing is missing.</p>
+  <div class="sum-wrap">
+    <table class="sum">
+      <thead>
+        <tr><th>Stage</th><th>Who</th><th>What they enter</th><th>What the app does by itself</th><th>Status after</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>0</td><td>Admin, then the new staff member</td>
+          <td>Name, email, mobile, role(s), centre · then their own password</td>
+          <td>Creates the account, shows the temporary password once, forces a password change, audit log</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>1</td><td>Therapist (with the parent)</td>
+          <td>11 steps: centre, applicant, parent, diagnosis, development, abilities, behaviour, history, concerns, recommendation, consent · photo, diagnosis PDF, parent's signature</td>
+          <td>Application number, autosave, age from date of birth, photo shrinking, required-answer check, queue for Therapy Head</td>
+          <td><span class="stamp stamp-turn">Waiting: Therapy Head</span></td>
+        </tr>
+        <tr>
+          <td>2</td><td>Therapy Head</td>
+          <td>Approve / Send back / Reject + comment</td>
+          <td>Records decision, name, time, form fingerprint; queue for Centre Head</td>
+          <td><span class="stamp stamp-turn">Waiting: Centre Head</span></td>
+        </tr>
+        <tr>
+          <td>3</td><td>Centre Head</td>
+          <td>Approve / Send back / Reject + comment</td>
+          <td>Same as stage 2; queue for Director</td>
+          <td><span class="stamp stamp-turn">Waiting: Director</span></td>
+        </tr>
+        <tr>
+          <td>4</td><td>Director</td>
+          <td>Admit / Waitlist / Reject + comment + password</td>
+          <td>Registration number, stored signature stamped, application locked, audit log</td>
+          <td><span class="stamp stamp-ok">Admitted</span></td>
+        </tr>
+        <tr>
+          <td>5</td><td>Heads, Director, Admin</td>
+          <td>Filters and Print only</td>
+          <td>Register and monthly counts, A4 report, Excel download, monthly backup</td>
+          <td><span class="stamp stamp-ok">Admitted · locked</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script src="mockups.js"></script>
+</body>
+</html>

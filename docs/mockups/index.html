@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-lang="en">
+<html lang="en" data-lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -40,10 +40,15 @@
       <p>Phone-first mockups for the staff app: sign in, the approval queue, the assessment form, review and signing. Switch the language to see every screen in Tamil.</p>
     </div>
     <div class="page-tools">
+      <a class="btn btn-outline" href="flow.html">Role flow<svg class="icon" aria-hidden="true"><use href="#i-right"/></svg></a>
       <span class="sample-chip">Sample data</span>
       <div class="choices two" role="group" aria-label="Language">
         <button class="choice" type="button" data-set-lang="ta">தமிழ்</button>
         <button class="choice" type="button" data-set-lang="en">English</button>
+      </div>
+      <div class="choices two" role="group" aria-label="Appearance">
+        <button class="choice" type="button" data-set-theme="light">Light</button>
+        <button class="choice" type="button" data-set-theme="dark">Dark</button>
       </div>
     </div>
   </header>
@@ -474,12 +479,60 @@
       </div>
     </figure>
 
+    <!-- S13 Settings -->
+    <figure class="shot">
+      <figcaption><strong>S13 · Settings</strong>Opened from Menu. Light is the default; Dark is a personal choice saved to the account. Try the buttons: they switch this whole page.</figcaption>
+      <div class="phone">
+        <div class="app-bar">
+          <span class="wordmark">Swabodhini<b>Care</b></span>
+          <button class="lang-btn" type="button" data-toggle-lang><span class="en">தமிழ்</span><span class="ta">English</span></button>
+          <button class="menu-btn" type="button"><svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg><span class="en">Menu</span><span class="ta">மெனு</span></button>
+        </div>
+        <div class="screen">
+          <a class="back-link" href="#"><svg class="icon" aria-hidden="true"><use href="#i-left"/></svg><span class="en">Back</span><span class="ta">பின் செல்</span></a>
+          <h2><span class="en">Settings</span><span class="ta">அமைப்புகள்</span></h2>
+
+          <div class="field">
+            <span class="label"><span class="en">Language</span><span class="ta">மொழி</span></span>
+            <div class="choices two">
+              <button class="choice" type="button" data-set-lang="ta">தமிழ்</button>
+              <button class="choice" type="button" data-set-lang="en">English</button>
+            </div>
+          </div>
+
+          <div class="field">
+            <span class="label"><span class="en">Appearance</span><span class="ta">தோற்றம்</span></span>
+            <div class="choices two">
+              <button class="choice" type="button" data-set-theme="light"><span class="en">Light</span><span class="ta">வெளிர்</span></button>
+              <button class="choice" type="button" data-set-theme="dark"><span class="en">Dark</span><span class="ta">அடர்</span></button>
+            </div>
+            <span class="hint"><span class="en">Light is easiest to read in daylight. Dark can be gentler on the eyes at night.</span><span class="ta">பகலில் வெளிர் நிறம் படிக்க எளிது. இரவில் அடர் நிறம் கண்களுக்கு இதமாக இருக்கலாம்.</span></span>
+          </div>
+
+          <div class="note"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg><span><span class="en">Saved to your account, so it stays the same on any phone.</span><span class="ta">உங்கள் கணக்கில் சேமிக்கப்படும்; எந்தக் கைப்பேசியிலும் இதே அமைப்பு இருக்கும்.</span></span></div>
+
+          <div class="panel">
+            <h3><span class="en">Your account</span><span class="ta">உங்கள் கணக்கு</span></h3>
+            <dl class="facts">
+              <div><dt><span class="en">Name</span><span class="ta">பெயர்</span></dt><dd>Lakshmi R</dd></div>
+              <div><dt><span class="en">Role</span><span class="ta">பணிப் பொறுப்பு</span></dt><dd><span class="en">Therapy Head</span><span class="ta">சிகிச்சைத் தலைவர்</span></dd></div>
+              <div><dt><span class="en">Email</span><span class="ta">மின்னஞ்சல்</span></dt><dd>lakshmi.r@example.com</dd></div>
+            </dl>
+            <button class="btn btn-outline btn-block" type="button"><svg class="icon" aria-hidden="true"><use href="#i-lock"/></svg><span class="en">Change password</span><span class="ta">கடவுச்சொல்லை மாற்று</span></button>
+          </div>
+        </div>
+        <div class="action-bar single">
+          <button class="btn btn-bad" type="button"><span class="en">Sign out</span><span class="ta">வெளியேறு</span></button>
+        </div>
+      </div>
+    </figure>
+
   </div>
 
   <h2 class="group-title">Desktop <small>Reports for Heads and the Director · the printed A4 report</small></h2>
 
   <!-- S9 Reports -->
-  <figure class="shot" style="justify-items:stretch">
+  <figure class="shot" id="s9" style="justify-items:stretch">
     <figcaption style="max-width:none"><strong>S9 · Reports: Application register</strong>Counts first, then centres side by side, then every application. The Excel file is built in the browser.</figcaption>
     <div class="wide-wrap">
       <div class="desktop">
@@ -635,7 +688,7 @@
   </figure>
 
   <!-- S10 Print A4 -->
-  <figure class="shot" style="justify-items:stretch; margin-top:40px">
+  <figure class="shot" id="s10" style="justify-items:stretch; margin-top:40px">
     <figcaption style="max-width:none"><strong>S10 · Individual Assessment Report (A4 print)</strong>Printed with the browser's “Save as PDF”. Headings appear in both languages; answers are shown exactly as the staff typed them.</figcaption>
     <div class="wide-wrap">
       <article class="a4" aria-label="A4 report preview">
@@ -715,7 +768,7 @@
     </div>
   </figure>
 
-  <p class="muted" style="margin-top:40px">Still to mock up (from the prompt): S5 Consent with signature pad · S8 Sent-back state · S11 Admin: Users · S12 Admin: Backups &amp; usage · error, offline and conflict states.</p>
+  <p class="muted" style="margin-top:40px">Consent (S5), the sent-back state (S8) and adding a staff member (S11) are on the <a href="flow.html">role flow page</a>. Still to mock up: the S11 staff list, S12 Admin: Backups &amp; usage, and the error, offline and conflict states.</p>
 
 </div>
 

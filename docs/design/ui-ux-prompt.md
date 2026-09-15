@@ -56,6 +56,11 @@ The single job of the app: **move each applicant's file from the first conversat
 - Suggested fonts: **Noto Sans Tamil** or **Mukta Malar** for Tamil; a highly legible sans for English (e.g. **Atkinson Hyperlegible**).
 - Staff may type answers in either language. Show them exactly as typed.
 
+**Appearance**
+- **Light mode is the default.** Design the light theme first.
+- Users can switch to **Dark** in **Settings** (screen S13). The app **never switches by itself** based on the phone's dark-mode setting.
+- Provide the dark theme as the same set of colour tokens with different values. Both themes meet the same contrast rules. **Printed reports are always light.**
+
 **Privacy**
 - This is sensitive data about children. Show only what each screen needs. No child photos on list screens larger than a small thumbnail.
 
@@ -107,7 +112,7 @@ Show the approval route (**Therapist → Therapy Head → Centre Head → Direct
 - Statuses shown as **rubber-stamp style badges** (bordered, slightly tilted, monospaced capitals in English).
 - Numbers such as application and registration numbers in a **monospace** face, like a file reference.
 - Avoid: purple gradients, glassmorphism, dark-mode-only designs, tiny grey text, emoji as icons, dense tables on phones.
-- Provide **light and dark** themes.
+- Light is the main design; the dark theme is a secondary version of the same tokens.
 
 ### 8. Sample data (fictional; use it so designs look real)
 
@@ -141,6 +146,7 @@ Show each phone screen at **390 × 844**. Also show **S1, S4 and S6 in Tamil**.
 | S10 | **Individual Assessment Report** (A4 print) | Heads, Director | Letterhead; app + registration no.; applicant details; summary of each section; therapist recommendation; approval trail table; **Director's signature**; form fingerprint (short hash); page numbers |
 | S11 | **Admin: Users** | Admin | Staff list with roles as chips; add staff; **reset password** (shows a temporary password once); deactivate |
 | S12 | **Admin: Backups & usage** | Admin | Latest monthly backup status (Complete / Running / Failed) with *Open as Excel*; storage meter (e.g. 1.2 GB of 8 GB) and today's upload/download counts against limits; plain-language warning when near a limit |
+| S13 | **Settings** | All | Language (தமிழ் / English); Appearance: **Light** (default) / Dark, with a one-line explanation; the user's name, role(s), email; **Change password**; **Sign out**; a note that settings are saved to their account |
 
 ### 10. States to show
 

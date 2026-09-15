@@ -42,34 +42,9 @@
   color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper: #0D1618;
-    --surface: #15222A;
-    --surface-2: #1B2B33;
-    --ink: #E4EDEF;
-    --ink-2: #A6B8BE;
-    --line: #2E424A;
-    --primary: #62C3D6;
-    --on-primary: #06262E;
-    --primary-soft: #173A43;
-    --marigold: #F2B84B;
-    --marigold-soft: #3A2E12;
-    --on-marigold: #1E1500;
-    --ok: #5DCB93;
-    --on-ok: #062415;
-    --ok-soft: #153526;
-    --warn: #F0B35A;
-    --warn-soft: #3A2A12;
-    --bad: #FF8A80;
-    --on-bad: #3A0906;
-    --bad-soft: #3D1B1A;
-    --frame: #000000;
-    --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 10px 30px rgb(0 0 0 / 35%);
-    color-scheme: dark;
-  }
-}
-
+/* Light is the default for everyone, whatever the phone's own setting.
+   Dark applies only when the user picks it in Settings (data-theme="dark").
+   We deliberately do not follow prefers-color-scheme. */
 :root[data-theme="dark"] {
   --paper: #0D1618;
   --surface: #15222A;

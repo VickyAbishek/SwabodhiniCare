@@ -20,8 +20,27 @@
   try { initial = localStorage.getItem(STORAGE_KEY) || "en"; } catch (e) { /* ignore */ }
   setLang(initial);
 
+  // Theme: light by default; dark only when chosen (mirrors the Settings screen).
+  var THEME_KEY = "sc-mock-theme";
+
+  function setTheme(theme) {
+    var next = theme === "dark" ? "dark" : "light";
+    root.dataset.theme = next;
+    document.querySelectorAll("[data-set-theme]").forEach(function (btn) {
+      btn.setAttribute("aria-pressed", String(btn.dataset.setTheme === next));
+    });
+    try { localStorage.setItem(THEME_KEY, next); } catch (e) { /* keep in-memory choice */ }
+  }
+
+  var initialTheme = "light";
+  try { initialTheme = localStorage.getItem(THEME_KEY) || "light"; } catch (e) { /* ignore */ }
+  setTheme(initialTheme);
+
   document.addEventListener("click", function (event) {
     var target = event.target;
+
+    var themeBtn = target.closest("[data-set-theme]");
+    if (themeBtn) { setTheme(themeBtn.dataset.setTheme); return; }
 
     var langBtn = target.closest("[data-set-lang]");
     if (langBtn) { setLang(langBtn.dataset.setLang); return; }
@@ -45,6 +64,10 @@
     var choice = target.closest(".choice");
     if (choice) {
       var group = choice.closest(".choices");
+      if (group && group.classList.contains("multi")) {
+        choice.setAttribute("aria-pressed", String(choice.getAttribute("aria-pressed") !== "true"));
+        return;
+      }
       if (group) {
         group.querySelectorAll(".choice").forEach(function (c) {
           c.setAttribute("aria-pressed", String(c === choice));

@@ -1,4 +1,4 @@
-# SwabodhiniCare — Design Spec (v0.3, POC)
+# SwabodhiniCare — Design Spec (v0.4, POC)
 
 | | |
 |---|---|
@@ -58,6 +58,7 @@
 | D20 | Alert emails | **Google Apps Script Gmail relay** in the NGO's Google account | Free, and works without moving the domain's DNS (§11.4) |
 | D21 | Alert frequency | **Once per day per alert** until it's resolved (not continuous) | Continuous emails flood the inbox and get ignored or marked as spam; Gmail also allows only 100 recipients a day |
 | D22 | Spending cap | **Enforced in the app at $0**, not a $1 billing cap | Cloudflare can't stop services at a dollar amount, so the usage guard stops R2 use before any billable usage (§11.3) |
+| D23 | Appearance | **Light mode by default for everyone.** Users can switch to Dark in **Settings**; the choice is saved to their profile | Light is easiest to read in daylight. The app never switches by itself, which could confuse older users (§12) |
 
 ---
 
@@ -234,6 +235,7 @@ users (
   kdf_iterations INTEGER NOT NULL DEFAULT 600000,
   must_change_password INTEGER NOT NULL DEFAULT 1,
   preferred_lang TEXT NOT NULL DEFAULT 'ta',   -- 'ta' | 'en'
+  preferred_theme TEXT NOT NULL DEFAULT 'light' CHECK (preferred_theme IN ('light','dark')),
   is_active INTEGER NOT NULL DEFAULT 1,
   failed_logins INTEGER NOT NULL DEFAULT 0,
   locked_until TEXT,
@@ -322,6 +324,7 @@ Every response uses the same envelope: `{ ok: boolean, data: any | null, error: 
 | POST | `/api/auth/prelogin` `{ email }` → `{ salt, iterations }` · `/api/auth/login` `{ email, key }` · `/api/auth/logout` | all |
 | POST | `/api/auth/change-password` `{ current_key, new_salt, new_key }` (both keys derived on the device) | all |
 | GET | `/api/me` | all |
+| PATCH | `/api/me` `{ preferred_lang, preferred_theme }` (Settings screen) | all |
 | GET / POST | `/api/users` · PATCH `/api/users/:id` · POST `/api/users/:id/reset-password` `{ salt, key }` (the Admin's browser derives the temporary password's key) | Admin |
 | GET | `/api/applications?status=&centre=&q=&from=&to=` | role-scoped |
 | POST | `/api/applications` (new draft) | fillers |
@@ -462,8 +465,16 @@ Everything runs on free plans. The one catch: Cloudflare asks for a card before 
 - Confirmations in plain language: *"Send this application to the Therapy Head? You cannot edit it after sending."* with **Yes, send** / **No, go back**.
 - Errors say how to fix them, next to the field, and the screen scrolls to the first error.
 
+### Appearance (light / dark)
+- **Light mode is the default** for everyone, whatever the phone's own setting.
+- Users can switch to **Dark** in **Settings** (Menu → Settings, screen S13). The choice is saved to their profile (`users.preferred_theme`) through `PATCH /api/me`, so it follows them to any device.
+- It's also cached in `localStorage` and applied by a tiny script in `<head>` before the page draws, so the page never flashes the wrong theme while the profile loads.
+- The app **doesn't follow the phone's system setting** (`prefers-color-scheme`). An app that changes colour by itself at night confuses older users, and they may not know how to change it back.
+- Both themes meet the same contrast rules (WCAG AA or better). **Printed reports are always light** (dark text on white).
+- **For developers:** every colour comes from CSS tokens. `:root` holds the light theme and `:root[data-theme="dark"]` holds the dark one; components never hard-code colours. The reference tokens are in `docs/mockups/mockups.css`.
+
 ### Language
-- The **EN | தமிழ்** switch is always in the header and saved in the user's profile. **Tamil is the default.**
+- The **EN | தமிழ்** switch is always in the header and saved in the user's profile; it's also in Settings. **Tamil is the default.**
 - Interface text lives in `i18n/en.json` and `i18n/ta.json`. Form labels are in the form schema.
 - Staff can type answers in either language. Reports show data exactly as entered.
 - The printed Assessment Report uses the chosen language, with bilingual section headings.
@@ -496,6 +507,7 @@ SwabodhiniCare/
 │   ├── reports.html
 │   ├── users.html             # Admin
 │   ├── admin.html             # Backups, usage meters, audit
+│   ├── settings.html          # Language, appearance (light/dark), change password, sign out
 │   ├── css/app.css  css/print.css
 │   ├── js/                    # api.js, i18n.js, ui.js, form-render.js, signature-pad.js, image-compress.js, kdf.js, xlsx.js, pages/*.js
 │   ├── i18n/en.json  i18n/ta.json
@@ -531,7 +543,7 @@ The browser has no bundler: it loads ES modules directly with `<script type="mod
 | Unit | `node:test` (built into Node) | `workflow.js` (every transition, including forbidden ones), `permissions.js`, `validate.js` against the schema, `crypto.js` (fake salt is always the same for an email, SHA-256 verify, timing-safe compare), `kdf.js` (PBKDF2 matches published test vectors), `xlsx.js` (opens in Excel/LibreOffice, CRC32 correct), `usage-guard.js` (refuses at each limit, resets at day change), `cron/backup.js` (cursor moves forward, resumes after a failure, manifest complete), registration number generation |
 | Integration | `wrangler dev` with a local D1 + R2 | API routes: login and lockout, session expiry, optimistic lock conflict, role scoping, upload type checks, usage-guard refusals, full backup job |
 | CPU budget | Cloudflare dashboard on POC data | Every endpoint and cron run at p99 under 5 ms |
-| E2E | Playwright (phone size + desktop) | Log in → fill all 11 sections → submit → Therapy Head → Centre Head → Director approves → print shows signature + registration no. Plus the send-back loop. Plus the Tamil UI |
+| E2E | Playwright (phone size + desktop) | Log in → fill all 11 sections → submit → Therapy Head → Centre Head → Director approves → print shows signature + registration no. Plus the send-back loop. Plus the Tamil UI. Plus switching to dark mode in Settings and checking it's still dark after signing in on another device |
 | Accessibility | Lighthouse / axe during development | Contrast, labels, tap-target size |
 
 Target: **80%+ coverage** on `src/lib` and `shared/`.
@@ -595,7 +607,7 @@ Target: **80%+ coverage** on `src/lib` and `shared/`.
 3. Form schema + form wizard renderer + autosave + photo compression + uploads + consent signature
 4. Workflow engine + review screens + Director signature + registration number + lock
 5. My Queue, Application Register, Individual Assessment Report (print), Excel export (built in the browser)
-6. Tamil/English, the older-user design system, PWA install
+6. Tamil/English, the older-user design system, light/dark setting (light by default), Settings screen, PWA install
 7. Chunked monthly backup cron, usage guard + Usage page, Apps Script alert relay, restore script + runbook
 8. Tests (unit, integration, E2E) + security review
 
@@ -636,3 +648,4 @@ Target: **80%+ coverage** on `src/lib` and `shared/`.
 | v0.1 | 2026-09-15 | First draft: Cloudflare Workers + D1 + R2, form, workflow, reports, security, UX |
 | v0.2 | 2026-09-15 | Designed to run within **free-plan limits (₹0)**: password hashing on the device, Excel built in the browser, uploads streamed into R2, automatic chunked monthly backup (undo not required), R2 usage guard with a $0 ceiling, Apps Script alert emails once a day. Added Appendix A (options rejected) |
 | v0.3 | 2026-09-15 | **Free plans only**: removed every mention of paid plans or upgrading. Explained that the card for R2 is required only to switch R2 on and is never charged |
+| v0.4 | 2026-09-15 | **Light mode by default**; Dark can be chosen in Settings and is saved per user (D23, §12 Appearance, `users.preferred_theme`, `PATCH /api/me`, `settings.html`) |
