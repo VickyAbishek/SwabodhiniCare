@@ -113,6 +113,13 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 .wordmark { font: 800 1.2rem/1 var(--f-head); color: var(--ink); margin-right: auto; text-decoration: none; }
 .wordmark b { color: var(--primary); }
+.app-bar .btn-small { white-space: nowrap; }
+
+@media (max-width: 420px) {
+  .app-bar { gap: 6px; padding-inline: 12px; }
+  .wordmark { font-size: 1.05rem; }
+  .app-bar .btn-small { padding-inline: 10px; }
+}
 
 .screen {
   flex: 1;

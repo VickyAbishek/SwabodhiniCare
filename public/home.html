@@ -7,6 +7,7 @@
 <title>SwabodhiniCare</title>
 <script src="js/theme-boot.js"></script>
 <script src="shared/actions.js"></script>
+<script src="shared/permissions.js"></script>
 <link rel="stylesheet" href="css/app.css">
 <script type="module" src="js/pages/home.js"></script>
 </head>
@@ -22,7 +23,13 @@
       <p class="muted" id="role-line"></p>
     </div>
     <p class="alert alert-bad" id="message" role="alert" hidden></p>
-    <p class="note" data-i18n="home.comingSoon">Applications and your queue will appear here in the next update.</p>
+    <a class="btn btn-primary btn-block" id="new-application" href="application.html" data-i18n="home.newApplication" hidden>Start a new application</a>
+
+    <section aria-labelledby="list-title">
+      <h2 id="list-title" data-i18n="home.myApplications">Your applications</h2>
+      <p class="muted" id="list-empty" data-i18n="home.noneYet" hidden>No applications yet.</p>
+      <ul class="app-list" id="app-list"></ul>
+    </section>
   </main>
   <nav class="bottom-nav" aria-label="Main">
     <a href="home.html" aria-current="page" data-i18n="nav.home">Home</a>

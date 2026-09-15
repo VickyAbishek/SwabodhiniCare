@@ -80,6 +80,12 @@ export async function startPage({ requireSignIn = false } = {}) {
     document.querySelectorAll("[data-set-theme]").forEach((button) => {
       button.setAttribute("aria-pressed", String(button.dataset.setTheme === state.prefs.theme));
     });
+    // The app-bar switch names the other language, written in that language, to keep it short.
+    document.querySelectorAll("[data-lang-toggle]").forEach((button) => {
+      const other = state.prefs.lang === "ta" ? "en" : "ta";
+      button.textContent = other === "en" ? "English" : "தமிழ்";
+      button.lang = other;
+    });
     renderHooks.forEach((hook) => hook());
   }
 

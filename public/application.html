@@ -1,0 +1,52 @@
+<!-- scope: shared -->
+<!doctype html>
+<html lang="ta" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SwabodhiniCare</title>
+<script src="js/theme-boot.js"></script>
+<script src="shared/dates.js"></script>
+<script src="shared/actions.js"></script>
+<script src="shared/form-schema.js"></script>
+<script src="shared/form-rules.js"></script>
+<link rel="stylesheet" href="css/app.css">
+<script type="module" src="js/pages/application.js"></script>
+</head>
+<body>
+<div class="app">
+  <header class="app-bar">
+    <a class="wordmark" href="home.html">Swabodhini<b>Care</b></a>
+    <button type="button" class="btn btn-outline btn-small" data-lang-toggle>தமிழ் / English</button>
+    <button type="button" class="btn btn-outline btn-small" id="overview-btn" data-i18n="form.allSteps">All steps</button>
+  </header>
+
+  <main class="screen" id="step-screen" hidden>
+    <div class="progress">
+      <div class="progress-top">
+        <span class="progress-label" id="step-label"></span>
+        <span class="save-status" id="save-status" role="status" aria-live="polite"></span>
+      </div>
+      <div class="ticks" id="ticks" aria-hidden="true"></div>
+    </div>
+    <p class="app-ref mono" id="app-no"></p>
+    <h1 id="step-title"></h1>
+    <p class="alert alert-bad" id="message" role="alert" hidden></p>
+    <form id="step-form" novalidate>
+      <div id="fields" class="questions"></div>
+    </form>
+  </main>
+
+  <main class="screen" id="overview-screen" hidden>
+    <h1 id="overview-title"></h1>
+    <p class="muted" id="overview-summary"></p>
+    <ol class="sec-list" id="step-list"></ol>
+  </main>
+
+  <div class="action-bar" id="action-bar" hidden>
+    <button type="button" class="btn btn-outline" id="back-btn" data-i18n="common.back">Back</button>
+    <button type="button" class="btn btn-primary" id="next-btn" data-i18n="form.saveNext">Save &amp; Next</button>
+  </div>
+</div>
+</body>
+</html>
