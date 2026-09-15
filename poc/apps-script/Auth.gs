@@ -92,7 +92,7 @@ var SC_Auth = (function () {
       var user = activeUserByEmail(email);
       if (!user) return SC_Actions.fail("INVALID_CREDENTIALS");
       if (user.locked_until && Date.parse(user.locked_until) > now) return SC_Actions.fail("ACCOUNT_LOCKED");
-      if (!SC_Crypto.safeEqual(SC_Crypto.sha256Hex(data.key), user.password_hash)) return recordFailure(user, now);
+      if (!verifyKey(user, data.key)) return recordFailure(user, now);
       SC_Store.update("Users", user.id, { failed_logins: 0, locked_until: null });
       return SC_Actions.ok({ token: startSession(user, now), user: publicUser(user) });
     });
@@ -148,8 +148,8 @@ var SC_Auth = (function () {
   }
 
   // The password never leaves the device: the phone sends PBKDF2(password, salt) and we compare
-  // SHA-256 of that with the stored hash. Used at sign-in, on a password change and on the
-  // Director's step-up before a final decision (main spec §10.1).
+  // SHA-256 of that with the stored hash. Three paths ask this same question — login, changePassword
+  // and the Director's step-up in applications.decide (main spec §10.1) — so they all ask it here.
   function verifyKey(user, key) {
     return typeof key === "string" && key !== "" &&
       SC_Crypto.safeEqual(SC_Crypto.sha256Hex(key), user.password_hash);
