@@ -179,6 +179,55 @@ var SC_Applications = (function () {
     });
   }
 
+  // Which stage a waiting application is at, for the routing slip.
+  var STAGE_BY_STATUS = {
+    PENDING_THERAPY_HEAD: "THERAPY_HEAD",
+    PENDING_CENTRE_HEAD: "CENTRE_HEAD",
+    PENDING_DIRECTOR: "DIRECTOR",
+  };
+  var REVIEW_ACTIONS = ["APPROVE", "SEND_BACK", "REJECT"];
+
+  // One person may not approve two stages of the same application. A round starts at each submit
+  // and holds every decision taken after that instant, so a send-back and resend clears it for
+  // free. Strictly after, not at: a decision sitting on the slip at the same instant as a resubmit
+  // belongs to the round that has just ended. Waitlisting is not approving, so a Director who
+  // waitlisted can still admit later.
+  function approversThisRound(applicationId, submittedAt) {
+    return SC_Store.filter("Approvals", function (r) {
+      if (r.application_id !== applicationId) return false;
+      if (r.action !== "APPROVE" && r.action !== "ADMIT") return false;
+      return !submittedAt || r.created_at > submittedAt;
+    }).map(function (r) { return r.user_id; });
+  }
+
+  // APPROVE, SEND_BACK or REJECT, by the one role whose stage it is. ADMIT and WAITLIST are the
+  // Director's alone and need their password, so they go through applications.decide instead.
+  function review(data, session) {
+    if (typeof data.id !== "string" || !data.id) return fail("INVALID_REQUEST");
+    if (REVIEW_ACTIONS.indexOf(data.action) === -1) return fail("INVALID_REQUEST");
+    return SC_Store.withLock(function () {
+      var found = loadVisible(data.id, session);
+      if (found.error) return found.error;
+      var row = found.row;
+      var move = SC_Workflow.next(row.status, data.action, {
+        actorId: session.user.id, actorRoles: session.user.roles, createdBy: row.created_by,
+        comment: data.comment, approvedThisRound: approversThisRound(row.id, row.submitted_at),
+      });
+      if (!move.ok) return fail(move.error);
+      var now = SC_Store.nowIso();
+      SC_Store.insert("Approvals", {
+        id: SC_Store.newId(), application_id: row.id, stage: STAGE_BY_STATUS[row.status],
+        action: data.action, comment: String(data.comment || "").trim() || null,
+        user_id: session.user.id, form_hash: formHash(row), created_at: now,
+      });
+      var saved = SC_Store.update("Applications", row.id, {
+        status: move.status, updated_at: now, version: row.version + 1,
+      });
+      SC_Audit.log(session.user.id, "applications.reviewed", "Applications", row.id, { action: data.action });
+      return SC_Actions.ok(view(saved));
+    });
+  }
+
   function listItem(row) {
     return {
       id: row.id, appNo: row.app_no, applicantName: row.applicant_name || "", centre: row.centre,
@@ -211,7 +260,7 @@ var SC_Applications = (function () {
     });
   }
 
-  return Object.freeze({ create: create, get: get, save: save, submit: submit, withdraw: withdraw, list: list, formHash: formHash });
+  return Object.freeze({ create: create, get: get, save: save, submit: submit, withdraw: withdraw, review: review, list: list, formHash: formHash });
 })();
 
 SC_Api.register("applications.create", SC_Applications.create);
@@ -219,4 +268,5 @@ SC_Api.register("applications.get", SC_Applications.get);
 SC_Api.register("applications.save", SC_Applications.save);
 SC_Api.register("applications.submit", SC_Applications.submit);
 SC_Api.register("applications.withdraw", SC_Applications.withdraw);
+SC_Api.register("applications.review", SC_Applications.review);
 SC_Api.register("applications.list", SC_Applications.list);

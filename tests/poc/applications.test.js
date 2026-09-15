@@ -208,3 +208,94 @@ test("a withdrawn application cannot be sent for review", () => {
   as("priya")("applications.withdraw", { id });
   assert.equal(as("priya")("applications.submit", { id }).error.code, "INVALID_TRANSITION");
 });
+
+test("the Therapy Head approves and it moves to the Centre Head", () => {
+  const { ctx, as } = setupPeople();
+  const { id } = submitReady(as, "priya");
+  const result = as("lakshmi")("applications.review", { id, action: "APPROVE", comment: "Good fit." });
+  assert.equal(result.data.status, "PENDING_CENTRE_HEAD");
+
+  const slip = ctx.SC_Store.filter("Approvals", (r) => r.application_id === id);
+  assert.equal(slip.length, 1);
+  assert.equal(slip[0].stage, "THERAPY_HEAD");
+  assert.equal(slip[0].action, "APPROVE");
+  assert.equal(slip[0].user_id, "u-lakshmi");
+  assert.match(slip[0].form_hash, /^[0-9a-f]{64}$/);
+  assert.ok(slip[0].created_at);
+});
+
+test("only the role for the current stage may decide", () => {
+  const { as } = setupPeople();
+  const { id } = submitReady(as, "priya");
+  assert.equal(as("suresh")("applications.review", { id, action: "APPROVE" }).error.code, "NOT_ALLOWED", "Centre Head too early");
+  assert.equal(as("revathi")("applications.review", { id, action: "APPROVE" }).error.code, "NOT_ALLOWED", "Director too early");
+});
+
+test("nobody reviews their own application, and nobody approves two stages", () => {
+  const { as } = setupPeople();
+  const { id } = submitReady(as, "lakshmi"); // the Therapy Head filed it themselves
+  assert.equal(as("lakshmi")("applications.review", { id, action: "APPROVE" }).error.code, "OWN_APPLICATION");
+
+  const other = submitReady(as, "priya");
+  as("lakshmi")("applications.review", { id: other.id, action: "APPROVE" });
+  assert.equal(as("lakshmi")("applications.review", { id: other.id, action: "APPROVE" }).error.code, "NOT_ALLOWED", "the Centre Head's turn now");
+});
+
+test("sending back and rejecting need a real comment", () => {
+  const { as } = setupPeople();
+  const { id } = submitReady(as, "priya");
+  assert.equal(as("lakshmi")("applications.review", { id, action: "SEND_BACK", comment: "   " }).error.code, "COMMENT_REQUIRED");
+  assert.equal(as("lakshmi")("applications.review", { id, action: "REJECT" }).error.code, "COMMENT_REQUIRED");
+
+  const sentBack = as("lakshmi")("applications.review", { id, action: "SEND_BACK", comment: "Please add the report." });
+  assert.equal(sentBack.data.status, "RETURNED");
+});
+
+test("a sent-back application starts the chain again at the Therapy Head", () => {
+  const { as } = setupPeople();
+  const { id } = submitReady(as, "priya");
+  as("lakshmi")("applications.review", { id, action: "APPROVE" });
+  as("suresh")("applications.review", { id, action: "SEND_BACK", comment: "Photo is blurred." });
+  assert.equal(as("priya")("applications.get", { id }).data.status, "RETURNED");
+
+  // create v1, submit v2, approve v3, send back v4 — every one of them bumps the version.
+  as("priya")("applications.save", { id, version: 4, values: { s2_name_ta: "நிலா" } });
+  const resent = as("priya")("applications.submit", { id });
+  assert.equal(resent.data.status, "PENDING_THERAPY_HEAD");
+
+  // Earlier comments stay on the slip.
+  const slip = as("lakshmi")("applications.get", { id }); // get returns the view; the slip is read in Task 6
+  assert.equal(resent.data.status, "PENDING_THERAPY_HEAD");
+});
+
+test("a redeeming reviewer is not blocked by their own earlier approval in a new round", () => {
+  const { as } = setupPeople();
+  const { id } = submitReady(as, "priya");
+  as("lakshmi")("applications.review", { id, action: "APPROVE" });
+  as("suresh")("applications.review", { id, action: "SEND_BACK", comment: "Please fix." });
+  as("priya")("applications.submit", { id });
+  // Lakshmi approved the previous round; the new round must let her approve her stage again.
+  const again = as("lakshmi")("applications.review", { id, action: "APPROVE" });
+  assert.equal(again.data.status, "PENDING_CENTRE_HEAD");
+});
+
+test("a decision is written to the audit log", () => {
+  const { ctx, as } = setupPeople();
+  const { id } = submitReady(as, "priya");
+  as("lakshmi")("applications.review", { id, action: "APPROVE" });
+  const logged = ctx.SC_Store.filter("Audit", (r) => r.action === "applications.reviewed" && r.entity_id === id);
+  assert.equal(logged.length, 1);
+});
+
+// RETURNED is unreachable until SEND_BACK exists, so Task 3 left this half of withdraw unverified.
+test("the owner can withdraw an application a reviewer sent back", () => {
+  const { as } = setupPeople();
+  const { id } = submitReady(as, "priya");
+  as("lakshmi")("applications.review", { id, action: "SEND_BACK", comment: "Please add the report." });
+  assert.equal(as("priya")("applications.get", { id }).data.status, "RETURNED");
+
+  const withdrawn = as("priya")("applications.withdraw", { id });
+  assert.equal(withdrawn.ok, true);
+  assert.equal(withdrawn.data.status, "WITHDRAWN");
+  assert.equal(as("priya")("applications.get", { id }).data.status, "WITHDRAWN");
+});
