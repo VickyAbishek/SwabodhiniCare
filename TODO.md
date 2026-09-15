@@ -25,12 +25,13 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 - [x] `[POC]` M3a: Node test harness with fake Apps Script services (`tests/poc/fakes.js`, `harness.js`)
 - [x] `[POC]` M3a: `Store.gs`: tab ↔ object mapping, columns generated from the form schema, readable encodings, `LockService`, counters
 - [x] `[POC]` M3a: `Api.gs`: `doPost` router, envelope, sign-in and capability checks
-- [ ] `[POC]` M3b: `Crypto.gs` + `Auth.gs`: prelogin (fake salts), login (SHA-256 of device key), sessions, lockout, change password
-- [ ] `[POC]` M3c: `Users.gs`: me, list, create (temporary password), update roles, reset password, deactivate
-- [ ] `[POC]` M3c: `Audit.gs`: audit tab writes and list
-- [ ] `[POC]` M3c: `Setup.gs`, `poc/seed/` (test account per role, fictional applicants), `poc/scripts/build.mjs`, `appsscript.json`, `poc/README.md` deploy steps (`clasp`, web app settings, monthly trigger)
+- [x] `[POC]` M3b: `Crypto.gs` + `Auth.gs`: prelogin (fake salts), login (SHA-256 of device key), sessions (12 h idle / 7 days), lockout, change password, temporary-password gate
+- [x] `[POC]` M3c: `Users.gs`: me, list, create (temporary password), update roles, reset password, deactivate
+- [x] `[POC]` M3c: `Audit.gs`: sign-in and account events, paged list for Director and Admin
+- [x] `[POC]` M3c: `Setup.gs` (`setup()` + one-time first-Admin code), `poc/scripts/build.mjs` + `source-order.mjs`, `appsscript.json`, `poc/README.md` deploy steps
 
 ### M4: Screens core
+- [ ] `[POC]` First-time setup screen: setup code → first Admin (`setup.firstAdmin`)
 - [ ] `[SHARED]` `public/css/`: design tokens from `docs/mockups/mockups.css` (light default, dark via Settings), print CSS
 - [ ] `[SHARED]` `public/js/config.js`, `api.js` (loads `backends/${BACKEND}.js`), i18n (EN/TA), theme bootstrap in `<head>`
 - [ ] `[POC]` `public/js/backends/poc.js`: `{action, token, data}` over `text/plain`, token in `localStorage`
@@ -39,6 +40,7 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 - [ ] `[POC]` "Test version: sample data only" banner behind `IS_DEMO`
 
 ### M5: Applications
+- [ ] `[POC]` `poc/seed/`: fictional sample applicants for demos (moved from M3; test accounts are created by the Admin in the app)
 - [ ] `[SHARED]` Form wizard rendered from the schema (one step per screen, progress, big tap choices, 3-dropdown DOB)
 - [ ] `[SHARED]` Autosave every 20 s + on step change; "Saving…" / "Saved ✓" / "Not saved" states; version-conflict message
 - [ ] `[POC]` `Applications.gs`: create, get, save (optimistic lock), list (role-scoped)
