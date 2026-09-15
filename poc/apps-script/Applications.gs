@@ -303,13 +303,19 @@ var SC_Applications = (function () {
     });
   }
 
-  // The routing slip (POC spec §6): the Approvals rows for this application, oldest first.
+  // The routing slip (POC spec §6): the Approvals rows for this application, oldest first. Each row
+  // carries the acting user's id as well as their name: the review screen has to know whether this
+  // person has already approved a stage in this round (approversThisRound below decides the round),
+  // and two people can share a name where one id cannot.
   function approvalsFor(id) {
     return SC_Store.filter("Approvals", function (r) { return r.application_id === id; })
       .sort(function (a, b) { return a.created_at < b.created_at ? -1 : a.created_at > b.created_at ? 1 : 0; })
       .map(function (r) {
         var user = SC_Store.find("Users", "id", r.user_id);
-        return { stage: r.stage, action: r.action, comment: r.comment, userName: user ? user.name : "", at: r.created_at };
+        return {
+          stage: r.stage, action: r.action, comment: r.comment,
+          userId: r.user_id, userName: user ? user.name : "", at: r.created_at,
+        };
       });
   }
 

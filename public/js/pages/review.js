@@ -42,12 +42,39 @@ function span(className, text) {
   return node;
 }
 
-// The context SC_Workflow checks an action against, from what this screen knows: the person signed in
-// and the file's author. One part is missing — who approved earlier stages this round, which the
-// payload does not carry — so a stage this person already approved is refused by the server and read
-// out from there (ALREADY_APPROVED_STAGE).
+/* Who has already approved this round — one person may not approve two stages of the same
+   application, which is what matters for anybody holding two reviewing roles. The browser's twin of
+   approversThisRound in poc/apps-script/Applications.gs, and the two must stay in step: the rule is
+   written twice only because applications.get does not carry the answer ready-made. It is the ids on
+   the Approvals rows whose action approves (APPROVE or ADMIT — a WAITLIST is not an approval, or a
+   Director who waitlisted could never admit later) and whose time is at or after submittedAt. Each
+   SUBMIT re-stamps submittedAt, so a send-back and resend clears the round by itself. */
+function approversThisRound() {
+  const submittedAt = state.app.submittedAt;
+  return (state.app.approvals || [])
+    .filter((row) => (row.action === "APPROVE" || row.action === "ADMIT") && (!submittedAt || row.at >= submittedAt))
+    .map((row) => row.userId);
+}
+
+// The context SC_Workflow checks an action against, from what this screen knows: the person signed in,
+// the file's author and who has already approved this round — so a button this person would be
+// refused is not drawn at all, and the refusal reads out from the server if it slips through anyway.
 function ctx(comment) {
-  return { actorId: state.me.id, actorRoles: state.me.roles, createdBy: state.app.createdBy, comment };
+  return {
+    actorId: state.me.id, actorRoles: state.me.roles, createdBy: state.app.createdBy,
+    approvedThisRound: approversThisRound(), comment,
+  };
+}
+
+// Why there is nothing to press on a file this person was counted as the reviewer for. The one
+// refusal that leaves them with no buttons at all is having approved an earlier stage of the same
+// file (the workflow then refuses every action here, not only Approve), so this says that much and
+// nothing else: a file nobody expects them to touch needs no sentence, because the stamp already
+// names the stage holding it.
+function blockedNote() {
+  if (state.actions.length > 0) return "";
+  const move = SC_Workflow.next(state.app.status, "APPROVE", ctx(""));
+  return move.error === "ALREADY_APPROVED_STAGE" ? state.page.errorMessage({ code: move.error }) : "";
 }
 
 function optionLabel(list, value) {
@@ -305,6 +332,9 @@ function draw() {
   $("action-bar").replaceChildren(...state.actions.map(button));
   $("action-bar").hidden = state.actions.length === 0;
   $("comment-field").hidden = state.actions.length === 0;
+  const blocked = blockedNote();
+  $("blocked").textContent = blocked;
+  $("blocked").hidden = !blocked;
 }
 
 async function load(page) {

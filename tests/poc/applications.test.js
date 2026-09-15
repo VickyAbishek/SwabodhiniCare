@@ -466,6 +466,9 @@ test("the routing slip keeps every decision, oldest first", () => {
   assert.deepEqual(plain(slip.map((s) => s.action)), ["APPROVE", "APPROVE", "ADMIT"]);
   assert.deepEqual(plain(slip.map((s) => s.stage)), ["THERAPY_HEAD", "CENTRE_HEAD", "DIRECTOR"]);
   assert.equal(slip[0].userName, "Lakshmi");
+  // The id as well as the name: the review screen works out whether this person has already approved
+  // a stage of this round, and a display name cannot answer that.
+  assert.deepEqual(plain(slip.map((s) => s.userId)), ["u-lakshmi", "u-suresh", "u-revathi"]);
 });
 
 // The slip is built for the application screen alone. save is the autosave — every few seconds while
