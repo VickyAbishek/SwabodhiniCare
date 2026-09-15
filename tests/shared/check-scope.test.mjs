@@ -67,6 +67,15 @@ test("only config.js and back-end adapters may hold the Apps Script URL", () => 
   assert.match(checkFile("public/js/ui.js", "// scope: shared\n" + url).join("\n"), /Apps Script URL/);
 });
 
+test("shared/ files may load sibling shared files, and nothing else", () => {
+  const sibling = '// scope: shared\nvar S = typeof SC_X !== "undefined" ? SC_X : require("./form-schema.js");\n';
+  assert.deepEqual(checkFile("shared/form-rules.js", sibling), []);
+  const parent = checkFile("shared/a.js", '// scope: shared\nvar P = require("../public/js/api.js");\n');
+  assert.match(parent.join("\n"), /plain scripts/);
+  const nested = checkFile("shared/a.js", '// scope: shared\nvar N = require("./lib/b.js");\n');
+  assert.match(nested.join("\n"), /plain scripts/);
+});
+
 test("the repository passes its own scope check", () => {
   assert.deepEqual(run(ROOT), []);
 });

@@ -61,11 +61,14 @@ function dependencyErrors(p, scope, refs) {
   return errors;
 }
 
+const SHARED_SIBLING = /^\.\/[a-z0-9-]+\.js$/;
+
 function sharedFolderErrors(p, code, refs) {
   if (!p.startsWith("shared/")) return [];
   const errors = [];
-  if (refs.length > 0) {
-    errors.push(`${p}: shared/ files are plain scripts and must not import anything (${refs.join(", ")})`);
+  const outside = refs.filter((r) => !SHARED_SIBLING.test(r));
+  if (outside.length > 0) {
+    errors.push(`${p}: shared/ files are plain scripts and may only load sibling shared files ("./name.js"), found: ${outside.join(", ")}`);
   }
   for (const api of PLATFORM_APIS) {
     if (code.includes(api)) errors.push(`${p}: shared/ must not use platform API "${api}"`);
