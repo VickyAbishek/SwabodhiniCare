@@ -39,18 +39,41 @@ function myTurn(item, me) {
   return SC_Workflow.isMyTurn(item.status, { actorId: me.id, actorRoles: me.roles, createdBy: item.createdBy });
 }
 
-// Where a card leads. A file waiting on this person's review opens the review screen, where they can
-// decide on it; every other card opens the application itself. Careful: that is not the same
-// question as myTurn above, and the difference is a draft, or a file sent back. Those are the
-// owner's turn — the therapist's move is to fix the form — so myTurn is true for the person looking
-// at their own, and the review screen is the one place that could do nothing with it. What decides
-// here is the reviewer's stage instead: the workflow names the role that reviews this status, and
-// this person holds that role. (A head looking at an application they filled in matches both and is
-// refused by the server as OWN_APPLICATION, so they see the file without any buttons.)
+// What each screen can actually do, which is what decides where a card leads. The review screen
+// approves, sends back and rejects; the decision screen is where the Director admits or waitlists.
+const REVIEW_ACTIONS = ["APPROVE", "SEND_BACK", "REJECT"];
+const DECISION_ACTIONS = ["ADMIT", "WAITLIST"];
+
+// Where a card leads. The question is asked of the workflow with this person as the actor, so a card
+// only ever opens a screen that has something to press: a waitlisted file — waiting on the Director,
+// where the review screen has no action at all — opens the decision screen, the one place ADMIT
+// lives. When neither screen could act on the file, the card opens the application itself, which is
+// what an Admin sees for a file at the Director's stage, or a therapist for their own.
+//
+// Where both could act — a file at PENDING_DIRECTOR, where the Director may admit, waitlist, send
+// back or reject — the decision screen wins: it is the screen the flow names for that stage
+// (flow.html stage 4, the mockup's S7) and the file is sitting there to be decided, not to be read
+// again. It links on to the review screen for the two moves that need no signature, so nothing the
+// workflow allows is out of reach.
+//
+// Careful: this is not the same question as myTurn above, and the difference is a draft, or a file
+// sent back. Those are the owner's turn — the therapist's move is to fix the form — so myTurn is true
+// for the person looking at their own, while neither screen has a move for it and the card opens the
+// application. (A head looking at an application they filled in matches both and is refused by the
+// server as OWN_APPLICATION, so they see the file without any buttons.)
+//
+// This round's separation of duties is not asked here: applications.list carries no approvals, so a
+// card cannot know that its reader already signed an earlier stage of the same round. Such a card is
+// still stamped "Your turn" and still counted in the hero — a gap in what the queue can know, not in
+// where it sends people: the screen it opens answers with ALREADY_APPROVED_STAGE, which is the
+// honest sentence available on this side of the wire. No seeded person holds two reviewing roles, so
+// that path is latent.
 function cardHref(item, me) {
-  const reviewer = SC_Workflow.reviewerRole(item.status);
-  const decides = reviewer ? me.roles.indexOf(reviewer) !== -1 : false;
-  const page = decides ? "review.html" : "application.html";
+  const actor = { actorId: me.id, actorRoles: me.roles, createdBy: item.createdBy };
+  const offered = SC_Workflow.availableActions(item.status, actor);
+  const page = offered.some((action) => DECISION_ACTIONS.includes(action)) ? "decision.html"
+    : offered.some((action) => REVIEW_ACTIONS.includes(action)) ? "review.html"
+      : "application.html";
   return `${page}?id=${encodeURIComponent(item.id)}`;
 }
 

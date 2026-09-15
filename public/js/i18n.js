@@ -42,6 +42,17 @@ export function errorText(error, lang, errors) {
   return lang === "en" ? entry.en : entry.ta;
 }
 
+// Names written as a list in the sentence's own language: "Priya S and Suresh M" / "Priya S மற்றும்
+// Suresh M". The joining word comes from the dictionary (common.and) rather than being glued in
+// English, because Tamil puts its own word between the names and would otherwise end up with an
+// English "and" inside a Tamil sentence.
+export function joinNames(names, t) {
+  const list = (names || []).filter(Boolean);
+  if (list.length === 0) return "";
+  if (list.length === 1) return list[0];
+  return `${list.slice(0, -1).join(", ")} ${t("common.and")} ${list[list.length - 1]}`;
+}
+
 export async function loadDictionaries(fetchImpl, base = "i18n") {
   const [en, ta] = await Promise.all(["en", "ta"].map(async (lang) => {
     const response = await fetchImpl(`${base}/${lang}.json`);

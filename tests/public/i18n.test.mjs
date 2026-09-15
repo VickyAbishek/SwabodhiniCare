@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import { createI18n, applyTranslations, errorText, loadDictionaries } from "../../public/js/i18n.js";
+import { createI18n, applyTranslations, errorText, loadDictionaries, joinNames } from "../../public/js/i18n.js";
 import { readPrefs, savePrefs, applyPrefs } from "../../public/js/prefs.js";
 
 const require = createRequire(import.meta.url);
@@ -92,4 +92,20 @@ test("savePrefs stores only valid values; applyPrefs sets theme and language on 
   assert.deepEqual([root.dataset.theme, root.dataset.lang, root.lang], ["dark", "en", "en"]);
   applyPrefs(root, { lang: "xx", theme: "xx" });
   assert.deepEqual([root.dataset.theme, root.lang], ["light", "ta"]);
+});
+
+test("names are joined with the sentence's own language, not with an English and", () => {
+  const ta = createI18n({ en: EN, ta: TA }, "ta");
+  const en = createI18n({ en: EN, ta: TA }, "en");
+  assert.equal(joinNames(["Priya S", "Suresh M"], ta.t), `Priya S ${TA["common.and"]} Suresh M`);
+  assert.equal(joinNames(["Priya S", "Suresh M"], en.t), "Priya S and Suresh M");
+  assert.equal(joinNames(["A", "B", "C"], en.t), "A, B and C");
+  assert.equal(joinNames(["A", "B", "C"], ta.t), `A, B ${TA["common.and"]} C`);
+});
+
+test("one name needs no joining word, and no names give no text at all", () => {
+  const en = createI18n({ en: EN, ta: TA }, "en");
+  assert.equal(joinNames(["Priya S"], en.t), "Priya S");
+  assert.equal(joinNames([], en.t), "");
+  assert.equal(joinNames(["", null, "Priya S"], en.t), "Priya S");
 });

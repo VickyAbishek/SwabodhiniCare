@@ -1,0 +1,111 @@
+<!-- scope: shared -->
+<!doctype html>
+<html lang="ta" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SwabodhiniCare</title>
+<script src="js/theme-boot.js"></script>
+<script src="shared/dates.js"></script>
+<script src="shared/actions.js"></script>
+<script src="shared/workflow.js"></script>
+<script src="shared/form-schema.js"></script>
+<script src="shared/numbers.js"></script>
+<link rel="stylesheet" href="css/app.css">
+<script type="module" src="js/pages/decision.js"></script>
+</head>
+<body>
+<div class="app">
+  <header class="app-bar">
+    <a class="wordmark" href="home.html">Swabodhini<b>Care</b></a>
+    <button type="button" class="btn btn-outline btn-small" data-lang-toggle>தமிழ் / English</button>
+  </header>
+
+  <main class="screen">
+    <a class="back-link" id="back" href="application.html" data-i18n="common.backToApplication">Back to application</a>
+    <p class="muted" id="loading" data-i18n="common.loading">Loading…</p>
+    <p class="alert alert-bad" id="message" role="alert" hidden></p>
+
+    <!-- S7: the choice, the number that will be issued, the signature, the password, and the lock. -->
+    <div class="review-body" id="decision-body" hidden>
+      <div>
+        <h1 data-i18n="decide.title">Final decision</h1>
+        <p class="app-sub"><span id="applicant"></span> · <span class="mono" id="app-no"></span></p>
+      </div>
+
+      <form id="decision-form" novalidate>
+        <div class="field">
+          <span class="label" id="choice-label" data-i18n="decide.decision">Decision</span>
+          <div class="choices list" id="choices" role="group" aria-labelledby="choice-label"></div>
+        </div>
+
+        <div class="field" id="regno-field">
+          <span class="label" id="regno-label"></span>
+          <span class="mono reg-no" id="regno"></span>
+          <span class="hint" id="regno-hint"></span>
+        </div>
+
+        <div class="sig-box">
+          <span class="hint" data-i18n="decide.signature">Your signature will be added</span>
+          <p class="note" data-i18n="form.waitsForUploads">Photos, documents and signatures can be added in the next update.</p>
+          <span class="sig-name" id="signer"></span>
+          <span class="hint" id="sign-date"></span>
+        </div>
+
+        <div class="field">
+          <label for="password" data-i18n="decide.password">Enter your password to sign</label>
+          <div class="with-action">
+            <input class="input" id="password" type="password" autocomplete="current-password">
+            <button type="button" class="btn btn-outline btn-small" data-show-password="password" aria-pressed="false">
+              <span data-i18n="common.show">Show</span>
+            </button>
+          </div>
+          <p class="field-error" id="password-error" hidden></p>
+        </div>
+
+        <p class="note" data-i18n="decide.lockNote">After signing, this application is locked. Only you or the Admin can reopen it, with a reason.</p>
+      </form>
+
+      <!-- The two moves that need no signature live on the review screen; this is the way there. -->
+      <a class="link-btn" id="review-instead" href="review.html" data-i18n="decide.sendBackInstead" hidden>Send back or reject instead</a>
+    </div>
+
+    <!-- D1: what the Director sees straight after signing. Focused when it appears, so the answer to
+         "what did that do?" is read out rather than left below a form that is no longer there. -->
+    <div class="review-body success" id="done-body" tabindex="-1" hidden>
+      <div class="big-check" aria-hidden="true">✓</div>
+      <h1 id="done-title"></h1>
+      <div class="field" id="done-regno-field">
+        <span class="label" data-i18n="decide.registrationNumber">Registration number</span>
+        <span class="mono reg-no" id="done-regno"></span>
+      </div>
+      <div class="sig-box">
+        <p class="note" data-i18n="form.waitsForUploads">Photos, documents and signatures can be added in the next update.</p>
+        <span class="hint" id="done-signed"></span>
+      </div>
+      <p class="note" id="done-lock" hidden></p>
+      <a class="btn btn-outline btn-block" href="home.html" data-i18n="common.backToQueue">Back to queue</a>
+    </div>
+  </main>
+
+  <div class="action-bar" id="action-bar" hidden>
+    <a class="btn btn-outline" id="back-btn" href="application.html" data-i18n="common.back">Back</a>
+    <button type="button" class="btn btn-primary" id="sign"></button>
+  </div>
+
+  <!-- Signing is confirmed first, in plain words (main spec §12), in the sheet the review screen uses. -->
+  <div class="scrim" id="confirm" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+      <h3 id="confirm-title"></h3>
+      <p class="muted" id="confirm-comment-label" hidden></p>
+      <p class="slip-note" id="confirm-comment" hidden></p>
+      <p id="confirm-body" hidden></p>
+      <div class="btns">
+        <button type="button" class="btn btn-ok" id="confirm-yes"></button>
+        <button type="button" class="btn btn-outline" id="confirm-no" data-i18n="confirm.noGoBack">No, go back</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -6,6 +6,7 @@
 // plain words before it is sent.
 import { startPage, showMessage, setBusy, goTo, PAGES } from "../page.js";
 import { createRoutingSlip } from "../routing-slip.js";
+import { createConfirmSheet } from "../confirm-sheet.js";
 
 const { SC_Workflow, SC_Dates, SC_FormSchema } = window;
 const $ = (id) => document.getElementById(id);
@@ -29,7 +30,7 @@ const APPROVE_TITLES = Object.freeze({
 });
 const SUITABILITY_TONE = { SUITABLE: "stamp-ok", NEEDS_ASSESSMENT: "stamp-warn", NOT_SUITABLE: "stamp-bad" };
 
-const state = { page: null, me: null, app: null, slip: null, actions: [], pending: null, opener: null };
+const state = { page: null, me: null, app: null, slip: null, sheet: null, actions: [] };
 
 const today = () => new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
 const lang = () => state.page.prefs().lang;
@@ -67,10 +68,12 @@ function ctx(comment, approvedThisRound = approversThisRound()) {
 }
 
 // Why there is nothing to press on a file this person was counted as the reviewer for: because of
-// the approvals already taken this round, the workflow would refuse them every action here — not
-// only Approve, which the last statuses have no action for at all (PENDING_DIRECTOR and WAITLISTED
-// offer ADMIT and WAITLIST instead). So the question is asked of the whole set, by asking the
-// workflow what this person could do if this round's approvals were set aside: if that is not
+// the approvals already taken this round, the workflow would refuse them every action here. That is
+// not the same as a status this screen has no action for at all: PENDING_DIRECTOR offers ADMIT,
+// WAITLIST, SEND_BACK and REJECT, of which only the last two are this screen's — a Director reaches
+// here from the decision screen for those two — and WAITLISTED offers ADMIT alone, which the queue
+// sends to the decision screen instead of here. So the question is asked of the whole set, by asking
+// the workflow what this person could do if this round's approvals were set aside: if that is not
 // nothing, this round's rule is what is stopping them, and that is what the sentence says.
 //
 // A file nobody expects them to touch still says nothing — the stamp already names the stage holding
@@ -210,34 +213,27 @@ function commentError(text) {
   $("comment").setAttribute("aria-describedby", text ? "comment-hint comment-error" : "comment-hint");
 }
 
-function openSheet(action) {
+// The confirmation for one action: the wording of the move, the reviewer's own comment read back,
+// and the action Yes sends. The sheet itself — focus, Escape, the dimmed backdrop, keeping a second
+// tap out while the first is in flight — is js/confirm-sheet.js, shared with the decision screen.
+function openSheet(action, opener) {
   const spec = ACTIONS[action];
   const t = state.page.t;
   const comment = $("comment").value.trim();
-  state.pending = action;
-  $("confirm-title").textContent = t(titleKey(action));
-  $("confirm-comment-label").textContent = t("review.comment");
-  $("confirm-comment-label").hidden = !comment;
-  $("confirm-comment").textContent = comment;
-  $("confirm-comment").hidden = !comment;
-  $("confirm-body").textContent = spec.body ? t(spec.body) : "";
-  $("confirm-body").hidden = !spec.body;
-  $("confirm-yes").textContent = t(spec.yes);
-  $("confirm-yes").className = `btn ${spec.button}`;
-  $("confirm").hidden = false;
-  $("confirm-yes").focus();
-}
-
-function closeSheet() {
-  state.pending = null;
-  $("confirm").hidden = true;
-  if (state.opener) state.opener.focus();
+  state.sheet.open({
+    title: t(titleKey(action)),
+    commentLabel: t("review.comment"),
+    comment,
+    body: spec.body ? t(spec.body) : "",
+    yes: t(spec.yes),
+    yesClass: spec.button,
+    onYes: () => act(action, $("confirm-yes")),
+  }, opener);
 }
 
 // The server refuses a send-back or a rejection without a comment, so the same rule is run here
 // first, against the box itself, rather than letting the round-trip say so afterwards (main §12).
 function ask(action, opener) {
-  state.opener = opener;
   const move = SC_Workflow.next(state.app.status, action, ctx($("comment").value.trim()));
   if (!move.ok) {
     const text = state.page.errorMessage({ code: move.error });
@@ -250,7 +246,7 @@ function ask(action, opener) {
     return;
   }
   commentError("");
-  openSheet(action);
+  openSheet(action, opener);
 }
 
 async function act(action, button) {
@@ -265,7 +261,7 @@ async function act(action, button) {
     return;
   }
   setBusy(button, "", false);
-  closeSheet();
+  state.sheet.close();
   showMessage($("message"), page.errorMessage(result.error));
   $("message").scrollIntoView({ block: "nearest" });
 }
@@ -282,26 +278,7 @@ function button(action) {
 function wire() {
   // Answering the complaint clears it, as the form's own fields do; the next action checks afresh.
   $("comment").addEventListener("input", () => commentError(""));
-  $("confirm-no").addEventListener("click", closeSheet);
-  $("confirm-yes").addEventListener("click", () => {
-    if (state.pending) act(state.pending, $("confirm-yes"));
-  });
-  $("confirm").addEventListener("click", (event) => {
-    if (event.target === $("confirm")) closeSheet();
-  });
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !$("confirm").hidden) closeSheet();
-  });
-  // Tab stays inside the sheet while it is open: aria-modal tells assistive tech the rest of the
-  // page is out of reach for the moment, so the keyboard has to agree.
-  $("confirm").addEventListener("keydown", (event) => {
-    if (event.key !== "Tab") return;
-    const stops = [$("confirm-yes"), $("confirm-no")];
-    const stop = event.shiftKey ? stops[0] : stops[stops.length - 1];
-    if (document.activeElement !== stop) return;
-    event.preventDefault();
-    (event.shiftKey ? stops[stops.length - 1] : stops[0]).focus();
-  });
+  state.sheet.wire();
 }
 
 // Drawn in code, so a language change redraws the facts, the slip and the buttons with it. What the
@@ -371,6 +348,7 @@ async function main() {
   state.page = page;
   state.me = me.data;
   state.slip = createRoutingSlip({ workflow: SC_Workflow, t: page.t, formatDate: shortDate });
+  state.sheet = createConfirmSheet();
   wire();
   const app = await load(page);
   if (!app) return;

@@ -469,3 +469,27 @@ textarea.input { min-height: 120px; resize: vertical; }
 .track-bar .done { background: var(--ok); }
 .track-bar .now { background: var(--marigold); }
 .track-text { font-size: 0.95rem; color: var(--ink-2); }
+
+/* ---------- The Director's decision (main spec §5, §10.1) ---------- */
+/* The number, as the mockup's S7 and D1 set it: the one thing on this screen that is read digit by
+   digit, so it is the largest text on it and never wraps mid-number on a narrow phone. */
+.reg-no { font-size: 1.3rem; font-weight: 700; color: var(--primary); overflow-wrap: anywhere; }
+/* Where the signature will be stamped. Dashed, because nothing is in it yet: the signature image is
+   M7, and the box says so rather than showing a place-holder that could be mistaken for one. */
+.sig-box {
+  display: grid; gap: 8px; padding: 14px;
+  border: 2px dashed var(--line); border-radius: var(--r-md); background: var(--surface-2);
+}
+.sig-name { font-weight: 700; }
+/* D1: what the Director sees straight after signing. */
+.success { justify-items: center; text-align: center; }
+.success .note { text-align: left; }
+/* The confirmation takes focus when it appears so it is read out; the ring would only outline a
+   block of text that is already the only thing on the screen. */
+.success:focus { outline: none; }
+.big-check {
+  width: 68px; height: 68px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--ok-soft); color: var(--ok);
+  font: 800 2rem/1 var(--f-head);
+}
