@@ -353,6 +353,16 @@ test("waitlisting needs no registration number, and the Director may admit later
   assert.equal(later.data.registrationNo, "SWB/VLC/2026/0001");
 });
 
+test("a waitlist records when the Director decided, as any decision does", () => {
+  const { as } = setupPeople();
+  const id = atDirector(as);
+  assert.equal(as("revathi")("applications.get", { id }).data.decidedAt, null, "nobody has decided yet");
+
+  const waitlisted = as("revathi")("applications.decide", { id, action: "WAITLIST", key: directorKey() });
+  assert.ok(waitlisted.data.decidedAt, "waitlisting is still a decision");
+  assert.equal(as("revathi")("applications.get", { id }).data.decidedAt, waitlisted.data.decidedAt);
+});
+
 test("only the Director decides, and Admit always needs the password", () => {
   const { as } = setupPeople();
   const id = atDirector(as);
@@ -378,6 +388,17 @@ test("registration numbers run per centre and per year, and never repeat", () =>
   as("revathi")("applications.decide", { id: second, action: "ADMIT", key: directorKey() });
   const third = atDirector(as);
   assert.equal(as("revathi")("applications.decide", { id: third, action: "ADMIT", key: directorKey() }).data.registrationNo, "SWB/VLC/2026/0003");
+});
+
+// The school's clock, not UTC's: 2026-12-31 19:00Z is 2027-01-01 00:30 in Chennai. A number minted
+// in that half hour must carry 2027 — it is issued once, so a wrong year in it is permanent, and it
+// has to agree with the application number, which takes its year the same way.
+test("the registration number uses the school's year, not UTC's", () => {
+  const { as } = setupPeople({ clock: { ms: Date.parse("2026-12-31T19:00:00Z") } });
+  const id = atDirector(as);
+  const decided = as("revathi")("applications.decide", { id, action: "ADMIT", key: directorKey() });
+  assert.equal(decided.data.registrationNo, "SWB/VLC/2027/0001");
+  assert.equal(decided.data.appNo, "APP-2027-0001", "the two numbers must agree on the year");
 });
 
 // Every person in people.js holds exactly one role, so no test could reach the two-stage rule at

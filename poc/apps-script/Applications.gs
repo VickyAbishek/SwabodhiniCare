@@ -251,12 +251,14 @@ var SC_Applications = (function () {
       });
       if (!move.ok) return fail(move.error);
       var now = SC_Store.nowIso();
-      var patch = { status: move.status, updated_at: now, version: row.version + 1 };
+      // Waitlisting is a decision too, so it is stamped here and not only where a number is minted.
+      var patch = { status: move.status, updated_at: now, decided_at: now, version: row.version + 1 };
       if (move.status === "ADMITTED" && !row.registration_no) {
         if (SC_Numbers.CENTRE_CODES.indexOf(row.centre) === -1) return fail("INVALID_REQUEST");
-        var year = Number(now.slice(0, 4));
+        // The school's year, as app_no takes it: a decision in the half hour after midnight in
+        // Chennai is still yesterday in UTC, and the year goes into a number we never re-issue.
+        var year = Number(SC_Store.todayIso().slice(0, 4));
         patch.registration_no = SC_Numbers.formatRegNo(row.centre, year, SC_Store.nextSeq("reg_seq:" + row.centre + ":" + year));
-        patch.decided_at = now;
       }
       SC_Store.insert("Approvals", {
         id: SC_Store.newId(), application_id: row.id, stage: "DIRECTOR", action: data.action,
