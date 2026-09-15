@@ -424,3 +424,94 @@ test("one person holding two reviewing roles cannot approve two stages of one ap
   assert.equal(second.error.code, "ALREADY_APPROVED_STAGE");
   assert.equal(as("priya")("applications.get", { id }).data.status, "PENDING_CENTRE_HEAD");
 });
+
+test("only the Director or an Admin reopens, and only with a reason", () => {
+  const { as } = setupPeople();
+  const id = atDirector(as);
+  as("revathi")("applications.decide", { id, action: "ADMIT", key: directorKey() });
+
+  // Suresh is the Centre Head, so he can see it — he just may not reopen it.
+  assert.equal(as("suresh")("applications.reopen", { id, reason: "x" }).error.code, "NOT_ALLOWED");
+  assert.equal(as("revathi")("applications.reopen", { id, reason: "  " }).error.code, "COMMENT_REQUIRED");
+
+  const reopened = as("revathi")("applications.reopen", { id, reason: "Centre transfer." });
+  assert.equal(reopened.data.status, "RETURNED");
+  assert.equal(reopened.data.registrationNo, "SWB/VLC/2026/0001", "a registration number is issued once");
+});
+
+test("the routing slip keeps every decision, oldest first", () => {
+  const { as } = setupPeople();
+  const id = atDirector(as);
+  as("revathi")("applications.decide", { id, action: "ADMIT", key: directorKey() });
+  const slip = as("priya")("applications.get", { id }).data.approvals;
+
+  assert.deepEqual(plain(slip.map((s) => s.action)), ["APPROVE", "APPROVE", "ADMIT"]);
+  assert.deepEqual(plain(slip.map((s) => s.stage)), ["THERAPY_HEAD", "CENTRE_HEAD", "DIRECTOR"]);
+  assert.equal(slip[0].userName, "Lakshmi");
+});
+
+test("a reopened application goes through the chain again but keeps its history", () => {
+  const { ctx, as } = setupPeople();
+  const id = atDirector(as);
+  as("revathi")("applications.decide", { id, action: "ADMIT", key: directorKey() });
+  as("revathi")("applications.reopen", { id, reason: "Centre transfer." });
+  ctx.clock.ms += MINUTE; // a resubmit starts a later round, and the fake clock has to be told
+  as("priya")("applications.submit", { id });
+
+  const slip = as("priya")("applications.get", { id }).data.approvals;
+  assert.equal(slip.length, 4);
+  assert.equal(slip[3].action, "REOPEN");
+  assert.equal(as("lakshmi")("applications.review", { id, action: "APPROVE" }).data.status, "PENDING_CENTRE_HEAD");
+});
+
+// The number is the family's — it is already printed on their report — so reopening for a correction
+// must not take it back, and admitting a second time must not mint a new one or spend a counter.
+test("a second admit keeps the registration number and does not spend a number", () => {
+  const { ctx, as } = setupPeople();
+  const id = atDirector(as);
+  const first = as("revathi")("applications.decide", { id, action: "ADMIT", key: directorKey() });
+  assert.equal(first.data.registrationNo, "SWB/VLC/2026/0001");
+
+  const reopened = as("revathi")("applications.reopen", { id, reason: "Centre transfer." });
+  assert.equal(reopened.data.registrationNo, "SWB/VLC/2026/0001", "reopening does not take the number back");
+  assert.equal(reopened.data.decidedAt, first.data.decidedAt, "nor the moment the Director decided");
+
+  ctx.clock.ms += MINUTE; // a resubmit starts a later round, and the fake clock has to be told
+  as("priya")("applications.submit", { id });
+  as("lakshmi")("applications.review", { id, action: "APPROVE" });
+  as("suresh")("applications.review", { id, action: "APPROVE" });
+  const again = as("revathi")("applications.decide", { id, action: "ADMIT", key: directorKey() });
+  assert.equal(again.data.status, "ADMITTED");
+  assert.equal(again.data.registrationNo, "SWB/VLC/2026/0001", "the number under the family never changes");
+
+  // And the counter was not spent twice: the next family still gets 0002, not 0003.
+  const next = atDirector(as);
+  assert.equal(
+    as("revathi")("applications.decide", { id: next, action: "ADMIT", key: directorKey() }).data.registrationNo,
+    "SWB/VLC/2026/0002"
+  );
+});
+
+// decide passes the same approvedThisRound list review does, and dropping it fails open the same way.
+// Vasan holds both reviewing roles and the Director's, so one person can reach decide after approving
+// a stage — the only shape that can. His Centre Head approval and the submit share one millisecond
+// here, so approversThisRound's ">=" must count it (">" would let him sign as Director too).
+test("the Director cannot admit after approving a stage of the same round", () => {
+  const { ctx, as } = setupPeople();
+  const key = sha("key-vasan");
+  ctx.SC_Store.insert("Users", {
+    id: "u-vasan", email: "vasan@example.com", name: "Vasan", roles: ["CENTRE_HEAD", "DIRECTOR"],
+    password_hash: sha(key), password_salt: "0123456789abcdef0123456789abcdef", kdf_iterations: 600000,
+    is_active: true, failed_logins: 0, must_change_password: false,
+  });
+  const token = plain(ctx.SC_Api.handle({ action: "auth.login", data: { email: "vasan@example.com", key } })).data.token;
+  const asVasan = (action, data) => plain(ctx.SC_Api.handle({ action, data, token }));
+
+  const { id } = submitReady(as, "priya");
+  as("lakshmi")("applications.review", { id, action: "APPROVE" });
+  assert.equal(asVasan("applications.review", { id, action: "APPROVE" }).data.status, "PENDING_DIRECTOR");
+
+  const admit = asVasan("applications.decide", { id, action: "ADMIT", key });
+  assert.equal(admit.error.code, "ALREADY_APPROVED_STAGE");
+  assert.equal(as("priya")("applications.get", { id }).data.status, "PENDING_DIRECTOR");
+});

@@ -62,7 +62,7 @@ var SC_Applications = (function () {
       id: row.id, appNo: row.app_no, registrationNo: row.registration_no, status: row.status,
       centre: row.centre, applicantName: row.applicant_name || "", createdBy: row.created_by,
       version: row.version, createdAt: row.created_at, updatedAt: row.updated_at, submittedAt: row.submitted_at,
-      decidedAt: row.decided_at || null,
+      decidedAt: row.decided_at || null, approvals: approvalsFor(row.id),
       values: values,
       completion: SC_FormRules.completion(values, SC_Store.todayIso()),
       safetyFlags: SC_FormRules.safetyFlags(values),
@@ -271,6 +271,43 @@ var SC_Applications = (function () {
     });
   }
 
+  // ADMITTED -> RETURNED, for corrections after signing. Director or Admin, reason required.
+  // The registration number stands: it has already been printed on the family's report.
+  function reopen(data, session) {
+    if (typeof data.id !== "string" || !data.id) return fail("INVALID_REQUEST");
+    return SC_Store.withLock(function () {
+      var found = loadVisible(data.id, session);
+      if (found.error) return found.error;
+      var row = found.row;
+      var move = SC_Workflow.next(row.status, "REOPEN", {
+        actorId: session.user.id, actorRoles: session.user.roles, createdBy: row.created_by,
+        comment: data.reason,
+      });
+      if (!move.ok) return fail(move.error);
+      var now = SC_Store.nowIso();
+      SC_Store.insert("Approvals", {
+        id: SC_Store.newId(), application_id: row.id, stage: "DIRECTOR", action: "REOPEN",
+        comment: String(data.reason || "").trim(), user_id: session.user.id,
+        form_hash: formHash(row), created_at: now,
+      });
+      var saved = SC_Store.update("Applications", row.id, {
+        status: move.status, updated_at: now, version: row.version + 1,
+      });
+      SC_Audit.log(session.user.id, "applications.reopened", "Applications", row.id, null);
+      return SC_Actions.ok(view(saved));
+    });
+  }
+
+  // The routing slip (POC spec §6): the Approvals rows for this application, oldest first.
+  function approvalsFor(id) {
+    return SC_Store.filter("Approvals", function (r) { return r.application_id === id; })
+      .sort(function (a, b) { return a.created_at < b.created_at ? -1 : a.created_at > b.created_at ? 1 : 0; })
+      .map(function (r) {
+        var user = SC_Store.find("Users", "id", r.user_id);
+        return { stage: r.stage, action: r.action, comment: r.comment, userName: user ? user.name : "", at: r.created_at };
+      });
+  }
+
   function listItem(row) {
     return {
       id: row.id, appNo: row.app_no, applicantName: row.applicant_name || "", centre: row.centre,
@@ -303,7 +340,10 @@ var SC_Applications = (function () {
     });
   }
 
-  return Object.freeze({ create: create, get: get, save: save, submit: submit, withdraw: withdraw, review: review, decide: decide, list: list, formHash: formHash });
+  return Object.freeze({
+    create: create, get: get, save: save, submit: submit, withdraw: withdraw, review: review,
+    decide: decide, reopen: reopen, list: list, formHash: formHash,
+  });
 })();
 
 SC_Api.register("applications.create", SC_Applications.create);
@@ -313,4 +353,5 @@ SC_Api.register("applications.submit", SC_Applications.submit);
 SC_Api.register("applications.withdraw", SC_Applications.withdraw);
 SC_Api.register("applications.review", SC_Applications.review);
 SC_Api.register("applications.decide", SC_Applications.decide);
+SC_Api.register("applications.reopen", SC_Applications.reopen);
 SC_Api.register("applications.list", SC_Applications.list);
