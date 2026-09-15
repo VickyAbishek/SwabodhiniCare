@@ -102,6 +102,13 @@ const { ok, data, error } = await res.json();
 | `attachments.upload`, `.get`, `.delete`, `signature.upload` | attachments, `/api/me/signature` |
 | `reports.get` | `/api/reports/:name` |
 | `admin.backups.list`, `admin.backups.runNow`, `admin.audit.list` | `/api/admin/*` |
+| `setup.firstAdmin` `[POC]` | none (production creates the first Admin with a one-time script) |
+
+**First Admin (bootstrap).** No password or key is ever committed; the repository is public.
+1. The developer runs `setup()` once in the Apps Script editor. It creates the data Sheet (if `SHEET_ID` is empty), the tabs, the 4 centres and `HMAC_SECRET`. While no active Admin exists, it also creates a **one-time 12-character setup code** in Script Properties and prints it in the execution log.
+2. The first Admin opens the app, enters the setup code, their email and name, and chooses a password. The phone derives the key as usual, and `setup.firstAdmin` creates the account.
+3. The code is deleted as soon as it's used. Five wrong codes also delete it, and `setup()` must be run again for a new one. Once an Admin exists, `setup.firstAdmin` always answers `NOT_ALLOWED`.
+4. All other staff, including one test account per role, are then created by the Admin in the app.
 
 ## 6. Google Sheet layout
 

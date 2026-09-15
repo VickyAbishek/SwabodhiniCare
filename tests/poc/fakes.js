@@ -141,6 +141,12 @@ function makeSpreadsheetApp() {
       if (!books.has(id)) books.set(id, new FakeSpreadsheet(id));
       return books.get(id);
     },
+    create(name) {
+      const book = new FakeSpreadsheet(`sheet-${books.size + 1}`);
+      book.name = name;
+      books.set(book.id, book);
+      return book;
+    },
   };
 }
 

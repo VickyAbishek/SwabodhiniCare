@@ -3,9 +3,9 @@ const assert = require("node:assert/strict");
 const A = require("../../shared/actions.js");
 const P = require("../../shared/permissions.js");
 
-test("only prelogin and login work without signing in", () => {
+test("only prelogin, login and first-admin setup work without signing in", () => {
   const publicActions = Object.keys(A.ACTIONS).filter((name) => A.ACTIONS[name].auth === "public");
-  assert.deepEqual(publicActions.sort(), ["auth.login", "auth.prelogin"]);
+  assert.deepEqual(publicActions.sort(), ["auth.login", "auth.prelogin", "setup.firstAdmin"]);
 });
 
 test("every action declares auth, and every capability exists", () => {
@@ -17,6 +17,7 @@ test("every action declares auth, and every capability exists", () => {
 
 test("the contract covers the POC spec §5 action list", () => {
   const expected = [
+    "setup.firstAdmin",
     "auth.prelogin", "auth.login", "auth.logout", "auth.changePassword", "me.get", "me.update",
     "users.list", "users.create", "users.update", "users.resetPassword",
     "applications.list", "applications.create", "applications.get", "applications.save",

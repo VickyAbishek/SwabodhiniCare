@@ -154,6 +154,7 @@ var SC_Users = (function () {
   }
 
   return Object.freeze({
+    validNewUser: validNewUser,
     meGet: meGet,
     meUpdate: meUpdate,
     list: list,

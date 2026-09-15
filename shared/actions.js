@@ -6,6 +6,7 @@ var SC_Actions = (function () {
   // auth "public" = no sign-in needed; "user" = signed in. A capability must also pass SC_Permissions.can().
   // Finer checks (owner, workflow stage) happen inside each handler.
   var CONTRACT = {
+    "setup.firstAdmin": { auth: "public" }, // POC bootstrap; refused once an Admin exists
     "auth.prelogin": { auth: "public" },
     "auth.login": { auth: "public" },
     "auth.logout": { auth: "user" },
