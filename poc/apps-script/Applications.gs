@@ -188,15 +188,13 @@ var SC_Applications = (function () {
   var REVIEW_ACTIONS = ["APPROVE", "SEND_BACK", "REJECT"];
 
   // One person may not approve two stages of the same application. A round starts at each submit
-  // and holds every decision taken after that instant, so a send-back and resend clears it for
-  // free. Strictly after, not at: a decision sitting on the slip at the same instant as a resubmit
-  // belongs to the round that has just ended. Waitlisting is not approving, so a Director who
-  // waitlisted can still admit later.
+  // and holds every decision taken at or after that instant, so a send-back and resend clears it
+  // for free. Waitlisting is not approving, so a Director who waitlisted can still admit later.
   function approversThisRound(applicationId, submittedAt) {
     return SC_Store.filter("Approvals", function (r) {
       if (r.application_id !== applicationId) return false;
       if (r.action !== "APPROVE" && r.action !== "ADMIT") return false;
-      return !submittedAt || r.created_at > submittedAt;
+      return !submittedAt || r.created_at >= submittedAt;
     }).map(function (r) { return r.user_id; });
   }
 

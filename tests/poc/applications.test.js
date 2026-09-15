@@ -231,6 +231,18 @@ test("only the role for the current stage may decide", () => {
   assert.equal(as("revathi")("applications.review", { id, action: "APPROVE" }).error.code, "NOT_ALLOWED", "Director too early");
 });
 
+// ADMIT and WAITLIST are the Director's alone and need their password re-entered, so they must not
+// be reachable through review: a decision that slipped through here would skip the step-up.
+test("a review cannot be the Director's admit or waitlist", () => {
+  const { as } = setupPeople();
+  const { id } = submitReady(as, "priya");
+  as("lakshmi")("applications.review", { id, action: "APPROVE" });
+  as("suresh")("applications.review", { id, action: "APPROVE" });
+  assert.equal(as("revathi")("applications.review", { id, action: "ADMIT" }).error.code, "INVALID_REQUEST");
+  assert.equal(as("revathi")("applications.review", { id, action: "WAITLIST" }).error.code, "INVALID_REQUEST");
+  assert.equal(as("revathi")("applications.get", { id }).data.status, "PENDING_DIRECTOR");
+});
+
 test("nobody reviews their own application, and nobody approves two stages", () => {
   const { as } = setupPeople();
   const { id } = submitReady(as, "lakshmi"); // the Therapy Head filed it themselves
@@ -269,10 +281,11 @@ test("a sent-back application starts the chain again at the Therapy Head", () =>
 });
 
 test("a redeeming reviewer is not blocked by their own earlier approval in a new round", () => {
-  const { as } = setupPeople();
+  const { ctx, as } = setupPeople();
   const { id } = submitReady(as, "priya");
   as("lakshmi")("applications.review", { id, action: "APPROVE" });
   as("suresh")("applications.review", { id, action: "SEND_BACK", comment: "Please fix." });
+  ctx.clock.ms += MINUTE; // a resubmit starts a later round, and the fake clock has to be told
   as("priya")("applications.submit", { id });
   // Lakshmi approved the previous round; the new round must let her approve her stage again.
   const again = as("lakshmi")("applications.review", { id, action: "APPROVE" });
