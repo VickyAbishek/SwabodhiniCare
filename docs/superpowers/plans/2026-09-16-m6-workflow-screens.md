@@ -187,13 +187,15 @@ Expected: FAIL — `UNKNOWN_ACTION: applications.submit`.
       var found = loadVisible(data.id, session);
       if (found.error) return found.error;
       var row = found.row;
-      var values = formValues(row);
-      var check = SC_FormRules.validate(values, { mode: "submit", today: SC_Store.todayIso() });
-      if (!check.ok) return fail("VALIDATION_FAILED", { errors: check.errors });
+      // Who may act comes before what the answers say: somebody who is not allowed must not
+      // learn which of their answers the server would have complained about.
       var move = SC_Workflow.next(row.status, "SUBMIT", {
         actorId: session.user.id, actorRoles: session.user.roles, createdBy: row.created_by,
       });
       if (!move.ok) return fail(move.error);
+      var values = formValues(row);
+      var check = SC_FormRules.validate(values, { mode: "submit", today: SC_Store.todayIso() });
+      if (!check.ok) return fail("VALIDATION_FAILED", { errors: check.errors });
       var now = SC_Store.nowIso();
       var saved = SC_Store.update("Applications", row.id, {
         status: move.status, submitted_at: now, updated_at: now, version: row.version + 1,
@@ -370,7 +372,8 @@ test("a sent-back application starts the chain again at the Therapy Head", () =>
   as("suresh")("applications.review", { id, action: "SEND_BACK", comment: "Photo is blurred." });
   assert.equal(as("priya")("applications.get", { id }).data.status, "RETURNED");
 
-  as("priya")("applications.save", { id, version: 3, values: { s2_name_ta: "நிலா" } });
+  // create v1, submit v2, approve v3, send back v4 — every one of them bumps the version.
+  as("priya")("applications.save", { id, version: 4, values: { s2_name_ta: "நிலா" } });
   const resent = as("priya")("applications.submit", { id });
   assert.equal(resent.data.status, "PENDING_THERAPY_HEAD");
 
@@ -548,10 +551,13 @@ test("only the Director decides, and Admit always needs the password", () => {
   assert.equal(as("revathi")("applications.decide", { id, action: "ADMIT" }).error.code, "INVALID_REQUEST");
 });
 
-test("a rejected application cannot be sent back or re-decided", () => {
+test("the Director rejects from the review screen, and a rejected application is final", () => {
   const { as } = setupPeople();
   const id = atDirector(as);
-  as("revathi")("applications.decide", { id, action: "REJECT", comment: "Not eligible.", key: directorKey() });
+  // Rejecting is not signing, so it goes through review and needs no password — only Admit and
+  // Waitlist carry the step-up.
+  const rejected = as("revathi")("applications.review", { id, action: "REJECT", comment: "Not eligible." });
+  assert.equal(rejected.data.status, "REJECTED");
   assert.equal(as("revathi")("applications.review", { id, action: "SEND_BACK", comment: "x" }).error.code, "INVALID_TRANSITION");
 });
 
@@ -667,7 +673,8 @@ test("only the Director or an Admin reopens, and only with a reason", () => {
   const id = atDirector(as);
   as("revathi")("applications.decide", { id, action: "ADMIT", key: directorKey() });
 
-  assert.equal(as("suresh")("applications.reopen", { id, reason: "x" }).error.code, "NOT_FOUND");
+  // Suresh is the Centre Head, so he can see it — he just may not reopen it.
+  assert.equal(as("suresh")("applications.reopen", { id, reason: "x" }).error.code, "NOT_ALLOWED");
   assert.equal(as("revathi")("applications.reopen", { id, reason: "  " }).error.code, "COMMENT_REQUIRED");
 
   const reopened = as("revathi")("applications.reopen", { id, reason: "Centre transfer." });
@@ -870,7 +877,45 @@ The English wording is in the mockups and in the spec extract above; take it fro
 
 ### Task 9: My Queue
 
-**Files:** Create `public/js/routing-slip.js` (the shared 4-step component, pure model + DOM); modify `public/home.html`, `public/js/pages/home.js`, `public/css/app.css`; Test `tests/public/routing-slip.test.mjs`.
+**Files:** Modify `poc/apps-script/Applications.gs` (add `dob` to `listItem`), `tests/poc/applications.test.js`; create `public/js/routing-slip.js` (the shared 4-step component, pure model + DOM); modify `public/home.html`, `public/js/pages/home.js`, `public/css/app.css`; Test `tests/public/routing-slip.test.mjs`.
+
+Start with the one server change this screen needs. `listItem` carries no `dob`, so the card cannot show the age the mockup asks for (`"19 yrs · Male · Selaiyur"`). Add it and let the client work the age out with `SC_Dates`, rather than a second round-trip per card or a stored age that goes stale.
+
+- [ ] **Step 1: Write the failing server test**
+
+```js
+test("the list carries the date of birth so a queue card can show the age", () => {
+  const { as } = setupPeople();
+  as("priya")("applications.create", { values: SAMPLE });
+  const list = as("lakshmi")("applications.list", {});
+  assert.equal(list.data.items[0].dob, SAMPLE.s2_dob);
+});
+```
+
+- [ ] **Step 2: Run it, watch it fail**
+
+Run: `node --test tests/poc/applications.test.js`
+Expected: FAIL — `undefined !== "2020-03-14"`.
+
+- [ ] **Step 3: Add `dob` to `listItem`**
+
+```js
+  function listItem(row) {
+    return {
+      id: row.id, appNo: row.app_no, applicantName: row.applicant_name || "", centre: row.centre,
+      dob: row.dob || null, gender: row.gender || null,
+      status: row.status, createdBy: row.created_by, updatedAt: row.updated_at,
+      safetyFlags: SC_FormRules.safetyFlags(formValues(row)),
+    };
+  }
+```
+
+`gender` comes along free from the same summary columns and saves a second lookup for the same line of the card.
+
+- [ ] **Step 4: Run it, watch it pass**
+
+Run: `node --test tests/poc/applications.test.js`
+Expected: PASS.
 
 **Interfaces:**
 - Produces: `createRoutingSlip({ workflow })` with `track(status) -> { step, total: 4, label }` and `slip({ status, approvals, names }) -> [{ stage, state: "done"|"now"|"todo", name, meta, comment }]`
@@ -955,4 +1000,4 @@ No mockup exists for either — the mockups' own footer lists them as still to d
 **Known holes, deliberately left:**
 - The **signature upload** and the **photo** are M7. Task 11's preview and Task 12's submit button both stop at "available in a later update", exactly as the form already does.
 - **Reopen keeps the registration number** (Decision #5). This interacts with the still-open question in TODO.md about whether a reopened application repeats every approval, and should be re-checked when that is settled.
-- `applications.list` returns no `age`, so the queue card's age line needs either a small addition to the list summary or a client-side calculation from `dob` (already in `summaryColumns`). **Decide when implementing Task 9**; the doctor's age is not worth a second round-trip per card.
+**Resolved during the pre-flight scan** (see the ledger for the full table): `applications.list` carried neither `dob` nor `gender`, so Task 9 now starts by adding both to `listItem` and working the age out on the client. Five other conflicts between a task's own tests and its own code were found and fixed in place: `submit` now checks who may act before what the answers say (else a non-owner got `VALIDATION_FAILED` instead of `NOT_ALLOWED`); the sent-back test saves at `version: 4`, not 3, because submit, approve and send-back each bump it; the Director's **Reject** goes through `review`, not `decide`, since rejecting is not signing; and a Centre Head reopening someone else's admitted application gets `NOT_ALLOWED`, not `NOT_FOUND`, because he is allowed to see it.
