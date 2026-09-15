@@ -166,6 +166,28 @@ var SC_Users = (function () {
 SC_Api.register("me.get", SC_Users.meGet);
 SC_Api.register("me.update", SC_Users.meUpdate);
 SC_Api.register("users.list", SC_Users.list);
-SC_Api.register("users.create", SC_Users.create);
-SC_Api.register("users.update", SC_Users.update);
-SC_Api.register("users.resetPassword", SC_Users.resetPassword);
+// Account changes are wrapped so each one lands in the audit log.
+SC_Api.register("users.create", function (data, session) {
+  var result = SC_Users.create(data);
+  if (result.ok) {
+    SC_Audit.log(session.user.id, "users.created", "Users", result.data.id, { email: result.data.email, roles: result.data.roles });
+  }
+  return result;
+});
+
+SC_Api.register("users.update", function (data, session) {
+  var result = SC_Users.update(data, session);
+  if (result.ok) {
+    var changed = ["name", "phone", "roles", "centre", "isActive"]
+      .filter(function (key) { return data[key] !== undefined; })
+      .map(function (key) { return key === "isActive" ? "is_active" : key; });
+    SC_Audit.log(session.user.id, "users.updated", "Users", result.data.id, { changed: changed });
+  }
+  return result;
+});
+
+SC_Api.register("users.resetPassword", function (data, session) {
+  var result = SC_Users.resetPassword(data);
+  if (result.ok) SC_Audit.log(session.user.id, "users.password_reset", "Users", result.data.id, null);
+  return result;
+});

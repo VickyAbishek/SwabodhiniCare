@@ -172,14 +172,44 @@ var SC_Auth = (function () {
     login: login,
     logout: logout,
     changePassword: changePassword,
+    normalizeEmail: normalizeEmail,
     // Signs a person out everywhere (deactivation, password reset). Call inside SC_Store.withLock.
     endSessions: function (userId) {
       endOtherSessions(userId, null);
     },
+    userIdForEmail: function (email) {
+      var user = activeUserByEmail(normalizeEmail(email));
+      return user ? user.id : null;
+    },
   });
 })();
 
+// Handlers are wrapped so every sign-in event lands in the audit log (never keys or tokens).
 SC_Api.register("auth.prelogin", SC_Auth.prelogin);
-SC_Api.register("auth.login", SC_Auth.login);
-SC_Api.register("auth.logout", SC_Auth.logout);
-SC_Api.register("auth.changePassword", SC_Auth.changePassword);
+
+SC_Api.register("auth.login", function (data) {
+  var result = SC_Auth.login(data);
+  if (result.ok) {
+    SC_Audit.log(result.data.user.id, "auth.login", "Users", result.data.user.id, null);
+    return result;
+  }
+  var code = result.error.code;
+  if (code === "INVALID_CREDENTIALS" || code === "ACCOUNT_LOCKED") {
+    var email = SC_Auth.normalizeEmail(data.email);
+    var userId = SC_Auth.userIdForEmail(email);
+    SC_Audit.log(userId, code === "ACCOUNT_LOCKED" ? "auth.locked" : "auth.login_failed", "Users", userId, { email: email });
+  }
+  return result;
+});
+
+SC_Api.register("auth.logout", function (data, session) {
+  var result = SC_Auth.logout(data, session);
+  if (result.ok) SC_Audit.log(session.user.id, "auth.logout", "Users", session.user.id, null);
+  return result;
+});
+
+SC_Api.register("auth.changePassword", function (data, session) {
+  var result = SC_Auth.changePassword(data, session);
+  if (result.ok) SC_Audit.log(session.user.id, "auth.password_changed", "Users", session.user.id, null);
+  return result;
+});
