@@ -128,9 +128,11 @@ A signature is just a non-empty string to the validator (`shared/form-rules.js` 
 test("only the owner can send an application for review", () => {
   const { as } = setupPeople();
   const { id } = draftFor(as, "priya", {});
-  const result = as("deepa")("applications.submit", { id });
-  assert.equal(result.ok, false);
-  assert.equal(result.error.code, "NOT_ALLOWED");
+  // Lakshmi is a Therapy Head, so she can see the application and is refused only for not
+  // having written it. Deepa is a plain therapist, so its existence is not revealed to her
+  // at all — the same pair the existing "only the author can save" test establishes.
+  assert.equal(as("lakshmi")("applications.submit", { id }).error.code, "NOT_ALLOWED");
+  assert.equal(as("deepa")("applications.submit", { id }).error.code, "NOT_FOUND");
 });
 
 test("sending for review needs every answer the submit check wants", () => {
