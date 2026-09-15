@@ -21,7 +21,9 @@ const dayOf = (iso) => new Date(iso).toLocaleDateString("en-CA", { timeZone: "As
 const shortDate = (iso, lang) =>
   new Date(iso).toLocaleDateString(lang === "en" ? "en-IN" : "ta-IN", { day: "numeric", month: "short" });
 
-const state = { page: null, slip: null, me: null, items: null };
+// `loaded` is what the queue may speak from: until a list call has come back, the screen knows nothing
+// about the work waiting, and must say nothing about it either.
+const state = { page: null, slip: null, me: null, items: null, loaded: false };
 
 function span(className, text) {
   const node = document.createElement("span");
@@ -106,10 +108,15 @@ function heroText(page, waiting) {
 }
 
 function draw() {
-  const { page, me, slip, items } = state;
+  const { page, me, slip } = state;
   $("greeting").textContent = page.t("home.greeting", { name: me.name });
   $("role-line").textContent = me.roles.map((role) => page.t(`role.${role}`)).join(" · ");
-  if (!items) return; // the first answer is still on its way
+  // No answer yet, or the last call failed: the queue says nothing rather than claiming there is
+  // nothing. "Nothing is waiting for you" and the list's "no applications yet" mean an answer that
+  // came back empty, and a slow first call on a phone must not be told it has no work. A failed call
+  // leaves this blank on purpose — the error alert is on screen then, and the two would contradict.
+  if (!state.loaded) return;
+  const items = state.items || [];
   const waiting = items.filter((item) => myTurn(item, me)).length;
   $("queue-count").textContent = waiting === 0 ? "" : String(waiting);
   $("queue-state").textContent = heroText(page, waiting);
@@ -126,6 +133,7 @@ async function load() {
     }
     showMessage($("message"), "");
     state.items = order(result.data.items, state.me);
+    state.loaded = true; // only now may the queue speak, even if the answer was "nothing"
     draw();
   } catch (err) {
     showMessage($("message"), state.page.errorMessage({ code: "NETWORK_ERROR" }));
