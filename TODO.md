@@ -1,0 +1,106 @@
+# SwabodhiniCare — TODO
+
+Every item has a scope tag (see `docs/architecture/scope-map.md`):
+**`[SHARED]`** used in both phases · **`[POC]`** Phase 0 only (Google Sheets) · **`[PROD]`** Phase 1 only (Cloudflare).
+
+Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone gets its own plan in `docs/superpowers/plans/` when it starts.
+
+---
+
+## Phase 0: POC on Google Sheets (every feature, tested by all roles)
+
+### M1: Shared foundations · plan: `docs/superpowers/plans/2026-09-15-m1-shared-foundations.md`
+- [ ] `[SHARED]` Tooling: `package.json` (no dependencies), `npm test`, `scripts/check-scope.mjs`
+- [ ] `[SHARED]` `shared/numbers.js`: application and registration numbers
+- [ ] `[SHARED]` `shared/dates.js`: age from date of birth, days waiting, calendar checks
+- [ ] `[SHARED]` `shared/permissions.js`: roles and capabilities (main spec §4)
+- [ ] `[SHARED]` `shared/workflow.js`: status machine and separation of duties (main spec §5)
+- [ ] `[SHARED]` `shared/actions.js`: API contract, EN/TA error messages, envelope
+
+### M2: Form definition and report maths
+- [ ] `[SHARED]` `shared/form-schema.js`: all 11 steps, fields, EN/TA labels, required rules, show-if (adult path 18+)
+- [ ] `[SHARED]` `shared/validate.js`: draft vs submit validation, error codes per field
+- [ ] `[SHARED]` `shared/reports.js`: queue counts, register rows, by-centre totals, waitlist, turnaround, demographics
+
+### M3: POC server (Apps Script) core
+- [ ] `[POC]` `poc/apps-script/`: `appsscript.json`, `Api.gs` router + envelope + token/role checks
+- [ ] `[POC]` `Sheets.gs`: tab ↔ object mapping, columns generated from the form schema, `LockService`, counters
+- [ ] `[POC]` `Setup.gs`: create tabs, fill centres, set Script Properties, create the monthly trigger
+- [ ] `[POC]` `Auth.gs`: prelogin (fake salts), login (SHA-256 of device key), sessions, lockout, change password
+- [ ] `[POC]` `Users.gs`: list, create (temporary password), update roles, reset password, deactivate
+- [ ] `[POC]` Audit tab writes
+- [ ] `[POC]` `poc/seed/`: fictional applicants and one test account per role
+- [ ] `[POC]` Deploy script/notes for `clasp` (dev-only) and web app settings
+
+### M4: Screens core
+- [ ] `[SHARED]` `public/css/`: design tokens from `docs/mockups/mockups.css` (light default, dark via Settings), print CSS
+- [ ] `[SHARED]` `public/js/config.js`, `api.js` (loads `backends/${BACKEND}.js`), i18n (EN/TA), theme bootstrap in `<head>`
+- [ ] `[POC]` `public/js/backends/poc.js`: `{action, token, data}` over `text/plain`, token in `localStorage`
+- [ ] `[SHARED]` `public/js/kdf.js`: PBKDF2 600k on the device
+- [ ] `[SHARED]` Screens: Sign in, first sign-in (set password), Settings (language, appearance, change password, sign out)
+- [ ] `[POC]` "Test version: sample data only" banner behind `IS_DEMO`
+
+### M5: Applications
+- [ ] `[SHARED]` Form wizard rendered from the schema (one step per screen, progress, big tap choices, 3-dropdown DOB)
+- [ ] `[SHARED]` Autosave every 20 s + on step change; "Saving…" / "Saved ✓" / "Not saved" states; version-conflict message
+- [ ] `[POC]` `Applications.gs`: create, get, save (optimistic lock), list (role-scoped)
+- [ ] `[SHARED]` All-steps overview, consent step with finger signature pad
+- [ ] `[POC]` "Fill with sample data" button behind `IS_DEMO`
+
+### M6: Workflow screens
+- [ ] `[SHARED]` My Queue (auto-refresh every 60 s while visible, Refresh button), review screen, routing slip
+- [ ] `[SHARED]` Approve / Send back / Reject with confirmations; sent-back view with "Fix and resend"
+- [ ] `[SHARED]` Director decision: Admit / Waitlist / Reject, password step-up, stored signature, registration number, lock
+- [ ] `[POC]` `Applications.gs`: submit, review, decide, reopen, withdraw (using `shared/workflow.js`), form fingerprint
+- [ ] `[SHARED]` Reopen and withdraw screens
+
+### M7: Files
+- [ ] `[SHARED]` `image-compress.js` (canvas, ≤1600 px, ~300 KB), file pickers (camera and gallery)
+- [ ] `[POC]` `Attachments.gs`: base64 upload to Drive, file-type check by first bytes, view, soft delete; Director signature upload
+
+### M8: Reports, Excel, print
+- [ ] `[SHARED]` Reports screens (R1–R7) with filters and CSS bar charts
+- [ ] `[SHARED]` `xlsx.js`: Excel built in the browser (UTF-8, Tamil-safe)
+- [ ] `[SHARED]` A4 Individual Assessment Report (`print.html` + `print.css`)
+- [ ] `[POC]` `Reports.gs`: reads rows, filters, pages of 50
+
+### M9: Backups, alerts, admin
+- [ ] `[POC]` `Backup.gs`: monthly trigger → Sheet copy + `.xlsx` to Drive, keep 24 months, `BackupLog`, email result
+- [ ] `[SHARED]` Admin screens: staff list, add staff (temporary password shown once), backups list + Backup now, audit log
+- [ ] `[POC]` Restore steps in `docs/runbook.md` + one practice restore
+
+### M10: Installable app, hosting, end-to-end
+- [ ] `[SHARED]` PWA: `manifest.webmanifest`, `sw.js` (app shell only, network-first), offline page
+- [ ] `[POC]` `public/_headers` for Cloudflare Pages (CSP with Apps Script `connect-src`, HSTS, etc.)
+- [ ] `[POC]` Deploy: Cloudflare Pages (static) + Apps Script web app; `API_BASE` set
+- [ ] `[SHARED]` Playwright E2E (dev-only): main path per role, send-back loop, Tamil, dark mode, two-browser save test
+- [ ] `[SHARED]` Security review before handing to staff
+
+### POC close-out
+- [ ] `[POC]` Staff testing with one test account per role (POC spec §16 exit criteria)
+- [ ] `[POC]` Collect feedback on form wording, Tamil text, reports
+- [ ] `[POC]` Decide: stay on Sheets for a small pilot, or move to Phase 1
+- [ ] `[POC]` If real data will be entered: move Sheet, script and Drive to the NGO account (POC spec §12 checklist)
+
+---
+
+## Phase 1: Production on Cloudflare (only if the POC review decides to move)
+
+- [ ] `[PROD]` `prod/worker/`: Worker router with REST `/api/*`, same `shared/` modules
+- [ ] `[PROD]` D1 migration `0001_init.sql` (same columns as the Sheet tabs)
+- [ ] `[PROD]` `public/js/backends/prod.js`: REST calls, `HttpOnly` cookie session
+- [ ] `[PROD]` Per-IP login rate limit
+- [ ] `[PROD]` R2 uploads (streamed) + usage guard + Usage page
+- [ ] `[PROD]` Chunked monthly backup cron + daily usage check
+- [ ] `[PROD]` Apps Script mail relay for alerts
+- [ ] `[PROD]` `prod/import/`: one-time Sheet → D1 and Drive → R2 import
+- [ ] `[PROD]` Remove `poc/`, `public/js/backends/poc.js` and `IS_DEMO` UI; set `BACKEND = "prod"`
+
+---
+
+## Decisions still open
+
+- [ ] Reopening a signed application: does it go through all approvals again? (Currently built as **yes**: `ADMITTED → REOPEN → RETURNED`.)
+- [ ] Rejections: therapist tells the family in person, with no automatic message in the POC. Is that OK?
+- [ ] Main spec §16 Q1–Q12 and POC spec §18 PQ1–PQ4
+- [ ] Tamil wording review by school staff (mockups, prompt, error messages)
