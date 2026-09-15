@@ -115,6 +115,22 @@ test("the list shows therapists their own applications and heads everything, new
   assert.equal(as("lakshmi")("applications.list", { page: 0 }).error.code, "INVALID_REQUEST");
 });
 
+test("the form fingerprint follows the answers and nothing else", () => {
+  const { ctx, as } = setupPeople();
+  const { id } = draftFor(as, "priya", {});
+  const row = () => ctx.SC_Store.find("Applications", "id", id);
+
+  const first = ctx.SC_Applications.formHash(row());
+  assert.match(first, /^[0-9a-f]{64}$/);
+
+  as("priya")("applications.save", { id, version: 1, values: { s2_full_name: "Nila M" } });
+  const changed = ctx.SC_Applications.formHash(row());
+  assert.notEqual(changed, first, "an answer change must change the fingerprint");
+
+  const again = ctx.SC_Applications.formHash(row());
+  assert.equal(again, changed, "the same answers must give the same fingerprint");
+});
+
 test("creating, viewing by others and saving are recorded in the audit log", () => {
   const { ctx, as } = setupPeople();
   const { id } = draftFor(as, "priya", {});

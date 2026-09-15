@@ -43,6 +43,11 @@ var SC_Applications = (function () {
     return values;
   }
 
+  // Main spec §5: a SHA-256 of the answers, stored with every decision so a later change shows up.
+  function formHash(row) {
+    return SC_Crypto.sha256Hex(JSON.stringify(formValues(row)));
+  }
+
   function summaryColumns(values) {
     var s = SC_FormRules.summarize(values);
     return {
@@ -160,7 +165,7 @@ var SC_Applications = (function () {
     });
   }
 
-  return Object.freeze({ create: create, get: get, save: save, list: list });
+  return Object.freeze({ create: create, get: get, save: save, list: list, formHash: formHash });
 })();
 
 SC_Api.register("applications.create", SC_Applications.create);
