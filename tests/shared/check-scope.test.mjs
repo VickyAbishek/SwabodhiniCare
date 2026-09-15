@@ -10,6 +10,7 @@ test("expectedScope maps folders to scopes", () => {
   assert.equal(expectedScope("public/js/api.js"), "shared");
   assert.equal(expectedScope("poc/apps-script/Api.gs"), "poc");
   assert.equal(expectedScope("public/js/backends/poc.js"), "poc");
+  assert.equal(expectedScope("public/js/seed/sample-applications.js"), "poc");
   assert.equal(expectedScope("prod/worker/src/index.js"), "prod");
   assert.equal(expectedScope("public/js/backends/prod.js"), "prod");
 });
@@ -39,6 +40,8 @@ test("shared code may not reference POC or production code", () => {
   assert.match(js.join("\n"), /must not reference POC code/);
   const html = checkFile("public/index.html", '<!-- scope: shared -->\n<script src="js/backends/prod.js"></script>');
   assert.match(html.join("\n"), /must not reference production code/);
+  const seed = checkFile("public/js/ui.js", '// scope: shared\nimport { S } from "./seed/sample-applications.js";\n');
+  assert.match(seed.join("\n"), /must not reference POC code/);
 });
 
 test("POC and production code may not reference each other", () => {

@@ -283,6 +283,8 @@ form { display: flex; flex-direction: column; gap: 18px; }
 .save-status[data-state="saved"] { color: var(--ok); }
 .save-status[data-state="error"], .save-status[data-state="conflict"] { color: var(--bad); }
 .app-ref { font-size: 0.9rem; color: var(--ink-2); }
+/* Demo aid: fills the whole form, so it sits apart from the questions and stays easy to ignore. */
+.demo-fill { margin: 6px 0 14px; border-style: dashed; color: var(--ink-2); }
 
 .questions { display: flex; flex-direction: column; gap: 20px; }
 .q { display: grid; gap: 10px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }

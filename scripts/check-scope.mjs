@@ -21,7 +21,7 @@ export function toPosix(p) {
 
 export function expectedScope(relPath) {
   const p = toPosix(relPath);
-  if (p.startsWith("poc/") || p === "public/js/backends/poc.js") return "poc";
+  if (p.startsWith("poc/") || p.startsWith("public/js/seed/") || p === "public/js/backends/poc.js") return "poc";
   if (p.startsWith("prod/") || p === "public/js/backends/prod.js") return "prod";
   return "shared";
 }
@@ -50,9 +50,14 @@ function headerErrors(p, content, scope) {
   return [];
 }
 
+// public/js/seed/ is POC code that lives in public/ so the static host can serve it (see
+// expectedScope), so a reference to it counts as a reference to POC code.
+const POC_REF = /(^|\/)poc\/|backends\/poc|(^|\/)seed\//;
+const PROD_REF = /(^|\/)prod\/|backends\/prod/;
+
 function dependencyErrors(p, scope, refs) {
-  const pocRef = refs.find((r) => /(^|\/)poc\/|backends\/poc/.test(r));
-  const prodRef = refs.find((r) => /(^|\/)prod\/|backends\/prod/.test(r));
+  const pocRef = refs.find((r) => POC_REF.test(r));
+  const prodRef = refs.find((r) => PROD_REF.test(r));
   const errors = [];
   if (scope === "shared" && pocRef) errors.push(`${p}: shared code must not reference POC code (${pocRef})`);
   if (scope === "shared" && prodRef) errors.push(`${p}: shared code must not reference production code (${prodRef})`);

@@ -3,6 +3,7 @@
 // all-steps overview. The server checks every answer; the same shared rules run here for progress.
 // Uses the SC_* shared scripts loaded by application.html.
 import { startPage, showMessage, goTo, PAGES } from "../page.js";
+import { CONFIG } from "../config.js";
 import { createFormView } from "../form-view.js";
 import { createAutosave } from "../autosave.js";
 import { renderQuestion } from "../form-render.js";
@@ -163,11 +164,28 @@ async function saveThen(next) {
   next();
 }
 
+// Demo only [POC]: fills every step with invented answers, then saves through the usual autosave.
+// The path comes from config, so this screen never has to know where the POC code lives.
+async function fillWithSample() {
+  const answers = await import(`../${CONFIG.SAMPLE_DATA}.js`);
+  const values = Object.assign({}, state.values, answers.SAMPLE_APPLICANT);
+  state.values = values;
+  state.errors = {};
+  state.autosave.update(values);
+  show(state.mode);
+}
+
 function wireButtons() {
   const stepAt = (offset) => view.stepIds[view.stepIds.indexOf(state.step) + offset];
   $("next-btn").addEventListener("click", () => saveThen(() => (stepAt(1) ? show("step", stepAt(1)) : show("overview"))));
   $("back-btn").addEventListener("click", () => saveThen(() => (stepAt(-1) ? show("step", stepAt(-1)) : goTo(PAGES.home))));
   $("overview-btn").addEventListener("click", () => saveThen(() => show("overview")));
+  $("fill-sample").addEventListener("click", () => {
+    fillWithSample().catch((err) => {
+      console.error("The sample answers could not be loaded", err);
+      showMessage($("message"), state.page.errorMessage({ code: "SERVER_ERROR" }));
+    });
+  });
   $("message").addEventListener("click", () => {
     if (!state.status || state.status.state !== "conflict") return;
     leavingOnPurpose = true;
@@ -206,6 +224,8 @@ async function main() {
   state.readOnly = loaded.app.createdBy !== me.data.id || !EDITABLE.includes(loaded.app.status);
   state.autosave = createAutosave({ diff: view.changedValues, save: saveAnswers, onStatus: showStatus });
   state.autosave.start({ values: state.values, version: loaded.app.version });
+  // The demo button appears only where the sample answers are available and this copy is editable.
+  $("fill-sample").hidden = !(CONFIG.IS_DEMO && CONFIG.SAMPLE_DATA) || state.readOnly;
   wireButtons();
   page.onRender(() => show(state.mode));
 }
