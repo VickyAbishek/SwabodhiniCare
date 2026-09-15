@@ -59,22 +59,27 @@ function approversThisRound() {
 // The context SC_Workflow checks an action against, from what this screen knows: the person signed in,
 // the file's author and who has already approved this round — so a button this person would be
 // refused is not drawn at all, and the refusal reads out from the server if it slips through anyway.
-function ctx(comment) {
+function ctx(comment, approvedThisRound = approversThisRound()) {
   return {
     actorId: state.me.id, actorRoles: state.me.roles, createdBy: state.app.createdBy,
-    approvedThisRound: approversThisRound(), comment,
+    approvedThisRound, comment,
   };
 }
 
-// Why there is nothing to press on a file this person was counted as the reviewer for. The one
-// refusal that leaves them with no buttons at all is having approved an earlier stage of the same
-// file (the workflow then refuses every action here, not only Approve), so this says that much and
-// nothing else: a file nobody expects them to touch needs no sentence, because the stamp already
-// names the stage holding it.
+// Why there is nothing to press on a file this person was counted as the reviewer for: because of
+// the approvals already taken this round, the workflow would refuse them every action here — not
+// only Approve, which the last statuses have no action for at all (PENDING_DIRECTOR and WAITLISTED
+// offer ADMIT and WAITLIST instead). So the question is asked of the whole set, by asking the
+// workflow what this person could do if this round's approvals were set aside: if that is not
+// nothing, this round's rule is what is stopping them, and that is what the sentence says.
+//
+// A file nobody expects them to touch still says nothing — the stamp already names the stage holding
+// it — and neither does the owner's own file or a stage that is not theirs: in those cases the
+// workflow would refuse them with the round set aside too, so the sentence would be beside the point.
 function blockedNote() {
   if (state.actions.length > 0) return "";
-  const move = SC_Workflow.next(state.app.status, "APPROVE", ctx(""));
-  return move.error === "ALREADY_APPROVED_STAGE" ? state.page.errorMessage({ code: move.error }) : "";
+  const withoutRound = SC_Workflow.availableActions(state.app.status, ctx("", [])).filter((action) => ACTIONS[action]);
+  return withoutRound.length > 0 ? state.page.errorMessage({ code: "ALREADY_APPROVED_STAGE" }) : "";
 }
 
 function optionLabel(list, value) {
