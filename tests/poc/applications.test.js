@@ -450,6 +450,19 @@ test("the routing slip keeps every decision, oldest first", () => {
   assert.equal(slip[0].userName, "Lakshmi");
 });
 
+// The slip is built for the application screen alone. save is the autosave — every few seconds while
+// somebody types — and building the slip reads the whole Approvals tab plus one user row per approval,
+// so it must not ride on a save's answer. This is a performance contract, not a detail: an endpoint
+// that genuinely needs the slip should have to change this test on purpose, not discover the cost in
+// production. It guards the reverse direction too: re-adding the field to view() would put the read
+// back on every action that returns an application.
+test("saving a draft does not build the routing slip", () => {
+  const { as } = setupPeople();
+  const { id } = draftFor(as, "priya", {});
+  const saved = as("priya")("applications.save", { id, version: 1, values: { s2_full_name: "X" } });
+  assert.equal("approvals" in saved.data, false);
+});
+
 test("a reopened application goes through the chain again but keeps its history", () => {
   const { ctx, as } = setupPeople();
   const id = atDirector(as);
