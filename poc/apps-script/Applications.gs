@@ -313,10 +313,17 @@ var SC_Applications = (function () {
       });
   }
 
+  // What a queue card shows (main spec §7 R1): the applicant, the age line "19 yrs · Male · Selaiyur"
+  // and who sent it. The date of birth travels instead of an age, because an application can sit in
+  // the queue across a birthday and a stored age would then be wrong. The sender's name travels too:
+  // only an Admin may read the staff list, so a therapist's phone cannot turn a user id into a name.
   function listItem(row) {
+    var sender = SC_Store.find("Users", "id", row.created_by);
     return {
       id: row.id, appNo: row.app_no, applicantName: row.applicant_name || "", centre: row.centre,
-      status: row.status, createdBy: row.created_by, updatedAt: row.updated_at,
+      dob: row.dob || null, gender: row.gender || null,
+      status: row.status, createdBy: row.created_by, createdByName: sender ? sender.name : "",
+      updatedAt: row.updated_at,
       safetyFlags: SC_FormRules.safetyFlags(formValues(row)),
     };
   }

@@ -114,12 +114,28 @@ test("the list shows therapists their own applications and heads everything, new
   const all = as("lakshmi")("applications.list", {}).data;
   assert.deepEqual(all.items.map((a) => a.id), [arjun.id, meena.id]);
   assert.deepEqual([all.page, all.pageSize, all.total], [1, 50, 2]);
-  assert.deepEqual(Object.keys(all.items[0]).sort(), ["appNo", "applicantName", "centre", "createdBy", "id", "safetyFlags", "status", "updatedAt"]);
+  assert.deepEqual(
+    Object.keys(all.items[0]).sort(),
+    ["appNo", "applicantName", "centre", "createdBy", "createdByName", "dob", "gender", "id", "safetyFlags", "status", "updatedAt"]
+  );
   assert.deepEqual(as("lakshmi")("applications.list", { q: "meena" }).data.items.map((a) => a.id), [meena.id]);
   assert.deepEqual(as("lakshmi")("applications.list", { q: "app-2026-0002" }).data.items.map((a) => a.id), [meena.id]);
   assert.equal(as("lakshmi")("applications.list", { status: "RETURNED" }).data.total, 0);
   assert.equal(as("lakshmi")("applications.list", { centre: "VLC" }).data.total, 1);
   assert.equal(as("lakshmi")("applications.list", { page: 0 }).error.code, "INVALID_REQUEST");
+});
+
+// The queue card reads "19 yrs · Male · Selaiyur" and "from Priya", so the list has to carry the
+// date of birth, the gender and the name of the person who filed it. None of the three can be worked
+// out on the phone — the age is not stored, and only an Admin may read the staff list — and a second
+// call per card is one round-trip too many on a phone held in a queue.
+test("the list carries the date of birth so a queue card can show the age", () => {
+  const { as } = setupPeople();
+  as("priya")("applications.create", { values: SAMPLE });
+  const list = as("lakshmi")("applications.list", {});
+  assert.equal(list.data.items[0].dob, SAMPLE.s2_dob);
+  assert.equal(list.data.items[0].gender, SAMPLE.s2_gender);
+  assert.equal(list.data.items[0].createdByName, "Priya");
 });
 
 test("the form fingerprint follows the answers and nothing else", () => {
@@ -467,6 +483,9 @@ test("a reopened application goes through the chain again but keeps its history"
   const { ctx, as } = setupPeople();
   const id = atDirector(as);
   as("revathi")("applications.decide", { id, action: "ADMIT", key: directorKey() });
+  // A minute between the admit and the reopen: on one frozen millisecond every comparator call ties,
+  // and the order this test is about would pass even if the slip were sorted backwards.
+  ctx.clock.ms += MINUTE;
   as("revathi")("applications.reopen", { id, reason: "Centre transfer." });
   ctx.clock.ms += MINUTE; // a resubmit starts a later round, and the fake clock has to be told
   as("priya")("applications.submit", { id });
@@ -474,6 +493,7 @@ test("a reopened application goes through the chain again but keeps its history"
   const slip = as("priya")("applications.get", { id }).data.approvals;
   assert.equal(slip.length, 4);
   assert.equal(slip[3].action, "REOPEN");
+  assert.equal(slip[3].comment, "Centre transfer.", "the reason is trimmed and mapped onto the slip");
   assert.equal(as("lakshmi")("applications.review", { id, action: "APPROVE" }).data.status, "PENDING_CENTRE_HEAD");
 });
 

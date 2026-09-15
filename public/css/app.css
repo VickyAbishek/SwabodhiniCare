@@ -316,6 +316,7 @@ textarea.input { min-height: 120px; resize: vertical; }
   font-weight: 700; font-size: 0.95rem; border-radius: var(--r-sm); padding: 4px 10px;
   background: var(--warn-soft); color: var(--warn);
 }
+.flag-bad { background: var(--bad-soft); color: var(--bad); }
 
 .action-bar {
   position: sticky;
@@ -370,7 +371,9 @@ textarea.input { min-height: 120px; resize: vertical; }
 }
 .app-card:hover { border-color: var(--primary); }
 .app-card-top { display: flex; justify-content: space-between; align-items: start; gap: 10px; }
+.app-who { display: grid; gap: 2px; }
 .app-name { font: 700 1.2rem/1.25 var(--f-head); }
+.app-sub { color: var(--ink-2); font-size: 1rem; }
 .stamp {
   display: inline-block;
   font: 600 0.8rem/1.2 var(--f-mono);
@@ -387,3 +390,23 @@ textarea.input { min-height: 120px; resize: vertical; }
 .stamp[data-status="RETURNED"] { color: var(--warn); }
 .stamp[data-status="ADMITTED"] { color: var(--ok); }
 .stamp[data-status="REJECTED"], .stamp[data-status="WITHDRAWN"] { color: var(--bad); }
+.stamp-turn { color: var(--on-marigold); background: var(--marigold-soft); }
+
+/* ---------- Queue (home, main spec §7 R1) ---------- */
+.queue-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.queue { display: grid; gap: 12px; }
+.queue-hero { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; }
+.queue-num {
+  font: 800 4.2rem/0.9 var(--f-head);
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
+}
+.queue-label { font: 700 1.2rem/1.3 var(--f-head); }
+
+/* The four-step route (routing-slip.js): four segments, then where the file is. */
+.track { display: grid; gap: 6px; }
+.track-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.track-bar span { height: 10px; border-radius: 5px; background: var(--line); }
+.track-bar .done { background: var(--ok); }
+.track-bar .now { background: var(--marigold); }
+.track-text { font-size: 0.95rem; color: var(--ink-2); }
