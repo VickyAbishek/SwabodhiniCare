@@ -47,7 +47,7 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 - [x] `[SHARED]` Form wizard rendered from the schema (one step per screen, progress, big tap choices, 3-dropdown DOB) — `js/form-view.js`, `js/form-render.js`, `application.html`, `js/pages/application.js`
 - [x] `[SHARED]` Home: "Start a new application" + the list of applications this person may see (`home.html`, `js/pages/home.js`)
 - [x] `[SHARED]` All-steps overview. The consent step's finger signature pad needs uploads, so it waits for M7
-- [ ] `[SHARED]` Version conflict: the "Not saved" line says "check Wi-Fi" when the real cause is someone else's save, and the "tap to reload" message then trips the leave-page warning
+- [ ] `[SHARED]` Version conflict: the "Not saved" line says "check Wi-Fi" when the real cause is someone else's save. Needs new EN + TA wording (`form.reload` and `form.continue` are defined but unused, and look meant for this)
 - [x] `[POC]` Sample answers for demos: `public/js/seed/sample-applications.js` — invented, and must pass the submit check except the signature (test accounts are made by the Admin in the app)
 - [x] `[POC]` "Fill with sample data" button behind `IS_DEMO` — `SAMPLE_DATA` in `config.js`, named like `BACKEND` so no shared screen names POC code
 
