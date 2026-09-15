@@ -1,0 +1,59 @@
+<!-- scope: shared -->
+<!doctype html>
+<html lang="ta" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SwabodhiniCare</title>
+<script src="js/theme-boot.js"></script>
+<script src="shared/actions.js"></script>
+<link rel="stylesheet" href="css/app.css">
+<script type="module" src="js/pages/settings.js"></script>
+</head>
+<body>
+<div class="app">
+  <header class="app-bar">
+    <span class="wordmark">Swabodhini<b>Care</b></span>
+  </header>
+  <main class="screen">
+    <h1 data-i18n="settings.title">Settings</h1>
+
+    <div class="field">
+      <span class="label" id="lang-label" data-i18n="common.language">Language</span>
+      <div class="choices" role="group" aria-labelledby="lang-label">
+        <button type="button" class="choice" data-set-lang="ta" lang="ta">தமிழ்</button>
+        <button type="button" class="choice" data-set-lang="en" lang="en">English</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <span class="label" id="theme-label" data-i18n="settings.appearance">Appearance</span>
+      <div class="choices" role="group" aria-labelledby="theme-label">
+        <button type="button" class="choice" data-set-theme="light" data-i18n="settings.light">Light</button>
+        <button type="button" class="choice" data-set-theme="dark" data-i18n="settings.dark">Dark</button>
+      </div>
+      <p class="hint" data-i18n="settings.themeHint">Light is easiest to read in daylight.</p>
+    </div>
+
+    <p class="note" data-i18n="settings.saved">Saved to your account, so it stays the same on any phone.</p>
+    <p class="alert alert-bad" id="message" role="alert" hidden></p>
+
+    <section class="panel" aria-labelledby="account-title">
+      <h2 id="account-title" data-i18n="settings.account">Your account</h2>
+      <dl class="facts">
+        <div><dt data-i18n="settings.name">Name</dt><dd id="fact-name"></dd></div>
+        <div><dt data-i18n="settings.roles">Role</dt><dd id="fact-roles"></dd></div>
+        <div><dt data-i18n="settings.email">Email</dt><dd id="fact-email"></dd></div>
+      </dl>
+      <a class="btn btn-outline btn-block" href="password.html" data-i18n="settings.changePassword">Change password</a>
+    </section>
+
+    <button type="button" class="btn btn-bad btn-block" id="sign-out" data-i18n="settings.signOut">Sign out</button>
+  </main>
+  <nav class="bottom-nav" aria-label="Main">
+    <a href="home.html" data-i18n="nav.home">Home</a>
+    <a href="settings.html" aria-current="page" data-i18n="nav.settings">Settings</a>
+  </nav>
+</div>
+</body>
+</html>

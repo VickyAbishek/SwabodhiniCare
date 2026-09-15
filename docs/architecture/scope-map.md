@@ -109,6 +109,8 @@ Nothing else may check `IS_DEMO`.
 | F29 | Move-to-NGO-account checklist | `[POC]` | POC spec §12 | — |
 | F30 | One-time import Sheet → D1, Drive → R2 | `[PROD]` | — | `prod/import/` |
 | F31 | Mockups (`docs/mockups/`) | design reference | not shipped | not shipped |
+| F32 | First-time setup (create the first Admin with a one-time code) | `[SHARED]` screen + `setup.firstAdmin` contract | `[POC]` code from `setup()` in Script Properties | `[PROD]` code issued once from a Worker secret |
+| F33 | Local dev server (real server code in memory) | `[POC]` | `poc/scripts/dev-server.mjs` | `wrangler dev` |
 
 ## 3. Documents and their scope
 

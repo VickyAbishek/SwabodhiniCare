@@ -67,6 +67,9 @@ export async function startPage({ requireSignIn = false } = {}) {
     return null;
   }
 
+  // Text built in code (for example "Hello, {name}") is redrawn by these after a language change.
+  const renderHooks = [];
+
   function render() {
     state.i18n = createI18n(dictionaries, state.prefs.lang);
     applyPrefs(document.documentElement, state.prefs);
@@ -77,6 +80,7 @@ export async function startPage({ requireSignIn = false } = {}) {
     document.querySelectorAll("[data-set-theme]").forEach((button) => {
       button.setAttribute("aria-pressed", String(button.dataset.setTheme === state.prefs.theme));
     });
+    renderHooks.forEach((hook) => hook());
   }
 
   function setPrefs(changes) {
@@ -101,6 +105,10 @@ export async function startPage({ requireSignIn = false } = {}) {
     t: (key, vars) => state.i18n.t(key, vars),
     prefs: () => state.prefs,
     setPrefs,
+    onRender(hook) {
+      renderHooks.push(hook);
+      hook();
+    },
     errorMessage: (error) => errorText(error, state.prefs.lang, window.SC_Actions.ERRORS),
   };
 }
@@ -110,6 +118,17 @@ export function showMessage(box, text, kind = "bad") {
   box.textContent = text || "";
   box.className = `alert alert-${kind}`;
   box.hidden = !text;
+}
+
+// Shows or clears the error under one field (element id + "-error") and links it for screen readers.
+export function fieldError(id, text) {
+  const input = document.getElementById(id);
+  const box = document.getElementById(`${id}-error`);
+  input.setAttribute("aria-invalid", text ? "true" : "false");
+  box.textContent = text || "";
+  box.hidden = !text;
+  if (text) input.setAttribute("aria-describedby", box.id);
+  else input.removeAttribute("aria-describedby");
 }
 
 // Disables a button while work is in progress and swaps its label.

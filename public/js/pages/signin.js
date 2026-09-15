@@ -1,20 +1,10 @@
 // scope: shared
 // Sign in (main spec §10.1): ask the server for this email's salt, turn the password into a key on
 // the phone, then send only the key. The password itself never leaves the phone.
-import { startPage, showMessage, setBusy, goTo, PAGES } from "../page.js";
+import { startPage, showMessage, setBusy, fieldError, goTo, PAGES } from "../page.js";
 import { deriveKey } from "../kdf.js";
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function fieldError(id, text) {
-  const input = document.getElementById(id);
-  const box = document.getElementById(`${id}-error`);
-  input.setAttribute("aria-invalid", text ? "true" : "false");
-  box.textContent = text || "";
-  box.hidden = !text;
-  if (text) input.setAttribute("aria-describedby", box.id);
-  else input.removeAttribute("aria-describedby");
-}
 
 async function signIn(page, email, password) {
   const pre = await page.api.call("auth.prelogin", { email });

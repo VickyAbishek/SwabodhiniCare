@@ -29,6 +29,8 @@
   "setup.button": "Create Admin account",
   "setup.working": "Creating the account…",
   "setup.done": "The Admin account is ready. Please sign in.",
+  "setup.codeInvalid": "Enter the 12-character setup code.",
+  "setup.nameMissing": "Enter your name.",
   "password.title": "Choose your own password",
   "password.intro": "Choose a new password that only you know.",
   "password.introTemporary": "You signed in with a temporary password. Choose a new one that only you know.",
