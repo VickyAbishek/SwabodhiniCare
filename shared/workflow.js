@@ -88,6 +88,17 @@ var SC_Workflow = (function () {
     return REVIEWER[status] || null;
   }
 
+  // True when the next move on this file is this person's — the queue's question, and narrower than
+  // the buttons they see. A file at a reviewer's stage waits on that role and nobody else; a draft or
+  // a file sent back waits on its owner, to fix it and resend. Waiting is not "could act": a Director
+  // may reopen an admitted file and an Admin may withdraw a draft, but no queue is held up by either,
+  // so neither is waiting for anyone. Nor is a stage that would review the file's own author.
+  function isMyTurn(status, ctx) {
+    var reviewer = REVIEWER[status];
+    if (reviewer) return ctx.actorId !== ctx.createdBy && hasRole(ctx.actorRoles, reviewer);
+    return ctx.actorId === ctx.createdBy && isEditable(status);
+  }
+
   return Object.freeze({
     STATUS: STATUS,
     ACTION: ACTION,
@@ -95,6 +106,7 @@ var SC_Workflow = (function () {
     availableActions: availableActions,
     isEditable: isEditable,
     reviewerRole: reviewerRole,
+    isMyTurn: isMyTurn,
   });
 })();
 

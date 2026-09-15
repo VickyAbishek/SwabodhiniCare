@@ -118,6 +118,8 @@ test("the list shows therapists their own applications and heads everything, new
     Object.keys(all.items[0]).sort(),
     ["appNo", "applicantName", "centre", "createdBy", "createdByName", "dob", "gender", "id", "safetyFlags", "status", "updatedAt"]
   );
+  // The senders come from one read of the Users tab per call, so both rows must still be named.
+  assert.deepEqual(all.items.map((a) => a.createdByName), ["Priya", "Deepa"]);
   assert.deepEqual(as("lakshmi")("applications.list", { q: "meena" }).data.items.map((a) => a.id), [meena.id]);
   assert.deepEqual(as("lakshmi")("applications.list", { q: "app-2026-0002" }).data.items.map((a) => a.id), [meena.id]);
   assert.equal(as("lakshmi")("applications.list", { status: "RETURNED" }).data.total, 0);

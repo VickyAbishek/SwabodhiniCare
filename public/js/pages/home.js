@@ -30,12 +30,11 @@ function span(className, text) {
   return node;
 }
 
-// Whose move it is: the same rule the server enforces, so the stamp and the count cannot promise
-// something the server would refuse.
+// Whose move it is, from the workflow itself: the file is waiting on this person. Not "could they act
+// on it" — a Director can reopen an admitted file and an Admin can withdraw a draft, and stamping
+// those would count and sort work that is waiting for nobody.
 function myTurn(item, me) {
-  return SC_Workflow.availableActions(item.status, {
-    actorId: me.id, actorRoles: me.roles, createdBy: item.createdBy,
-  }).length > 0;
+  return SC_Workflow.isMyTurn(item.status, { actorId: me.id, actorRoles: me.roles, createdBy: item.createdBy });
 }
 
 // "19 yrs · Male · Selaiyur". The age is worked out from the date of birth every time it is drawn,

@@ -313,16 +313,24 @@ var SC_Applications = (function () {
       });
   }
 
+  // One read of the Users tab, not one per row: this endpoint is polled every minute and each read
+  // costs a whole tab.
+  function namesById() {
+    return SC_Store.all("Users").reduce(function (names, user) {
+      names[user.id] = user.name;
+      return names;
+    }, {});
+  }
+
   // What a queue card shows (main spec §7 R1): the applicant, the age line "19 yrs · Male · Selaiyur"
   // and who sent it. The date of birth travels instead of an age, because an application can sit in
   // the queue across a birthday and a stored age would then be wrong. The sender's name travels too:
   // only an Admin may read the staff list, so a therapist's phone cannot turn a user id into a name.
-  function listItem(row) {
-    var sender = SC_Store.find("Users", "id", row.created_by);
+  function listItem(row, names) {
     return {
       id: row.id, appNo: row.app_no, applicantName: row.applicant_name || "", centre: row.centre,
       dob: row.dob || null, gender: row.gender || null,
-      status: row.status, createdBy: row.created_by, createdByName: sender ? sender.name : "",
+      status: row.status, createdBy: row.created_by, createdByName: names[row.created_by] || "",
       updatedAt: row.updated_at,
       safetyFlags: SC_FormRules.safetyFlags(formValues(row)),
     };
@@ -347,8 +355,11 @@ var SC_Applications = (function () {
       return a.updated_at < b.updated_at ? 1 : -1;
     });
     var start = (page - 1) * PAGE_SIZE;
+    var shown = rows.slice(start, start + PAGE_SIZE);
+    var names = shown.length > 0 ? namesById() : {}; // an empty queue costs no read at all
     return SC_Actions.ok({
-      items: rows.slice(start, start + PAGE_SIZE).map(listItem), page: page, pageSize: PAGE_SIZE, total: rows.length,
+      items: shown.map(function (row) { return listItem(row, names); }),
+      page: page, pageSize: PAGE_SIZE, total: rows.length,
     });
   }
 
