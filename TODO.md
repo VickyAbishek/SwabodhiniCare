@@ -41,13 +41,15 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 - [x] `[POC]` "Test version: sample data only" banner behind `IS_DEMO`
 - [ ] `[SHARED]` Deploy check: copy `shared/*.js` to `public/shared/` for Cloudflare Pages (M10 hosting task)
 
-### M5: Applications
-- [ ] `[POC]` `poc/seed/`: fictional sample applicants for demos (moved from M3; test accounts are created by the Admin in the app)
-- [ ] `[SHARED]` Form wizard rendered from the schema (one step per screen, progress, big tap choices, 3-dropdown DOB)
-- [ ] `[SHARED]` Autosave every 20 s + on step change; "Saving…" / "Saved ✓" / "Not saved" states; version-conflict message
-- [ ] `[POC]` `Applications.gs`: create, get, save (optimistic lock), list (role-scoped)
-- [ ] `[SHARED]` All-steps overview, consent step with finger signature pad
-- [ ] `[POC]` "Fill with sample data" button behind `IS_DEMO`
+### M5: Applications · plan: `docs/superpowers/plans/2026-09-15-m5-applications.md`
+- [x] `[SHARED]` Autosave every 20 s + on step change; "Saving…" / "Saved ✓" / "Not saved" states; version-conflict message (`js/autosave.js` + tests)
+- [x] `[POC]` `Applications.gs`: create, get, save (optimistic lock), list (role-scoped) (+ `tests/poc/applications.test.js`, `tests/poc/people.js`)
+- [x] `[SHARED]` Form wizard rendered from the schema (one step per screen, progress, big tap choices, 3-dropdown DOB) — `js/form-view.js`, `js/form-render.js`, `application.html`, `js/pages/application.js`
+- [x] `[SHARED]` Home: "Start a new application" + the list of applications this person may see (`home.html`, `js/pages/home.js`)
+- [x] `[SHARED]` All-steps overview. The consent step's finger signature pad needs uploads, so it waits for M7
+- [ ] `[SHARED]` Version conflict: the "Not saved" line says "check Wi-Fi" when the real cause is someone else's save, and the "tap to reload" message then trips the leave-page warning
+- [x] `[POC]` Sample answers for demos: `public/js/seed/sample-applications.js` — invented, and must pass the submit check except the signature (test accounts are made by the Admin in the app)
+- [x] `[POC]` "Fill with sample data" button behind `IS_DEMO` — `SAMPLE_DATA` in `config.js`, named like `BACKEND` so no shared screen names POC code
 
 ### M6: Workflow screens
 - [ ] `[SHARED]` My Queue (auto-refresh every 60 s while visible, Refresh button), review screen, routing slip
