@@ -54,7 +54,8 @@ class FakeRange {
     return this;
   }
 
-  setNumberFormat() {
+  setNumberFormat(format) {
+    for (let c = 0; c < this.cols; c += 1) this.sheet.formats[this.col + c] = format;
     return this;
   }
 }
@@ -63,10 +64,15 @@ class FakeSheet {
   constructor(name) {
     this.name = name;
     this.rows = [];
+    this.formats = {};
   }
 
   getName() {
     return this.name;
+  }
+
+  getMaxRows() {
+    return Math.max(1000, this.rows.length);
   }
 
   set(row, col, value) {
