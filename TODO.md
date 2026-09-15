@@ -9,13 +9,13 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 
 ## Phase 0: POC on Google Sheets (every feature, tested by all roles)
 
-### M1: Shared foundations · plan: `docs/superpowers/plans/2026-09-15-m1-shared-foundations.md`
-- [ ] `[SHARED]` Tooling: `package.json` (no dependencies), `npm test`, `scripts/check-scope.mjs`
-- [ ] `[SHARED]` `shared/numbers.js`: application and registration numbers
-- [ ] `[SHARED]` `shared/dates.js`: age from date of birth, days waiting, calendar checks
-- [ ] `[SHARED]` `shared/permissions.js`: roles and capabilities (main spec §4)
-- [ ] `[SHARED]` `shared/workflow.js`: status machine and separation of duties (main spec §5)
-- [ ] `[SHARED]` `shared/actions.js`: API contract, EN/TA error messages, envelope
+### M1: Shared foundations · plan: `docs/superpowers/plans/2026-09-15-m1-shared-foundations.md` · ✅ done (53 tests, 97.95% line coverage)
+- [x] `[SHARED]` Tooling: `package.json` (no dependencies), `npm test`, `scripts/check-scope.mjs`
+- [x] `[SHARED]` `shared/numbers.js`: application and registration numbers
+- [x] `[SHARED]` `shared/dates.js`: age from date of birth, days waiting, calendar checks
+- [x] `[SHARED]` `shared/permissions.js`: roles and capabilities (main spec §4)
+- [x] `[SHARED]` `shared/workflow.js`: status machine and separation of duties (main spec §5)
+- [x] `[SHARED]` `shared/actions.js`: API contract, EN/TA error messages, envelope
 
 ### M2: Form definition and report maths
 - [ ] `[SHARED]` `shared/form-schema.js`: all 11 steps, fields, EN/TA labels, required rules, show-if (adult path 18+)
