@@ -1,11 +1,13 @@
-# SwabodhiniCare — Design Spec (v0.4, POC)
+# SwabodhiniCare — Design Spec (v0.5)
 
 | | |
 |---|---|
 | **App** | SwabodhiniCare |
 | **Organisation** | Swabodhini Autism (NGO), Chennai — https://swabodhiniautism.org/ |
 | **Purpose** | Digital registration / assessment → approval → admission workflow |
-| **Status** | Draft for review — POC. **Free plans only, ₹0 running cost** |
+| **Status** | Draft for review. **Free plans only, ₹0 running cost** |
+| **POC** | The POC (Phase 0) has every feature below but runs on **Google Sheets + Apps Script**. See `2026-09-15-swabodhinicare-poc-sheets-design.md` |
+| **Scope map** | Which features and files are POC-only, production-only or shared: `docs/architecture/scope-map.md` |
 | **Date** | 2026-09-15 |
 
 ---
@@ -59,10 +61,13 @@
 | D21 | Alert frequency | **Once per day per alert** until it's resolved (not continuous) | Continuous emails flood the inbox and get ignored or marked as spam; Gmail also allows only 100 recipients a day |
 | D22 | Spending cap | **Enforced in the app at $0**, not a $1 billing cap | Cloudflare can't stop services at a dollar amount, so the usage guard stops R2 use before any billable usage (§11.3) |
 | D23 | Appearance | **Light mode by default for everyone.** Users can switch to Dark in **Settings**; the choice is saved to their profile | Light is easiest to read in daylight. The app never switches by itself, which could confuse older users (§12) |
+| D24 | POC back end | **Phase 0 runs on Google Sheets + Apps Script, with files in Google Drive**; screens on Cloudflare Pages; developer's account; test data; **every feature included** | All roles test the POC; data is visible in Sheets; nothing to pay for; the screens call one `api.js`, so moving to the Cloudflare design later changes only the back end (POC spec) |
 
 ---
 
 ## 3. Architecture
+
+> This is the **production** architecture (Phase 1). The POC (Phase 0) uses Google Sheets, Apps Script and Drive in place of D1, the Worker and R2. See the POC spec, §2–§3.
 
 ```mermaid
 flowchart LR
@@ -496,6 +501,8 @@ Everything runs on free plans. The one catch: Cloudflare asks for a card before 
 
 ## 14. Project structure
 
+> **Repository layout:** the tree below shows the production app's parts. In the repository they're arranged by scope (`docs/architecture/scope-map.md` §1). `public/` and `shared/` sit at the root. The Worker (`src/`, `migrations/`, `wrangler.toml`) lives under `prod/worker/`. The Apps Script mail relay is `[PROD]` and lives under `prod/`. The POC server lives under `poc/`.
+
 ```
 SwabodhiniCare/
 ├── public/                    # Static assets served by Worker
@@ -601,7 +608,12 @@ Target: **80%+ coverage** on `src/lib` and `shared/`.
 
 ## 19. POC scope and phases
 
-**Phase 1: POC (this spec)**
+**Phase 0: POC on Google Sheets** (POC spec). Tested by every role.
+- Items 2–6 and 8 below, built on Google Sheets + Apps Script + Drive.
+- Item 1 becomes the Sheet/Apps Script setup. Item 7 becomes the monthly Sheet-copy + `.xlsx` backup with a **Backup now** button.
+- Exit criteria: POC spec §16.
+
+**Phase 1: Production on Cloudflare (this spec)**, if the POC review decides to move
 1. Project skeleton, `wrangler.toml`, D1 migration, security headers
 2. Login (password hashed on the device), sessions, change password, admin user management and reset
 3. Form schema + form wizard renderer + autosave + photo compression + uploads + consent signature
@@ -626,7 +638,7 @@ Target: **80%+ coverage** on `src/lib` and `shared/`.
 | **Excel files as the database** (user's first idea) | Rejected; Excel is used as the export format (D5) | Two people saving at once lose each other's changes; no per-row permissions (anyone with the file sees every child); files get corrupted |
 | **Vercel hosting** (user's first idea) | Rejected (D6) | The filesystem can't store files; Excel would have to live in OneDrive through the Microsoft Graph API, with OAuth tokens to maintain; Hobby plan is for personal, non-commercial use |
 | Next.js (the user's usual stack) | Rejected (D1) | Its npm dependency tree needs ongoing security patching, and there is no developer on staff |
-| Google Sheets + Apps Script as the backend | Rejected | Slow (1–3 s per save); our own weaker login code; the sheet is easy to share by accident. (Apps Script is still used, but only as the mail relay) |
+| Google Sheets + Apps Script as the backend | **Chosen for the POC only** (D24); not for production for now | Fine for testing with sample data: free, and the data is visible. Weaker for production: 1–3 s per save, the Sheet is easy to share by accident, and Apps Script can't see IP addresses for rate limiting. Phone-side hashing keeps login strong in both |
 | Supabase (free) | Rejected | The project pauses after 7 days idle (school holidays); no backups on the free plan |
 | Firebase (free) | Rejected | File storage and managed backups aren't available on the free plan any more |
 | Free virtual server (e.g. Oracle Cloud) | Rejected | Someone has to patch the operating system, which is exactly the maintenance we're avoiding |
@@ -649,3 +661,4 @@ Target: **80%+ coverage** on `src/lib` and `shared/`.
 | v0.2 | 2026-09-15 | Designed to run within **free-plan limits (₹0)**: password hashing on the device, Excel built in the browser, uploads streamed into R2, automatic chunked monthly backup (undo not required), R2 usage guard with a $0 ceiling, Apps Script alert emails once a day. Added Appendix A (options rejected) |
 | v0.3 | 2026-09-15 | **Free plans only**: removed every mention of paid plans or upgrading. Explained that the card for R2 is required only to switch R2 on and is never charged |
 | v0.4 | 2026-09-15 | **Light mode by default**; Dark can be chosen in Settings and is saved per user (D23, §12 Appearance, `users.preferred_theme`, `PATCH /api/me`, `settings.html`) |
+| v0.5 | 2026-09-15 | Added **Phase 0: POC on Google Sheets + Apps Script + Drive**, with every feature, tested by all roles (D24, new POC spec). This spec now describes Phase 1 (production) |

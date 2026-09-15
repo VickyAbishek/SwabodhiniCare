@@ -151,6 +151,7 @@ Show each phone screen at **390 × 844**. Also show **S1, S4 and S6 in Tamil**.
 ### 10. States to show
 
 - Loading (a skeleton or plain *"Loading…"* in both languages)
+- Saving (*"Saving…"*; in the first version a save can take 1–3 seconds, so it must be clearly visible and never block reading)
 - Empty queue
 - Field error (inline, next to the field, with how to fix it)
 - **Offline / not saved** banner
