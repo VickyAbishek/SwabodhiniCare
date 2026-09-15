@@ -55,7 +55,7 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 - [ ] `[SHARED]` My Queue (auto-refresh every 60 s while visible, Refresh button), review screen, routing slip
 - [ ] `[SHARED]` Approve / Send back / Reject with confirmations; sent-back view with "Fix and resend"
 - [ ] `[SHARED]` Director decision: Admit / Waitlist / Reject, password step-up, stored signature, registration number, lock
-- [~] `[POC]` `Applications.gs`: submit, review, decide, reopen, withdraw (using `shared/workflow.js`), form fingerprint — fingerprint, submit, withdraw and review done and reviewed; decide built; reopen still to come (plan tasks 1–6)
+- [~] `[POC]` `Applications.gs`: submit, review, decide, reopen, withdraw (using `shared/workflow.js`), form fingerprint — fingerprint, submit, withdraw, review and decide done and reviewed; reopen still to come (plan tasks 1–6)
 - [ ] `[SHARED]` Reopen and withdraw screens
 
 ### M7: Files
