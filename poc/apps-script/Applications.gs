@@ -62,7 +62,7 @@ var SC_Applications = (function () {
       id: row.id, appNo: row.app_no, registrationNo: row.registration_no, status: row.status,
       centre: row.centre, applicantName: row.applicant_name || "", createdBy: row.created_by,
       version: row.version, createdAt: row.created_at, updatedAt: row.updated_at, submittedAt: row.submitted_at,
-      decidedAt: row.decided_at || null, approvals: approvalsFor(row.id),
+      decidedAt: row.decided_at || null,
       values: values,
       completion: SC_FormRules.completion(values, SC_Store.todayIso()),
       safetyFlags: SC_FormRules.safetyFlags(values),
@@ -111,7 +111,12 @@ var SC_Applications = (function () {
     if (found.row.created_by !== session.user.id) {
       SC_Audit.log(session.user.id, "applications.viewed", "Applications", found.row.id, null);
     }
-    return SC_Actions.ok(view(found.row));
+    // The routing slip is built here and nowhere else: only the application screen reads it, and
+    // building it costs a read of the whole Approvals tab plus a user lookup per row. Leaving it in
+    // view() would charge that to every action that returns one, save — the autosave — included.
+    var shown = view(found.row);
+    shown.approvals = approvalsFor(found.row.id);
+    return SC_Actions.ok(shown);
   }
 
   function save(data, session) {
