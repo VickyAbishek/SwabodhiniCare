@@ -159,6 +159,26 @@ var SC_Applications = (function () {
     });
   }
 
+  // DRAFT or RETURNED -> WITHDRAWN. The owner, or an Admin acting for the family. Nothing is
+  // deleted: the record and its routing slip stay for the audit log.
+  function withdraw(data, session) {
+    if (typeof data.id !== "string" || !data.id) return fail("INVALID_REQUEST");
+    return SC_Store.withLock(function () {
+      var found = loadVisible(data.id, session);
+      if (found.error) return found.error;
+      var row = found.row;
+      var move = SC_Workflow.next(row.status, "WITHDRAW", {
+        actorId: session.user.id, actorRoles: session.user.roles, createdBy: row.created_by,
+      });
+      if (!move.ok) return fail(move.error);
+      var saved = SC_Store.update("Applications", row.id, {
+        status: move.status, updated_at: SC_Store.nowIso(), version: row.version + 1,
+      });
+      SC_Audit.log(session.user.id, "applications.withdrawn", "Applications", row.id, { appNo: row.app_no });
+      return SC_Actions.ok(view(saved));
+    });
+  }
+
   function listItem(row) {
     return {
       id: row.id, appNo: row.app_no, applicantName: row.applicant_name || "", centre: row.centre,
@@ -191,11 +211,12 @@ var SC_Applications = (function () {
     });
   }
 
-  return Object.freeze({ create: create, get: get, save: save, submit: submit, list: list, formHash: formHash });
+  return Object.freeze({ create: create, get: get, save: save, submit: submit, withdraw: withdraw, list: list, formHash: formHash });
 })();
 
 SC_Api.register("applications.create", SC_Applications.create);
 SC_Api.register("applications.get", SC_Applications.get);
 SC_Api.register("applications.save", SC_Applications.save);
 SC_Api.register("applications.submit", SC_Applications.submit);
+SC_Api.register("applications.withdraw", SC_Applications.withdraw);
 SC_Api.register("applications.list", SC_Applications.list);

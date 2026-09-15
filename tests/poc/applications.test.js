@@ -185,3 +185,26 @@ test("a sent application cannot be sent again", () => {
   const result = as("priya")("applications.submit", { id });
   assert.equal(result.error.code, "INVALID_TRANSITION");
 });
+
+test("the owning therapist withdraws a draft; another therapist cannot", () => {
+  const { as } = setupPeople();
+  const { id } = draftFor(as, "priya", {});
+  assert.equal(as("deepa")("applications.withdraw", { id }).error.code, "NOT_FOUND");
+  assert.equal(as("priya")("applications.withdraw", { id }).data.status, "WITHDRAWN");
+});
+
+test("an Admin can withdraw on the family's behalf, but not once it is with a reviewer", () => {
+  const { as } = setupPeople();
+  const draft = draftFor(as, "priya", {});
+  assert.equal(as("anand")("applications.withdraw", { id: draft.id }).data.status, "WITHDRAWN");
+
+  const sent = submitReady(as, "priya");
+  assert.equal(as("anand")("applications.withdraw", { id: sent.id }).error.code, "INVALID_TRANSITION");
+});
+
+test("a withdrawn application cannot be sent for review", () => {
+  const { as } = setupPeople();
+  const { id } = draftFor(as, "priya", {});
+  as("priya")("applications.withdraw", { id });
+  assert.equal(as("priya")("applications.submit", { id }).error.code, "INVALID_TRANSITION");
+});
