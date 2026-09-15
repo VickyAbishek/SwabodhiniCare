@@ -10,6 +10,13 @@ function draftFor(as, name, values) {
   return as(name)("applications.create", { values }).data;
 }
 
+// An application already waiting for the Therapy Head.
+function submitReady(as, who) {
+  const created = draftFor(as, who, SAMPLE);
+  as(who)("applications.submit", { id: created.id });
+  return created;
+}
+
 test("a therapist starts a draft with the next application number", () => {
   const { as } = setupPeople();
   const first = as("priya")("applications.create", {});
@@ -145,4 +152,36 @@ test("creating, viewing by others and saving are recorded in the audit log", () 
   ]);
   assert.deepEqual(log[2].details, { fields: ["s2_full_name"] });
   assert.ok(log.every((e) => e.entity === "Applications" && e.entity_id === id));
+});
+
+test("only the owner can send an application for review", () => {
+  const { as } = setupPeople();
+  const { id } = draftFor(as, "priya", {});
+  const result = as("lakshmi")("applications.submit", { id });
+  assert.equal(result.ok, false);
+  assert.equal(result.error.code, "NOT_ALLOWED");
+});
+
+test("sending for review needs every answer the submit check wants", () => {
+  const { as } = setupPeople();
+  const { id } = draftFor(as, "priya", {}); // a draft holding nothing
+  const result = as("priya")("applications.submit", { id });
+  assert.equal(result.ok, false);
+  assert.equal(result.error.code, "VALIDATION_FAILED");
+  assert.ok(Object.keys(result.error.details.errors).length > 0);
+});
+
+test("the owner sends a complete application and it reaches the Therapy Head", () => {
+  const { as } = setupPeople();
+  const { id } = submitReady(as, "priya");
+  const shown = as("lakshmi")("applications.get", { id }).data;
+  assert.equal(shown.status, "PENDING_THERAPY_HEAD");
+  assert.ok(shown.submittedAt, "submitting must stamp the time");
+});
+
+test("a sent application cannot be sent again", () => {
+  const { as } = setupPeople();
+  const { id } = submitReady(as, "priya");
+  const result = as("priya")("applications.submit", { id });
+  assert.equal(result.error.code, "INVALID_TRANSITION");
 });

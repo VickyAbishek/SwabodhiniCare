@@ -133,6 +133,32 @@ var SC_Applications = (function () {
     });
   }
 
+  // DRAFT or RETURNED -> PENDING_THERAPY_HEAD. Only the owner; every answer is checked again in
+  // submit mode, because a draft may have been saved while questions were still missing.
+  function submit(data, session) {
+    if (typeof data.id !== "string" || !data.id) return fail("INVALID_REQUEST");
+    return SC_Store.withLock(function () {
+      var found = loadVisible(data.id, session);
+      if (found.error) return found.error;
+      var row = found.row;
+      // Who may act comes before what the answers say: somebody who is not allowed must not
+      // learn which of their answers the server would have complained about.
+      var move = SC_Workflow.next(row.status, "SUBMIT", {
+        actorId: session.user.id, actorRoles: session.user.roles, createdBy: row.created_by,
+      });
+      if (!move.ok) return fail(move.error);
+      var values = formValues(row);
+      var check = SC_FormRules.validate(values, { mode: "submit", today: SC_Store.todayIso() });
+      if (!check.ok) return fail("VALIDATION_FAILED", { errors: check.errors });
+      var now = SC_Store.nowIso();
+      var saved = SC_Store.update("Applications", row.id, {
+        status: move.status, submitted_at: now, updated_at: now, version: row.version + 1,
+      });
+      SC_Audit.log(session.user.id, "applications.submitted", "Applications", row.id, { appNo: row.app_no });
+      return SC_Actions.ok(view(saved));
+    });
+  }
+
   function listItem(row) {
     return {
       id: row.id, appNo: row.app_no, applicantName: row.applicant_name || "", centre: row.centre,
@@ -165,10 +191,11 @@ var SC_Applications = (function () {
     });
   }
 
-  return Object.freeze({ create: create, get: get, save: save, list: list, formHash: formHash });
+  return Object.freeze({ create: create, get: get, save: save, submit: submit, list: list, formHash: formHash });
 })();
 
 SC_Api.register("applications.create", SC_Applications.create);
 SC_Api.register("applications.get", SC_Applications.get);
 SC_Api.register("applications.save", SC_Applications.save);
+SC_Api.register("applications.submit", SC_Applications.submit);
 SC_Api.register("applications.list", SC_Applications.list);
