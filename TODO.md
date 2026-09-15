@@ -21,7 +21,7 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 - [x] `[SHARED]` `shared/form-schema.js`: all 11 steps, 82 questions, EN/TA labels, required rules, show-if (adult path 18+)
 - [x] `[SHARED]` `shared/form-rules.js`: draft vs submit checks with EN/TA error text, show-if, step progress, safety flags, summary columns
 
-### M3: POC server (Apps Script) core · plan: `docs/superpowers/plans/2026-09-15-m3-poc-server.md`
+### M3: POC server (Apps Script) core · plan: `docs/superpowers/plans/2026-09-15-m3-poc-server.md` · ✅ done
 - [x] `[POC]` M3a: Node test harness with fake Apps Script services (`tests/poc/fakes.js`, `harness.js`)
 - [x] `[POC]` M3a: `Store.gs`: tab ↔ object mapping, columns generated from the form schema, readable encodings, `LockService`, counters
 - [x] `[POC]` M3a: `Api.gs`: `doPost` router, envelope, sign-in and capability checks
@@ -39,9 +39,8 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 - [x] `[SHARED]` `public/js/kdf.js`: PBKDF2 600k on the device, password rules
 - [x] `[SHARED]` Screens: Sign in, choose your password, Home (placeholder), Settings (language, appearance, change password, sign out)
 - [x] `[POC]` "Test version: sample data only" banner behind `IS_DEMO`
-- [ ] `[SHARED]` Deploy check: copy `shared/*.js` to `public/shared/` for Cloudflare Pages (M10 hosting task)
 
-### M5: Applications · plan: `docs/superpowers/plans/2026-09-15-m5-applications.md`
+### M5: Applications · plan: `docs/superpowers/plans/2026-09-15-m5-applications.md` · 🚧 7 of 8 (the conflict wording is parked)
 - [x] `[SHARED]` Autosave every 20 s + on step change; "Saving…" / "Saved ✓" / "Not saved" states; version-conflict message (`js/autosave.js` + tests)
 - [x] `[POC]` `Applications.gs`: create, get, save (optimistic lock), list (role-scoped) (+ `tests/poc/applications.test.js`, `tests/poc/people.js`)
 - [x] `[SHARED]` Form wizard rendered from the schema (one step per screen, progress, big tap choices, 3-dropdown DOB) — `js/form-view.js`, `js/form-render.js`, `application.html`, `js/pages/application.js`
@@ -51,12 +50,12 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 - [x] `[POC]` Sample answers for demos: `public/js/seed/sample-applications.js` — invented, and must pass the submit check except the signature (test accounts are made by the Admin in the app)
 - [x] `[POC]` "Fill with sample data" button behind `IS_DEMO` — `SAMPLE_DATA` in `config.js`, named like `BACKEND` so no shared screen names POC code
 
-### M6: Workflow screens · plan: `docs/superpowers/plans/2026-09-16-m6-workflow-screens.md`
+### M6: Workflow screens · plan: `docs/superpowers/plans/2026-09-16-m6-workflow-screens.md` · 🚧 in progress
 - [ ] `[POC]` Demo seed: the dev server starts with an application at every stage, so the queues can be shown before uploads exist (M7). Added by decision, not in the spec
 - [ ] `[SHARED]` My Queue (auto-refresh every 60 s while visible, Refresh button), review screen, routing slip
 - [ ] `[SHARED]` Approve / Send back / Reject with confirmations; sent-back view with "Fix and resend"
 - [ ] `[SHARED]` Director decision: Admit / Waitlist / Reject, password step-up, stored signature, registration number, lock
-- [ ] `[POC]` `Applications.gs`: submit, review, decide, reopen, withdraw (using `shared/workflow.js`), form fingerprint
+- [~] `[POC]` `Applications.gs`: submit, review, decide, reopen, withdraw (using `shared/workflow.js`), form fingerprint — fingerprint, submit and withdraw done and reviewed; review in flight; decide and reopen to come (plan tasks 1–6)
 - [ ] `[SHARED]` Reopen and withdraw screens
 
 ### M7: Files
@@ -76,6 +75,7 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 - [ ] `[POC]` Restore steps in `docs/runbook.md` + one practice restore
 
 ### M10: Installable app, hosting, end-to-end
+- [ ] `[SHARED]` Deploy check: copy `shared/*.js` to `public/shared/` for Cloudflare Pages (moved here from M4 — `application.html` loads `shared/form-rules.js`, and the dev server serves `/shared/` from the repo, but Cloudflare Pages will not)
 - [ ] `[SHARED]` PWA: `manifest.webmanifest`, `sw.js` (app shell only, network-first), offline page
 - [ ] `[POC]` `public/_headers` for Cloudflare Pages (CSP with Apps Script `connect-src`, HSTS, etc.)
 - [ ] `[POC]` Deploy: Cloudflare Pages (static) + Apps Script web app; `API_BASE` set
