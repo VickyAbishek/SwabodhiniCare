@@ -39,6 +39,21 @@ function myTurn(item, me) {
   return SC_Workflow.isMyTurn(item.status, { actorId: me.id, actorRoles: me.roles, createdBy: item.createdBy });
 }
 
+// Where a card leads. A file waiting on this person's review opens the review screen, where they can
+// decide on it; every other card opens the application itself. Careful: that is not the same
+// question as myTurn above, and the difference is a draft, or a file sent back. Those are the
+// owner's turn — the therapist's move is to fix the form — so myTurn is true for the person looking
+// at their own, and the review screen is the one place that could do nothing with it. What decides
+// here is the reviewer's stage instead: the workflow names the role that reviews this status, and
+// this person holds that role. (A head looking at an application they filled in matches both and is
+// refused by the server as OWN_APPLICATION, so they see the file without any buttons.)
+function cardHref(item, me) {
+  const reviewer = SC_Workflow.reviewerRole(item.status);
+  const decides = reviewer ? me.roles.indexOf(reviewer) !== -1 : false;
+  const page = decides ? "review.html" : "application.html";
+  return `${page}?id=${encodeURIComponent(item.id)}`;
+}
+
 // "19 yrs · Male · Selaiyur". The age is worked out from the date of birth every time it is drawn,
 // so it is right even when the application has sat in the queue since a birthday.
 function subtitle(page, item) {
@@ -62,7 +77,7 @@ function ageText(page, item) {
 function card(page, slip, item, me) {
   const link = document.createElement("a");
   link.className = "app-card";
-  link.href = `application.html?id=${encodeURIComponent(item.id)}`;
+  link.href = cardHref(item, me);
   const top = document.createElement("div");
   top.className = "app-card-top";
   const who = document.createElement("div");
