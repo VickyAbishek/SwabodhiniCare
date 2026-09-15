@@ -172,6 +172,10 @@ var SC_Auth = (function () {
     login: login,
     logout: logout,
     changePassword: changePassword,
+    // Signs a person out everywhere (deactivation, password reset). Call inside SC_Store.withLock.
+    endSessions: function (userId) {
+      endOtherSessions(userId, null);
+    },
   });
 })();
 

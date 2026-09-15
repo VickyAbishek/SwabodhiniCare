@@ -94,6 +94,20 @@ test("a handler that forgets to return an envelope is a server error", () => {
   assert.equal(post(ctx, router, { action: "me.get", token: "t-admin" }).body.error.code, "SERVER_ERROR");
 });
 
+test("people with a temporary password can only change it, sign out or see their profile", () => {
+  const ctx = createContext();
+  const newcomer = { user: { id: "u-new", roles: ["ADMIN"], mustChangePassword: true } };
+  const router = ctx.SC_Api.createRouter({ resolveSession: () => newcomer });
+  for (const action of ["users.list", "me.get", "auth.changePassword", "auth.logout"]) {
+    router.register(action, () => ctx.SC_Actions.ok({}));
+  }
+  const ask = (action) => post(ctx, router, { action, token: "t" }).body;
+  assert.equal(ask("users.list").error.code, "PASSWORD_CHANGE_REQUIRED");
+  assert.equal(ask("me.get").ok, true);
+  assert.equal(ask("auth.changePassword").ok, true);
+  assert.equal(ask("auth.logout").ok, true);
+});
+
 test("the global doPost answers JSON", () => {
   const ctx = createContext();
   const out = ctx.doPost({ postData: { contents: "{", type: "text/plain" } });

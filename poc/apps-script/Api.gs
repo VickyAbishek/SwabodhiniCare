@@ -24,7 +24,10 @@ var SC_Api = (function () {
     }
   }
 
-  // Returns { user } for a good session, or an error envelope.
+  // Until a temporary password is replaced, only these actions are allowed.
+  var ALLOWED_BEFORE_PASSWORD_CHANGE = ["auth.changePassword", "auth.logout", "me.get"];
+
+  // Returns { user, token } for a good session, or an error envelope.
   function checkAccess(contract, request, resolveSession) {
     if (contract.auth !== "user") return { user: null };
     var found = request.token ? resolveSession(String(request.token)) : null;
@@ -32,6 +35,9 @@ var SC_Api = (function () {
     if (found.error) return SC_Actions.fail(found.error);
     if (contract.capability && !SC_Permissions.can(found.user.roles, contract.capability)) {
       return SC_Actions.fail("NOT_ALLOWED");
+    }
+    if (found.user.mustChangePassword && ALLOWED_BEFORE_PASSWORD_CHANGE.indexOf(request.action) === -1) {
+      return SC_Actions.fail("PASSWORD_CHANGE_REQUIRED");
     }
     return { user: found.user, token: String(request.token) };
   }
