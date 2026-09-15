@@ -16,6 +16,8 @@ const TEXT_TYPES = ["text", "textarea", "phone", "pincode", "number"];
 const SHOW_IF_SOURCES = new Set(SC_FormSchema.allFields().filter((f) => f.showIf && f.showIf.field).map((f) => f.showIf.field));
 
 const state = { page: null, app: null, values: {}, errors: {}, step: "s1", mode: "step", readOnly: false, autosave: null, status: null };
+// Reloading after a clash is the fix the message asks for, so leaving is meant and not warned about.
+let leavingOnPurpose = false;
 
 const today = () => new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
 const lang = () => state.page.prefs().lang;
@@ -167,10 +169,12 @@ function wireButtons() {
   $("back-btn").addEventListener("click", () => saveThen(() => (stepAt(-1) ? show("step", stepAt(-1)) : goTo(PAGES.home))));
   $("overview-btn").addEventListener("click", () => saveThen(() => show("overview")));
   $("message").addEventListener("click", () => {
-    if (state.status && state.status.state === "conflict") window.location.reload();
+    if (!state.status || state.status.state !== "conflict") return;
+    leavingOnPurpose = true;
+    window.location.reload();
   });
   window.addEventListener("beforeunload", (event) => {
-    if (!state.autosave.hasUnsaved()) return;
+    if (leavingOnPurpose || !state.autosave.hasUnsaved()) return;
     state.autosave.flush();
     event.preventDefault();
   });
