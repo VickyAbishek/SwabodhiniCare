@@ -6,18 +6,9 @@ const path = require("node:path");
 const fakes = require("./fakes.js");
 
 const ROOT = path.join(__dirname, "..", "..");
-// Same order as the deploy build (poc/scripts/build.mjs): dependencies first.
-const SHARED_ORDER = ["dates", "numbers", "permissions", "workflow", "actions", "form-schema", "form-rules"];
+// The same load order the deploy build uses: one list, in poc/scripts/source-order.mjs.
+const { sourceFiles } = require("../../poc/scripts/source-order.mjs");
 const DEFAULT_START = Date.parse("2026-09-15T10:00:00Z");
-
-function sourceFiles() {
-  const shared = SHARED_ORDER.map((name) => path.join(ROOT, "shared", name + ".js"));
-  const gsDir = path.join(ROOT, "poc", "apps-script");
-  const gs = fs.existsSync(gsDir)
-    ? fs.readdirSync(gsDir).filter((f) => f.endsWith(".gs")).sort().map((f) => path.join(gsDir, f))
-    : [];
-  return shared.concat(gs);
-}
 
 function createContext(options = {}) {
   const clock = options.clock || { ms: DEFAULT_START };
@@ -32,7 +23,7 @@ function createContext(options = {}) {
     console: fakes.makeConsole(logs),
     Date: fakes.makeDate(clock),
   });
-  for (const file of sourceFiles()) {
+  for (const file of sourceFiles(ROOT)) {
     vm.runInContext(fs.readFileSync(file, "utf8"), context, { filename: file });
   }
   context.clock = clock;
