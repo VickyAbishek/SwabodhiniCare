@@ -21,6 +21,17 @@ function makeUtilities() {
     getUuid: () => crypto.randomUUID(),
     base64Encode: (data) => toBuffer(data).toString("base64"),
     base64Decode: (text) => toSigned(Buffer.from(text, "base64")),
+    // Supports the patterns the server uses: yyyy MM dd HH mm ss.
+    formatDate: (date, timeZone, format) => {
+      const parts = Object.fromEntries(
+        new Intl.DateTimeFormat("en-CA", {
+          timeZone, year: "numeric", month: "2-digit", day: "2-digit",
+          hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23",
+        }).formatToParts(date).map((p) => [p.type, p.value])
+      );
+      return format.replace("yyyy", parts.year).replace("MM", parts.month).replace("dd", parts.day)
+        .replace("HH", parts.hour).replace("mm", parts.minute).replace("ss", parts.second);
+    },
     sleep: () => {},
   };
 }

@@ -202,6 +202,12 @@ var SC_Store = (function () {
     return new Date().toISOString();
   }
 
+  // Today's date at the school (Chennai), so an application started late in the evening
+  // never lands on the wrong day.
+  function todayIso() {
+    return Utilities.formatDate(new Date(), "Asia/Kolkata", "yyyy-MM-dd");
+  }
+
   function newId() {
     return Utilities.getUuid().replace(/-/g, "");
   }
@@ -217,6 +223,7 @@ var SC_Store = (function () {
     withLock: withLock,
     nextSeq: nextSeq,
     nowIso: nowIso,
+    todayIso: todayIso,
     newId: newId,
   });
 })();
