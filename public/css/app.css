@@ -158,6 +158,8 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .btn[disabled] { opacity: 0.6; cursor: progress; }
 .btn-primary { background: var(--primary); color: var(--on-primary); }
 .btn-outline { background: var(--surface); color: var(--primary); border-color: var(--primary); }
+.btn-ok { background: var(--ok); color: var(--on-ok); }
+.btn-warn { background: var(--surface); color: var(--warn); border-color: var(--warn); }
 .btn-bad { background: var(--surface); color: var(--bad); border-color: var(--bad); }
 .btn-block { width: 100%; }
 .btn-small { min-height: 48px; font-size: 1rem; padding-inline: 14px; }
@@ -391,6 +393,9 @@ textarea.input { min-height: 120px; resize: vertical; }
 .stamp[data-status="ADMITTED"] { color: var(--ok); }
 .stamp[data-status="REJECTED"], .stamp[data-status="WITHDRAWN"] { color: var(--bad); }
 .stamp-turn { color: var(--on-marigold); background: var(--marigold-soft); }
+.stamp-ok { color: var(--ok); }
+.stamp-warn { color: var(--warn); }
+.stamp-bad { color: var(--bad); }
 
 /* ---------- Queue (home, main spec §7 R1) ---------- */
 .queue-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -402,6 +407,60 @@ textarea.input { min-height: 120px; resize: vertical; }
   font-variant-numeric: tabular-nums;
 }
 .queue-label { font: 700 1.2rem/1.3 var(--f-head); }
+
+/* ---------- Review screen (main spec §5, §12) ---------- */
+.review-body { display: grid; gap: 20px; }
+.applicant { display: grid; grid-template-columns: 64px 1fr; gap: 12px; align-items: center; }
+.thumb {
+  width: 64px; height: 64px; border-radius: var(--r-md);
+  background: var(--primary-soft); color: var(--primary);
+  display: grid; place-items: center; font: 800 1.4rem var(--f-head);
+}
+.back-link {
+  display: inline-flex; align-items: center; gap: 6px; align-self: flex-start;
+  font-weight: 700; color: var(--primary); text-decoration: none; min-height: 48px;
+}
+.flags { display: grid; gap: 6px; justify-items: start; }
+
+/* The full routing slip: one row per step, joined by the line between the numbered nodes. */
+.slip { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.slip li { display: grid; grid-template-columns: 36px 1fr; gap: 12px; position: relative; padding-bottom: 18px; }
+.slip li:not(:last-child)::before {
+  content: ""; position: absolute; left: 17px; top: 36px; bottom: 0; width: 2px; background: var(--line);
+}
+.slip li.is-done:not(:last-child)::before { background: var(--ok); }
+.slip .node {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: grid; place-items: center;
+  font: 700 0.95rem var(--f-mono);
+  border: 3px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-2);
+}
+.slip .is-done .node { background: var(--ok); border-color: var(--ok); color: var(--on-ok); }
+.slip .is-now .node { border-color: var(--marigold); background: var(--marigold-soft); color: var(--on-marigold); }
+.slip-body { display: grid; gap: 4px; padding-top: 4px; }
+.slip-role { font-weight: 700; }
+.slip-meta { font-size: 0.95rem; color: var(--ink-2); }
+.slip-note { margin: 4px 0 0; padding: 8px 12px; background: var(--surface-2); border-radius: var(--r-sm); font-size: 1rem; }
+
+/* Decision buttons: the strongest one takes the whole width when there is an odd number of them,
+   so Approve is never shoulder to shoulder with Reject (the mockup's S6 bar). */
+.action-bar.decisions { grid-template-columns: 1fr 1fr; }
+.action-bar.decisions > .btn:first-child:nth-last-child(odd) { grid-column: 1 / -1; }
+.action-bar.decisions > .btn { padding-inline: 10px; }
+
+/* Confirmations before every action, in plain words (main spec §12): a sheet over a dimmed screen. */
+.scrim { position: fixed; inset: 0; background: rgb(13 22 24 / 55%); display: flex; align-items: flex-end; }
+.sheet {
+  width: 100%; max-width: 560px; margin: 0 auto;
+  background: var(--surface);
+  border-radius: 22px 22px 0 0;
+  padding: 24px 16px calc(18px + env(safe-area-inset-bottom, 0px));
+  display: grid; gap: 14px;
+}
+.sheet h3 { font-size: 1.4rem; font-weight: 800; }
+.sheet .btns { display: grid; gap: 10px; }
 
 /* The four-step route (routing-slip.js): four segments, then where the file is. */
 .track { display: grid; gap: 6px; }
