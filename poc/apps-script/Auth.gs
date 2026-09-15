@@ -147,14 +147,20 @@ var SC_Auth = (function () {
     }).forEach(revoke);
   }
 
+  // The password never leaves the device: the phone sends PBKDF2(password, salt) and we compare
+  // SHA-256 of that with the stored hash. Used at sign-in, on a password change and on the
+  // Director's step-up before a final decision (main spec §10.1).
+  function verifyKey(user, key) {
+    return typeof key === "string" && key !== "" &&
+      SC_Crypto.safeEqual(SC_Crypto.sha256Hex(key), user.password_hash);
+  }
+
   function changePassword(data, session) {
     var valid = isKey(data.currentKey) && isKey(data.newKey) && typeof data.newSalt === "string" && HEX_SALT.test(data.newSalt);
     if (!valid) return SC_Actions.fail("INVALID_REQUEST");
     return SC_Store.withLock(function () {
       var user = SC_Store.find("Users", "id", session.user.id);
-      if (!user || !SC_Crypto.safeEqual(SC_Crypto.sha256Hex(data.currentKey), user.password_hash)) {
-        return SC_Actions.fail("INVALID_CREDENTIALS");
-      }
+      if (!user || !verifyKey(user, data.currentKey)) return SC_Actions.fail("INVALID_CREDENTIALS");
       var updated = SC_Store.update("Users", user.id, {
         password_hash: SC_Crypto.sha256Hex(data.newKey), password_salt: data.newSalt,
         must_change_password: false, updated_at: iso(Date.now()),
@@ -172,6 +178,7 @@ var SC_Auth = (function () {
     login: login,
     logout: logout,
     changePassword: changePassword,
+    verifyKey: verifyKey,
     normalizeEmail: normalizeEmail,
     // Signs a person out everywhere (deactivation, password reset). Call inside SC_Store.withLock.
     endSessions: function (userId) {

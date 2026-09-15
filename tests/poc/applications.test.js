@@ -1,6 +1,6 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
-const { setupPeople } = require("./people.js");
+const { setupPeople, sha } = require("./people.js");
 const { plain } = require("./harness.js");
 const SAMPLE = require("../fixtures/sample-application.js");
 
@@ -311,4 +311,95 @@ test("the owner can withdraw an application a reviewer sent back", () => {
   assert.equal(withdrawn.ok, true);
   assert.equal(withdrawn.data.status, "WITHDRAWN");
   assert.equal(as("priya")("applications.get", { id }).data.status, "WITHDRAWN");
+});
+
+// Walks an application to the Director's desk and returns its id.
+function atDirector(as) {
+  const { id } = submitReady(as, "priya");
+  as("lakshmi")("applications.review", { id, action: "APPROVE" });
+  as("suresh")("applications.review", { id, action: "APPROVE" });
+  return id;
+}
+const directorKey = () => sha("key-revathi"); // people.js exports sha and uses sha(`key-${name}`)
+
+test("the Director admits with their password and a registration number is issued", () => {
+  const { ctx, as } = setupPeople();
+  const id = atDirector(as);
+  const result = as("revathi")("applications.decide", { id, action: "ADMIT", key: directorKey() });
+  assert.equal(result.data.status, "ADMITTED");
+  assert.equal(result.data.registrationNo, "SWB/VLC/2026/0001");
+
+  const row = ctx.SC_Store.find("Applications", "id", id);
+  assert.equal(row.registration_no, "SWB/VLC/2026/0001");
+});
+
+test("the wrong password refuses the decision and changes nothing", () => {
+  const { as } = setupPeople();
+  const id = atDirector(as);
+  const result = as("revathi")("applications.decide", { id, action: "ADMIT", key: "not-the-key" });
+  assert.equal(result.error.code, "INVALID_CREDENTIALS");
+  assert.equal(as("revathi")("applications.get", { id }).data.status, "PENDING_DIRECTOR");
+});
+
+test("waitlisting needs no registration number, and the Director may admit later", () => {
+  const { as } = setupPeople();
+  const id = atDirector(as);
+  const waitlisted = as("revathi")("applications.decide", { id, action: "WAITLIST", key: directorKey() });
+  assert.equal(waitlisted.data.status, "WAITLISTED");
+  assert.equal(waitlisted.data.registrationNo, null);
+
+  const later = as("revathi")("applications.decide", { id, action: "ADMIT", key: directorKey() });
+  assert.equal(later.data.status, "ADMITTED");
+  assert.equal(later.data.registrationNo, "SWB/VLC/2026/0001");
+});
+
+test("only the Director decides, and Admit always needs the password", () => {
+  const { as } = setupPeople();
+  const id = atDirector(as);
+  assert.equal(as("suresh")("applications.decide", { id, action: "ADMIT", key: "not-the-key" }).error.code, "NOT_ALLOWED");
+  assert.equal(as("revathi")("applications.decide", { id, action: "ADMIT" }).error.code, "INVALID_REQUEST");
+});
+
+test("the Director rejects from the review screen, and a rejected application is final", () => {
+  const { as } = setupPeople();
+  const id = atDirector(as);
+  // Rejecting is not signing, so it goes through review and needs no password — only Admit and
+  // Waitlist carry the step-up.
+  const rejected = as("revathi")("applications.review", { id, action: "REJECT", comment: "Not eligible." });
+  assert.equal(rejected.data.status, "REJECTED");
+  assert.equal(as("revathi")("applications.review", { id, action: "SEND_BACK", comment: "x" }).error.code, "INVALID_TRANSITION");
+});
+
+test("registration numbers run per centre and per year, and never repeat", () => {
+  const { as } = setupPeople();
+  const first = atDirector(as);
+  const second = atDirector(as);
+  assert.equal(as("revathi")("applications.decide", { id: first, action: "ADMIT", key: directorKey() }).data.registrationNo, "SWB/VLC/2026/0001");
+  as("revathi")("applications.decide", { id: second, action: "ADMIT", key: directorKey() });
+  const third = atDirector(as);
+  assert.equal(as("revathi")("applications.decide", { id: third, action: "ADMIT", key: directorKey() }).data.registrationNo, "SWB/VLC/2026/0003");
+});
+
+// Every person in people.js holds exactly one role, so no test could reach the two-stage rule at
+// handler level: workflow.js reads (ctx.approvedThisRound || []), which fails open if a handler
+// forgets to pass the list. One person with both reviewing roles pins it — and pins the boundary
+// too: their stage-1 approval and the submit share one millisecond here, so approversThisRound's
+// ">=" must count it (">" would let them sign the next stage as well).
+test("one person holding two reviewing roles cannot approve two stages of one application", () => {
+  const { ctx, as } = setupPeople();
+  const key = sha("key-mala");
+  ctx.SC_Store.insert("Users", {
+    id: "u-mala", email: "mala@example.com", name: "Mala", roles: ["THERAPY_HEAD", "CENTRE_HEAD"],
+    password_hash: sha(key), password_salt: "0123456789abcdef0123456789abcdef", kdf_iterations: 600000,
+    is_active: true, failed_logins: 0, must_change_password: false,
+  });
+  const token = plain(ctx.SC_Api.handle({ action: "auth.login", data: { email: "mala@example.com", key } })).data.token;
+  const asMala = (action, data) => plain(ctx.SC_Api.handle({ action, data, token }));
+
+  const { id } = submitReady(as, "priya");
+  assert.equal(asMala("applications.review", { id, action: "APPROVE" }).data.status, "PENDING_CENTRE_HEAD");
+
+  const second = asMala("applications.review", { id, action: "APPROVE" });
+  assert.equal(second.error.code, "ALREADY_APPROVED_STAGE");
+  assert.equal(as("priya")("applications.get", { id }).data.status, "PENDING_CENTRE_HEAD");
 });

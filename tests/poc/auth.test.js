@@ -142,3 +142,17 @@ test("a missing HMAC secret is a logged server error, not a crash", () => {
   assert.equal(call(ctx, "auth.prelogin", { email: "nobody@example.com" }).error.code, "SERVER_ERROR");
   assert.match(String(ctx.logs.errors[0][0]), /HMAC_SECRET/);
 });
+
+test("verifyKey accepts the right key and refuses the wrong one", () => {
+  const ctx = createContext({ properties: { HMAC_SECRET: "test-secret" } });
+  ctx.SC_Store.ensureTabs();
+  const key = "key-anand";
+  ctx.SC_Store.insert("Users", {
+    id: "u-1", email: "a@example.com", name: "A", roles: ["DIRECTOR"],
+    password_hash: require("node:crypto").createHash("sha256").update(key).digest("hex"),
+    password_salt: "0123456789abcdef0123456789abcdef", is_active: true, must_change_password: false,
+  });
+  const user = ctx.SC_Store.find("Users", "id", "u-1");
+  assert.equal(ctx.SC_Auth.verifyKey(user, key), true);
+  assert.equal(ctx.SC_Auth.verifyKey(user, "not-the-key"), false);
+});
