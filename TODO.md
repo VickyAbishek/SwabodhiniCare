@@ -21,15 +21,14 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 - [x] `[SHARED]` `shared/form-schema.js`: all 11 steps, 82 questions, EN/TA labels, required rules, show-if (adult path 18+)
 - [x] `[SHARED]` `shared/form-rules.js`: draft vs submit checks with EN/TA error text, show-if, step progress, safety flags, summary columns
 
-### M3: POC server (Apps Script) core
-- [ ] `[POC]` `poc/apps-script/`: `appsscript.json`, `Api.gs` router + envelope + token/role checks
-- [ ] `[POC]` `Sheets.gs`: tab ↔ object mapping, columns generated from the form schema, `LockService`, counters
-- [ ] `[POC]` `Setup.gs`: create tabs, fill centres, set Script Properties, create the monthly trigger
-- [ ] `[POC]` `Auth.gs`: prelogin (fake salts), login (SHA-256 of device key), sessions, lockout, change password
-- [ ] `[POC]` `Users.gs`: list, create (temporary password), update roles, reset password, deactivate
-- [ ] `[POC]` Audit tab writes
-- [ ] `[POC]` `poc/seed/`: fictional applicants and one test account per role
-- [ ] `[POC]` Deploy script/notes for `clasp` (dev-only) and web app settings
+### M3: POC server (Apps Script) core · plan: `docs/superpowers/plans/2026-09-15-m3-poc-server.md`
+- [x] `[POC]` M3a: Node test harness with fake Apps Script services (`tests/poc/fakes.js`, `harness.js`)
+- [x] `[POC]` M3a: `Store.gs`: tab ↔ object mapping, columns generated from the form schema, readable encodings, `LockService`, counters
+- [x] `[POC]` M3a: `Api.gs`: `doPost` router, envelope, sign-in and capability checks
+- [ ] `[POC]` M3b: `Crypto.gs` + `Auth.gs`: prelogin (fake salts), login (SHA-256 of device key), sessions, lockout, change password
+- [ ] `[POC]` M3c: `Users.gs`: me, list, create (temporary password), update roles, reset password, deactivate
+- [ ] `[POC]` M3c: `Audit.gs`: audit tab writes and list
+- [ ] `[POC]` M3c: `Setup.gs`, `poc/seed/` (test account per role, fictional applicants), `poc/scripts/build.mjs`, `appsscript.json`, `poc/README.md` deploy steps (`clasp`, web app settings, monthly trigger)
 
 ### M4: Screens core
 - [ ] `[SHARED]` `public/css/`: design tokens from `docs/mockups/mockups.css` (light default, dark via Settings), print CSS
