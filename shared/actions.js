@@ -30,6 +30,7 @@ var SC_Actions = (function () {
     "attachments.get": { auth: "user" },
     "attachments.delete": { auth: "user" },
     "signature.upload": { auth: "user", capability: "decision.final" },
+    "signature.get": { auth: "user", capability: "decision.final" },
     "reports.get": { auth: "user", capability: "reports.view" },
     "admin.backups.list": { auth: "user", capability: "backups.view" },
     "admin.backups.runNow": { auth: "user", capability: "backups.run" },
