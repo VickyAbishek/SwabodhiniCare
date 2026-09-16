@@ -394,6 +394,10 @@ var SC_Applications = (function () {
   return Object.freeze({
     create: create, get: get, save: save, submit: submit, withdraw: withdraw, review: review,
     decide: decide, reopen: reopen, list: list, formHash: formHash,
+    // Attachments.gs asks the application for permission, and for the answers to fingerprint.
+    // valuesOf is formValues under a name that says what a caller wants, not how this file
+    // spells it.
+    loadVisible: loadVisible, valuesOf: formValues,
   });
 })();
 
