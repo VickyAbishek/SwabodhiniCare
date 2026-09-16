@@ -9,7 +9,7 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 
 ## ▶ Start here (updated 2026-09-16)
 
-**M7b is done and merged** (PR #10, 342 tests). **M8 (reports, Excel, print) is done** — all seven tasks committed on `feat/m8-reports-excel-print`; 360 tests. **Next: M9 (backups, alerts, admin).**
+**M7b is done and merged** (PR #10, 342 tests). **M8 (reports, Excel, print) is done and merged** (PR #12, 360 tests). **M9 (backups, alerts, admin) is in progress** — design and plan written.
 
 Run tasks **inline, not with subagents** (token cost).
 
@@ -101,7 +101,7 @@ Run tasks **inline, not with subagents** (token cost).
 - [x] `[POC]` Director signature upload: `Signatures` tab, `signature.upload`
 - [x] `[SHARED]` Director signature Settings UI (`signature-image.js` shared `strokesToPng`; Director-only pad) and the fresh-draft *submit* button (M7a carry-forward)
 
-### M8: Reports, Excel, print · spec: `docs/superpowers/specs/2026-09-16-m8-reports-excel-print-design.md` · plan: `docs/superpowers/plans/2026-09-16-m8-reports-excel-print.md` · ✅ done (360 tests; checked in a browser)
+### M8: Reports, Excel, print · spec: `docs/superpowers/specs/2026-09-16-m8-reports-excel-print-design.md` · plan: `docs/superpowers/plans/2026-09-16-m8-reports-excel-print.md` · ✅ done & merged — PR #12 (360 tests; checked in a browser)
 - [x] `[SHARED]` `shared/reports.js`: queue counts, register rows, by-centre totals, waitlist, turnaround, demographics (moved from M2)
 - [x] `[SHARED]` Reports screens (R1–R7) with filters and CSS bar charts
 - [x] `[SHARED]` `xlsx.js`: Excel built in the browser (UTF-8, Tamil-safe)
@@ -109,7 +109,7 @@ Run tasks **inline, not with subagents** (token cost).
 - [x] `[SHARED]` Pending & Turnaround (R5): take a rejection's date from its `Approvals` row, not from `decided_at`, which no rejection writes (M6 plan, carry-forward 2)
 - [x] `[POC]` `Reports.gs`: reads rows, filters, pages of 50
 
-### M9: Backups, alerts, admin
+### M9: Backups, alerts, admin · spec: `docs/superpowers/specs/2026-09-16-m9-backups-alerts-admin-design.md` · plan: `docs/superpowers/plans/2026-09-16-m9-backups-alerts-admin.md` · [~] in progress
 - [ ] `[POC]` `Backup.gs`: monthly trigger → Sheet copy + `.xlsx` to Drive, keep 24 months, `BackupLog`, email result
 - [ ] `[SHARED]` Admin screens: staff list, add staff (temporary password shown once), backups list + Backup now, audit log
 - [ ] `[POC]` Restore steps in `docs/runbook.md` + one practice restore
