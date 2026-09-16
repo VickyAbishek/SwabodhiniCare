@@ -89,9 +89,13 @@ The dev server serves `/shared/` straight from the repo root, but Pages serves o
 
 ### 3. Deploy the web app (Pages)
 
-1. `npx wrangler pages deploy public` (from the repo root). `public/_headers` ships the CSP and the
+1. **First time only:** `npx wrangler pages project create swabodhinicare --production-branch main --force`.
+   The `--force` matters: without it, wrangler 4.13x turns the project into a Cloudflare *Worker*
+   (a `*.workers.dev` address, plus an unasked-for `wrangler.jsonc` and `package.json` edits). We keep
+   classic Pages (`swabodhinicare.pages.dev`). Once the project exists, don't pass `--force` again.
+2. `npx wrangler pages deploy public --project-name swabodhinicare --branch main` (from the repo root). `public/_headers` ships the CSP and the
    security headers; `manifest.webmanifest`, `sw.js`, `offline.html` and `icon.svg` make it installable.
-2. Sanity-check: open the Pages URL, sign in, and load one application. The browser calls the Apps
+3. Sanity-check: open the Pages URL, sign in, and load one application. The browser calls the Apps
    Script `/exec` URL directly (cross-origin), which the CSP's `connect-src` already allows.
 
 ### 4. Install as a PWA
