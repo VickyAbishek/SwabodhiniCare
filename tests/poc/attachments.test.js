@@ -80,14 +80,65 @@ test("only someone who may see the application may attach to it", () => {
   assert.equal(result.error.code, "NOT_FOUND");
 });
 
-test("M7a stores signatures only", () => {
+test("photos, diagnosis reports and the UDID certificate are accepted", () => {
   const { as } = setupPeople();
   const app = draft(as, "priya");
-  const result = as("priya")("attachments.upload", {
-    applicationId: app.id, kind: "PHOTO", filename: "face.png", base64: b64(PNG),
+  for (const kind of ["PHOTO", "DIAGNOSIS", "UDID"]) {
+    const result = as("priya")("attachments.upload", {
+      applicationId: app.id, kind, filename: `${kind}.png`, base64: b64(PNG),
+    });
+    assert.equal(result.ok, true, `${kind} accepted`);
+    assert.equal(result.data.kind, kind);
+  }
+});
+
+test("a PDF is a valid diagnosis report but not a photo", () => {
+  const { as } = setupPeople();
+  const app = draft(as, "priya");
+  const diag = as("priya")("attachments.upload", {
+    applicationId: app.id, kind: "DIAGNOSIS", filename: "report.pdf", base64: b64(PDF),
   });
-  assert.equal(result.ok, false);
-  assert.equal(result.error.code, "INVALID_REQUEST");
+  assert.equal(diag.ok, true);
+  const photo = as("priya")("attachments.upload", {
+    applicationId: app.id, kind: "PHOTO", filename: "face.pdf", base64: b64(PDF),
+  });
+  assert.equal(photo.ok, false);
+  assert.equal(photo.error.code, "FILE_TYPE_NOT_ALLOWED");
+});
+
+test("adding a second diagnosis report keeps the first (kinds are additive)", () => {
+  const { ctx, as } = setupPeople();
+  const app = draft(as, "priya");
+  const first = as("priya")("attachments.upload", { applicationId: app.id, kind: "DIAGNOSIS", filename: "a.pdf", base64: b64(PDF) });
+  const second = as("priya")("attachments.upload", { applicationId: app.id, kind: "DIAGNOSIS", filename: "b.pdf", base64: b64(PDF) });
+  assert.equal(second.ok, true);
+  assert.equal(ctx.SC_Store.all("Attachments").length, 2);
+  assert.equal(ctx.SC_Store.find("Attachments", "id", first.data.id).deleted_at, null, "the first report is not deleted");
+});
+
+test("the eleventh attachment is refused", () => {
+  const { as } = setupPeople();
+  const app = draft(as, "priya");
+  for (let i = 0; i < 10; i++) {
+    const r = as("priya")("attachments.upload", { applicationId: app.id, kind: "DIAGNOSIS", filename: `r${i}.png`, base64: b64(PNG) });
+    assert.equal(r.ok, true);
+  }
+  const extra = as("priya")("attachments.upload", { applicationId: app.id, kind: "DIAGNOSIS", filename: "r10.png", base64: b64(PNG) });
+  assert.equal(extra.ok, false);
+  assert.equal(extra.error.code, "TOO_MANY_FILES");
+});
+
+test("re-signing does not count the signature it replaces against the cap", () => {
+  const { ctx, as } = setupPeople();
+  const app = draft(as, "priya", { s11_parent_name: "Selvam R" });
+  sign(as, "priya", app.id); // 1 live: the signature
+  for (let i = 0; i < 9; i++) {
+    assert.equal(as("priya")("attachments.upload", { applicationId: app.id, kind: "DIAGNOSIS", filename: `r${i}.png`, base64: b64(PNG) }).ok, true);
+  }
+  ctx.clock.ms += 1000;
+  const again = sign(as, "priya", app.id, JPEG);
+  assert.equal(again.ok, true);
+  assert.equal(ctx.SC_Store.filter("Attachments", (r) => !r.deleted_at).length, 10, "the replacement keeps the count at 10");
 });
 
 test("a signature can be read back by someone who may see the application", () => {

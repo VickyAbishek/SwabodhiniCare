@@ -53,6 +53,7 @@ var SC_Actions = (function () {
     VALIDATION_FAILED: ["Some answers need attention. They're marked in red.", "சில பதில்களைச் சரிபார்க்க வேண்டும். அவை சிவப்பில் குறிக்கப்பட்டுள்ளன."],
     FILE_TYPE_NOT_ALLOWED: ["Only photos (JPG, PNG) and PDF files can be added.", "புகைப்படங்கள் (JPG, PNG) மற்றும் PDF கோப்புகளை மட்டுமே சேர்க்க முடியும்."],
     FILE_TOO_LARGE: ["This file is larger than 5 MB. Please choose a smaller one.", "இந்தக் கோப்பு 5 MB-ஐ விடப் பெரியது. சிறிய கோப்பைத் தேர்ந்தெடுக்கவும்."],
+    TOO_MANY_FILES: ["Too many files. Remove one first.", "கோப்புகள் அதிகம். முதலில் ஒன்றை நீக்கவும்."],
     NOT_FOUND: ["We couldn't find that. It may have been removed.", "அதைக் கண்டுபிடிக்க முடியவில்லை. அது நீக்கப்பட்டிருக்கலாம்."],
     NETWORK_ERROR: ["Can't reach the server. Check the Wi-Fi or mobile data, then try again.", "சர்வரை அணுக முடியவில்லை. Wi-Fi அல்லது மொபைல் டேட்டாவைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்."],
     PASSWORD_CHANGE_REQUIRED: ["Please choose your own password first.", "முதலில் உங்கள் சொந்தக் கடவுச்சொல்லைத் தேர்ந்தெடுக்கவும்."],
