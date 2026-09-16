@@ -7,6 +7,28 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 
 ---
 
+## ▶ Start here (updated 2026-09-16)
+
+**Branch:** `feat/m7a-consent-signature` — cut from `feat/m6-workflow-screens` @ `ce08a0a`.
+Milestones branch from the **previous milestone's branch, not from `main`** (M6 branched from M5; `main` only ever fast-forwards behind). Branching M7a off `main` would lose all of M6, which M7a's server work builds on directly.
+
+**Next action:** execute `docs/superpowers/plans/2026-09-16-m7a-consent-signature.md`, **Task 1 of 8. Nothing has been executed yet** — the plan and its spec are written and committed, no implementation has started.
+
+Run tasks **inline, not with subagents** (token cost). Each task is self-contained: exact files, the test to write first, the code, the commands, and its own commit message. Work them in order — Task 3 needs Task 2's `DriveApp` fake, Task 5 needs Task 3's `consent_payload` column.
+
+| | |
+|---|---|
+| Spec (the *why*) | `docs/superpowers/specs/2026-09-16-m7a-consent-signature-design.md` |
+| Plan (the *how*) | `docs/superpowers/plans/2026-09-16-m7a-consent-signature.md` |
+| Tests now | **293 pass, 0 fail** — `npm test` (runs the scope check, then `node --test`) |
+| Expected after Task 8 | ~320 passing; each task's step 6-ish states its own count |
+| Open PR | **#6** — M6 workflow screens + the M5 conflict-wording fix. Open, **not merged**. `main` is 16 commits behind |
+| Dev server | `node poc/scripts/dev-server.mjs` → http://127.0.0.1:8787 · sign in `priya@example.com` / `demo-pass-2026` (all demo staff share it; see `poc/seed/demo-data.mjs`) |
+
+**The one thing worth knowing before touching the code:** `s11_signature` is `required: true` (`shared/form-schema.js:184`) and nothing can produce one, so **no application in this system has ever passed the submit check.** M5 seeded past that gate and M6 built the whole approval chain on files that never went through it. M7a is what makes fill in → sign → submit real, which is why it comes before photos and PDFs.
+
+---
+
 ## Phase 0: POC on Google Sheets (every feature, tested by all roles)
 
 ### M1: Shared foundations · plan: `docs/superpowers/plans/2026-09-15-m1-shared-foundations.md` · ✅ done (53 tests, 97.95% line coverage)
@@ -61,7 +83,7 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 
 ### M7: Files · split into M7a (the signature, on the critical path) and M7b (everything else)
 
-#### M7a: The parent's consent signature · spec: `docs/superpowers/specs/2026-09-16-m7a-consent-signature-design.md` · 🚧 designed, plan next
+#### M7a: The parent's consent signature · 🚧 **planned, not started (0 of 8 tasks)** · spec: `docs/superpowers/specs/2026-09-16-m7a-consent-signature-design.md` · plan: `docs/superpowers/plans/2026-09-16-m7a-consent-signature.md`
 > Why first: `form-schema.js:184` marks the signature required and nothing can produce one, so **no application can pass the submit check today**. M5 seeded past that gate and M6 built the approval chain on files that never went through it.
 - [ ] `[SHARED]` `shared/consent.js`: the five consented fields + their normalized serialization. No hashing — `check-scope.mjs` bans platform APIs from `shared/`, so each side hashes the one shared payload (M6 plan, carry-forward 3)
 - [ ] `[SHARED]` `public/js/signature-pad.js`: canvas capture, PNG out. Pure geometry (`isBlank`, `trimToInk`, scale to a fixed box) tested apart from the DOM wrapper
