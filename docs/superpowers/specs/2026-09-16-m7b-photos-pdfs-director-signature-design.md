@@ -92,7 +92,7 @@ soft-delete runs only for the signature. Removing or replacing a photo is an exp
 `attachments.delete` by the client.
 
 `applications.get` gains an `attachments` list of live rows — id, kind, filename, mime, size,
-uploaded_at — so the form can render photos and PDFs without a round trip per file. Bytes stay
+uploadedAt — so the form can render photos and PDFs without a round trip per file. Bytes stay
 behind `attachments.get`.
 
 ### 3.4 `shared/form-schema.js` — the UDID certificate
