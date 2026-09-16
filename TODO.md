@@ -9,15 +9,16 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 
 ## ▶ Start here (updated 2026-09-16)
 
-**M7b is done and merged** (PR #10, 342 tests). **M8 (reports, Excel, print) is done** — all seven tasks committed on `feat/m8-reports-excel-print`; 360 tests. **Next: M9 (backups, alerts, admin).**
+**M8 (reports, Excel, print) is done and merged** (PR #12, 360 tests). **M9 (backups, alerts, admin) is done** (365 tests; checked in a browser) — runbook written, PR #13 open. **Next: M10 (installable app, hosting, end-to-end).**
 
 Run tasks **inline, not with subagents** (token cost).
 
 | | |
 |---|---|
-| M8 spec (the *why*) | `docs/superpowers/specs/2026-09-16-m8-reports-excel-print-design.md` |
-| M8 plan (the *how*) | ✅ done — `docs/superpowers/plans/2026-09-16-m8-reports-excel-print.md` |
-| Tests now | **360 pass, 0 fail** — `npm test` (runs the scope check, then `node --test`) |
+| M9 spec (the *why*) | `docs/superpowers/specs/2026-09-16-m9-backups-alerts-admin-design.md` |
+| M9 plan (the *how*) | ✅ done — `docs/superpowers/plans/2026-09-16-m9-backups-alerts-admin.md` |
+| Runbook | `docs/runbook.md` |
+| Tests now | **365 pass, 0 fail** — `npm test` (runs the scope check, then `node --test`) |
 | Dev server | `node poc/scripts/dev-server.mjs` → http://127.0.0.1:8787 · sign in `priya@example.com` / `demo-pass-2026` (all demo staff share it; see `poc/seed/demo-data.mjs`) |
 
 ---
@@ -101,7 +102,7 @@ Run tasks **inline, not with subagents** (token cost).
 - [x] `[POC]` Director signature upload: `Signatures` tab, `signature.upload`
 - [x] `[SHARED]` Director signature Settings UI (`signature-image.js` shared `strokesToPng`; Director-only pad) and the fresh-draft *submit* button (M7a carry-forward)
 
-### M8: Reports, Excel, print · spec: `docs/superpowers/specs/2026-09-16-m8-reports-excel-print-design.md` · plan: `docs/superpowers/plans/2026-09-16-m8-reports-excel-print.md` · ✅ done (360 tests; checked in a browser)
+### M8: Reports, Excel, print · spec: `docs/superpowers/specs/2026-09-16-m8-reports-excel-print-design.md` · plan: `docs/superpowers/plans/2026-09-16-m8-reports-excel-print.md` · ✅ done & merged — PR #12 (360 tests; checked in a browser)
 - [x] `[SHARED]` `shared/reports.js`: queue counts, register rows, by-centre totals, waitlist, turnaround, demographics (moved from M2)
 - [x] `[SHARED]` Reports screens (R1–R7) with filters and CSS bar charts
 - [x] `[SHARED]` `xlsx.js`: Excel built in the browser (UTF-8, Tamil-safe)
@@ -109,10 +110,10 @@ Run tasks **inline, not with subagents** (token cost).
 - [x] `[SHARED]` Pending & Turnaround (R5): take a rejection's date from its `Approvals` row, not from `decided_at`, which no rejection writes (M6 plan, carry-forward 2)
 - [x] `[POC]` `Reports.gs`: reads rows, filters, pages of 50
 
-### M9: Backups, alerts, admin
-- [ ] `[POC]` `Backup.gs`: monthly trigger → Sheet copy + `.xlsx` to Drive, keep 24 months, `BackupLog`, email result
-- [ ] `[SHARED]` Admin screens: staff list, add staff (temporary password shown once), backups list + Backup now, audit log
-- [ ] `[POC]` Restore steps in `docs/runbook.md` + one practice restore
+### M9: Backups, alerts, admin · spec: `docs/superpowers/specs/2026-09-16-m9-backups-alerts-admin-design.md` · plan: `docs/superpowers/plans/2026-09-16-m9-backups-alerts-admin.md` · ✅ done (365 tests; checked in a browser)
+- [x] `[POC]` `Backup.gs`: monthly trigger → Sheet copy + `.xlsx` to Drive, keep 24 months, `BackupLog`, email result
+- [x] `[SHARED]` Admin screens: staff list, add staff (temporary password shown once), backups list + Backup now, audit log
+- [x] `[POC]` Restore steps in `docs/runbook.md` + one practice restore
 
 ### M10: Installable app, hosting, end-to-end
 - [ ] `[SHARED]` Deploy check: copy `shared/*.js` to `public/shared/` for Cloudflare Pages (moved here from M4 — `application.html` loads `shared/form-rules.js`, and the dev server serves `/shared/` from the repo, but Cloudflare Pages will not)

@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { pbkdf2Sync } from "node:crypto";
-import { deriveKey, newSalt, checkPassword, DEFAULT_ITERATIONS, hexToBytes, bytesToHex } from "../../public/js/kdf.js";
+import { deriveKey, newSalt, newPassword, checkPassword, DEFAULT_ITERATIONS, hexToBytes, bytesToHex } from "../../public/js/kdf.js";
 
 const nodeKey = (password, saltHex, rounds) =>
   pbkdf2Sync(Buffer.from(password, "utf8"), Buffer.from(saltHex, "hex"), rounds, 32, "sha256").toString("hex");
@@ -26,6 +26,15 @@ test("newSalt gives 16 random bytes as hex", () => {
   const a = newSalt();
   const b = newSalt();
   assert.match(a, /^[0-9a-f]{32}$/);
+  assert.notEqual(a, b);
+});
+
+test("newPassword gives 16 random bytes (128 bits) as base64url, no padding", () => {
+  const a = newPassword();
+  const b = newPassword();
+  // 16 bytes → 24 base64 chars minus 2 padding chars = 22, all from the base64url alphabet.
+  assert.equal(a.length, 22);
+  assert.match(a, /^[A-Za-z0-9_-]{22}$/);
   assert.notEqual(a, b);
 });
 

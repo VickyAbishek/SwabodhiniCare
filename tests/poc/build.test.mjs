@@ -56,6 +56,8 @@ test("the bundle runs as a single Apps Script file", () => {
     CacheService: fakes.makeCacheService(clock),
     PropertiesService: fakes.makePropertiesService({}),
     ContentService: fakes.makeContentService(),
+    MailApp: fakes.makeMailApp(),
+    ScriptApp: fakes.makeScriptApp(),
     console: fakes.makeConsole({ info: [], warns: [], errors: [] }),
     Date: fakes.makeDate(clock),
   });
