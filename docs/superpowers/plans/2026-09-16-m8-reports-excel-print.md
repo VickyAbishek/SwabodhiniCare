@@ -1782,7 +1782,7 @@ git commit -m "feat: A4 individual assessment report (print)"
 **Interfaces:**
 - Consumes: the `print.html?id=` route from Task 6; `common.printReport` (already in i18n); `state.app.id` (review/decision), `state.decided.id` (decision's signed screen), register rows' `r.id` (reports.js).
 
-- [ ] **Step 1: Review screen — add the print link**
+- [x] **Step 1: Review screen — add the print link**
 
 In `public/review.html`, next to the existing "Read full application" link inside the Key facts panel, add:
 
@@ -1798,7 +1798,7 @@ In `public/js/pages/review.js`, in `draw()` (after the `$("read-full").href = �
   $("print").href = `print.html?id=${encodeURIComponent(app.id)}`;
 ```
 
-- [ ] **Step 2: Decision screen — add the print link to the signed screen**
+- [x] **Step 2: Decision screen — add the print link to the signed screen**
 
 In `public/decision.html`, in the `#done-body` (after the "Back to queue" link), add:
 
@@ -1812,7 +1812,7 @@ In `public/js/pages/decision.js`, in `drawDone()` (after `$("done-lock").hidden 
   $("print").href = `print.html?id=${encodeURIComponent(state.decided.id)}`;
 ```
 
-- [ ] **Step 3: Register rows — add a print link per row**
+- [x] **Step 3: Register rows — add a print link per row**
 
 In `public/js/pages/reports.js`, the register table's rows should link to the print report. Update the `sheet()` register case so the app number is a link is not needed — instead, add a helper and a "Print" affordance. Replace the register case in `sheet()` with a version that also returns the row ids for linking, and in `renderTable` render the app-number cell as a link:
 
@@ -1859,19 +1859,19 @@ function renderTable(rows) {
 
 And in `sheet()` for register, include the ids: add `ids: data.items.map((r) => r.id)` to the returned register object. (The `renderTable` above reads `rows.ids`.)
 
-- [ ] **Step 4: Update `TODO.md`**
+- [x] **Step 4: Update `TODO.md`**
 
 Mark the plan done and reflect the new state:
 - In the **Start here** table, change the M8 plan row from "**next** —" to "✅ done —", and update the status sentence to "**M8 (reports, Excel, print) is in progress** — spec and plan committed; implementation is the next step."
 - In the **M8** section header, change `⏳ in progress (plan next)` to `⏳ in progress`.
 - Tick the M8 line items as they are completed by these tasks (after a final full run): `shared/reports.js`, Reports screens, `xlsx.js`, A4 print, R5 carry-forward, and `Reports.gs`.
 
-- [ ] **Step 5: Run the full suite**
+- [x] **Step 5: Run the full suite**
 
 Run: `npm test`
 Expected: all pass, 0 fail.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add public/review.html public/js/pages/review.js public/decision.html public/js/pages/decision.js public/js/pages/reports.js TODO.md

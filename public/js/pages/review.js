@@ -309,6 +309,9 @@ function draw() {
 
   $("facts").replaceChildren(...facts());
   $("read-full").href = `application.html?id=${encodeURIComponent(app.id)}&view=all`;
+  const canPrint = ["THERAPY_HEAD", "CENTRE_HEAD", "DIRECTOR"].some((role) => me.roles.includes(role));
+  $("print").hidden = !canPrint;
+  $("print").href = `print.html?id=${encodeURIComponent(app.id)}`;
   $("slip").replaceChildren(...slipList());
 
   // In the order the workflow lists them, never a list of this screen's own.

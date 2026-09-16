@@ -39,6 +39,11 @@ function optionLabel(list, value) {
 
 const shortDate = (iso) => String(iso || "").slice(0, 10);
 
+// The register table links each app number to its print report, but only for the roles the server
+// allows to print (an Admin sees the register and not the print).
+const CAN_PRINT = ["THERAPY_HEAD", "CENTRE_HEAD", "DIRECTOR"];
+const mayPrint = () => CAN_PRINT.some((role) => state.me.roles.includes(role));
+
 function visibleFilters(report) {
   [["centre", "centre-field"], ["status", "status-field"], ["program", "program-field"],
     ["age", "age-field"], ["from", "from-field"], ["to", "to-field"]].forEach(([key, id]) => {
@@ -69,6 +74,7 @@ function sheet(data) {
         optionLabel(SC_FormSchema.OPTIONS.GENDER, r.gender), optionLabel(SC_FormSchema.OPTIONS.CENTRE, r.centre),
         t(`status.${r.status}`), r.therapist, shortDate(r.submitted), r.suitability || "",
       ]),
+      ids: data.items.map((r) => r.id),
     };
   }
   if (state.report === "waitlist") {
@@ -115,9 +121,20 @@ function renderTable(rows) {
   rows.headers.forEach((h) => headRow.append(el("th", "", h)));
   thead.append(headRow);
   const tbody = el("tbody");
-  rows.rows.forEach((cells) => {
+  const linkAppNo = rows.ids && mayPrint();
+  rows.rows.forEach((cells, i) => {
     const tr = el("tr");
-    cells.forEach((cell) => tr.append(el("td", "", cell)));
+    cells.forEach((cell, c) => {
+      if (linkAppNo && c === 0) {
+        const a = el("a", "", cell);
+        a.href = `print.html?id=${encodeURIComponent(rows.ids[i])}`;
+        const td = el("td");
+        td.append(a);
+        tr.append(td);
+      } else {
+        tr.append(el("td", "", cell));
+      }
+    });
     tbody.append(tr);
   });
   table.append(thead, tbody);

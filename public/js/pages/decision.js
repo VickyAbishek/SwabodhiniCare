@@ -179,6 +179,7 @@ function drawDone() {
   const locked = admitted ? t("decide.locked", { names: seenByNames() }) : "";
   $("done-lock").textContent = locked;
   $("done-lock").hidden = !locked;
+  $("print").href = `print.html?id=${encodeURIComponent(decided.id)}`;
 }
 
 function askToSign() {
