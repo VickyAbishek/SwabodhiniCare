@@ -4,6 +4,22 @@
 // version they were based on. If someone else saved first, saving stops until the form is reloaded.
 export const AUTOSAVE_MS = 20000;
 
+// The wording each state is shown in. A clash with someone else's save is its own state, because
+// its cause and its cure are not the network's: no amount of checking Wi-Fi will clear it, and the
+// only way on is to reload and see what the other person wrote.
+const STATUS_KEYS = {
+  pending: "form.pending",
+  saving: "form.saving",
+  saved: "form.saved",
+  error: "form.notSaved",
+  conflict: "form.notSavedConflict",
+};
+
+// A state with no wording of its own says nothing, rather than borrowing another state's sentence.
+export function saveStatusKey(state) {
+  return STATUS_KEYS[state] || "";
+}
+
 export function createAutosave({
   save, diff, intervalMs = AUTOSAVE_MS, setTimer = setTimeout, clearTimer = clearTimeout,
   now = () => new Date(), onStatus = () => {},

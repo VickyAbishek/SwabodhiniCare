@@ -116,6 +116,10 @@ var SC_Applications = (function () {
     // view() would charge that to every action that returns one, save — the autosave — included.
     var shown = view(found.row);
     shown.approvals = approvalsFor(found.row.id);
+    // Who has already approved this round ships with the file, so the review and decision screens ask
+    // the rule rather than keeping a second copy of it. A screen that recomputes "one person may not
+    // approve two stages" can only drift from the guard it is showing, and nothing would notice.
+    shown.approvedThisRound = approversThisRound(found.row.id, found.row.submitted_at);
     return SC_Actions.ok(shown);
   }
 
@@ -219,15 +223,18 @@ var SC_Applications = (function () {
       });
       if (!move.ok) return fail(move.error);
       var now = SC_Store.nowIso();
+      var comment = String(data.comment || "").trim() || null;
       SC_Store.insert("Approvals", {
         id: SC_Store.newId(), application_id: row.id, stage: STAGE_BY_STATUS[row.status],
-        action: data.action, comment: String(data.comment || "").trim() || null,
+        action: data.action, comment: comment,
         user_id: session.user.id, form_hash: formHash(row), created_at: now,
       });
       var saved = SC_Store.update("Applications", row.id, {
         status: move.status, updated_at: now, version: row.version + 1,
       });
-      SC_Audit.log(session.user.id, "applications.reviewed", "Applications", row.id, { action: data.action });
+      // The reason travels with the action (main spec §10.4): a rejection's comment is the only place
+      // its why is written down, and the audit log is where a school looks for it.
+      SC_Audit.log(session.user.id, "applications.reviewed", "Applications", row.id, { action: data.action, comment: comment });
       return SC_Actions.ok(view(saved));
     });
   }
@@ -247,8 +254,13 @@ var SC_Applications = (function () {
       if (found.error) return found.error;
       var row = found.row;
       var user = SC_Store.find("Users", "id", session.user.id);
-      if (!SC_Permissions.can(session.user.roles, "decision.final") || !user || !SC_Auth.verifyKey(user, data.key)) {
-        return fail(SC_Permissions.can(session.user.roles, "decision.final") ? "INVALID_CREDENTIALS" : "NOT_ALLOWED");
+      var allowed = SC_Permissions.can(session.user.roles, "decision.final");
+      if (!allowed || !user || !SC_Auth.verifyKey(user, data.key)) {
+        // A refused step-up is written down before it is refused (main spec §10.4): a decision someone
+        // tried to sign is exactly what the audit log is for. Nothing else follows from it — locking a
+        // Director out mid-decision would be a worse failure than the wrong password it guards against.
+        if (allowed && user) SC_Audit.log(session.user.id, "applications.decide_failed", "Applications", row.id, { action: data.action });
+        return fail(allowed ? "INVALID_CREDENTIALS" : "NOT_ALLOWED");
       }
       var move = SC_Workflow.next(row.status, data.action, {
         actorId: session.user.id, actorRoles: session.user.roles, createdBy: row.created_by,
@@ -303,20 +315,51 @@ var SC_Applications = (function () {
     });
   }
 
-  // The routing slip (POC spec §6): the Approvals rows for this application, oldest first.
+  // The role a row was taken in: the stage's own role whenever the person holds it, which is every
+  // review row, and otherwise the first role they do hold. The second case is an Admin reopening a
+  // signed file: the row records the DIRECTOR stage of authority, truthfully, but "Anand (Director)"
+  // would name a role Anand does not have.
+  function roleFor(stage, user) {
+    var roles = (user && user.roles) || [];
+    return roles.indexOf(stage) !== -1 ? stage : roles[0] || null;
+  }
+
+  // The routing slip (POC spec §6): the Approvals rows for this application, oldest first. Each row
+  // carries the acting user's id as well as their name: the review screen has to know whether this
+  // person has already approved a stage in this round (approversThisRound below decides the round),
+  // and two people can share a name where one id cannot. The role travels too, so no screen has to
+  // turn a stage into a job title and name somebody the stage does not belong to.
   function approvalsFor(id) {
     return SC_Store.filter("Approvals", function (r) { return r.application_id === id; })
       .sort(function (a, b) { return a.created_at < b.created_at ? -1 : a.created_at > b.created_at ? 1 : 0; })
       .map(function (r) {
         var user = SC_Store.find("Users", "id", r.user_id);
-        return { stage: r.stage, action: r.action, comment: r.comment, userName: user ? user.name : "", at: r.created_at };
+        return {
+          stage: r.stage, action: r.action, comment: r.comment, role: roleFor(r.stage, user),
+          userId: r.user_id, userName: user ? user.name : "", at: r.created_at,
+        };
       });
   }
 
-  function listItem(row) {
+  // One read of the Users tab, not one per row: this endpoint is polled every minute and each read
+  // costs a whole tab.
+  function namesById() {
+    return SC_Store.all("Users").reduce(function (names, user) {
+      names[user.id] = user.name;
+      return names;
+    }, {});
+  }
+
+  // What a queue card shows (main spec §7 R1): the applicant, the age line "19 yrs · Male · Selaiyur"
+  // and who sent it. The date of birth travels instead of an age, because an application can sit in
+  // the queue across a birthday and a stored age would then be wrong. The sender's name travels too:
+  // only an Admin may read the staff list, so a therapist's phone cannot turn a user id into a name.
+  function listItem(row, names) {
     return {
       id: row.id, appNo: row.app_no, applicantName: row.applicant_name || "", centre: row.centre,
-      status: row.status, createdBy: row.created_by, updatedAt: row.updated_at,
+      dob: row.dob || null, gender: row.gender || null,
+      status: row.status, createdBy: row.created_by, createdByName: names[row.created_by] || "",
+      updatedAt: row.updated_at,
       safetyFlags: SC_FormRules.safetyFlags(formValues(row)),
     };
   }
@@ -340,8 +383,11 @@ var SC_Applications = (function () {
       return a.updated_at < b.updated_at ? 1 : -1;
     });
     var start = (page - 1) * PAGE_SIZE;
+    var shown = rows.slice(start, start + PAGE_SIZE);
+    var names = shown.length > 0 ? namesById() : {}; // an empty queue costs no read at all
     return SC_Actions.ok({
-      items: rows.slice(start, start + PAGE_SIZE).map(listItem), page: page, pageSize: PAGE_SIZE, total: rows.length,
+      items: shown.map(function (row) { return listItem(row, names); }),
+      page: page, pageSize: PAGE_SIZE, total: rows.length,
     });
   }
 

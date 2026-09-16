@@ -1,0 +1,78 @@
+<!-- scope: shared -->
+<!doctype html>
+<html lang="ta" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SwabodhiniCare</title>
+<script src="js/theme-boot.js"></script>
+<script src="shared/dates.js"></script>
+<script src="shared/actions.js"></script>
+<script src="shared/workflow.js"></script>
+<script src="shared/form-schema.js"></script>
+<link rel="stylesheet" href="css/app.css">
+<script type="module" src="js/pages/review.js"></script>
+</head>
+<body>
+<div class="app">
+  <header class="app-bar">
+    <a class="wordmark" href="home.html">Swabodhini<b>Care</b></a>
+    <button type="button" class="btn btn-outline btn-small" data-lang-toggle>தமிழ் / English</button>
+  </header>
+
+  <main class="screen">
+    <a class="back-link" href="home.html" data-i18n="common.backToQueue">Back to queue</a>
+    <p class="muted" id="loading" data-i18n="common.loading">Loading…</p>
+    <p class="alert alert-bad" id="message" role="alert" hidden></p>
+
+    <div class="review-body" id="review-body" hidden>
+      <div class="applicant">
+        <div class="thumb" id="thumb" aria-hidden="true"></div>
+        <div>
+          <div class="app-name" id="applicant"></div>
+          <div class="app-sub" id="applicant-sub"></div>
+          <div class="app-ref mono" id="app-no"></div>
+        </div>
+      </div>
+      <div class="stamp-row" id="stamp-row"></div>
+
+      <section class="panel" aria-labelledby="facts-title">
+        <h2 id="facts-title" data-i18n="review.facts">Key facts</h2>
+        <dl class="facts" id="facts"></dl>
+        <a class="btn btn-outline btn-block" id="read-full" href="home.html" data-i18n="review.readFull">Read full application (11 sections)</a>
+      </section>
+
+      <section aria-labelledby="route-title">
+        <h2 id="route-title" data-i18n="review.approvalRoute">Approval route</h2>
+        <ol class="slip" id="slip"></ol>
+      </section>
+
+      <div class="field" id="comment-field">
+        <label for="comment" data-i18n="review.comment">Comment</label>
+        <span class="hint" id="comment-hint" data-i18n="review.commentHint">Needed if you send back or reject.</span>
+        <textarea class="input" id="comment" rows="3" aria-describedby="comment-hint"></textarea>
+        <p class="field-error" id="comment-error" hidden></p>
+      </div>
+
+      <p class="note" id="blocked" role="status" hidden></p>
+    </div>
+  </main>
+
+  <div class="action-bar decisions" id="action-bar" hidden></div>
+
+  <!-- Every decision is confirmed here first, in plain words (main spec §12). -->
+  <div class="scrim" id="confirm" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+      <h3 id="confirm-title"></h3>
+      <p class="muted" id="confirm-comment-label" hidden></p>
+      <p class="slip-note" id="confirm-comment" hidden></p>
+      <p id="confirm-body" hidden></p>
+      <div class="btns">
+        <button type="button" class="btn btn-ok" id="confirm-yes"></button>
+        <button type="button" class="btn btn-outline" id="confirm-no" data-i18n="confirm.noGoBack">No, go back</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

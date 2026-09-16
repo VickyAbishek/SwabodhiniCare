@@ -102,3 +102,45 @@ test("reviewerRole names who decides at each waiting status", () => {
   assert.equal(W.reviewerRole(S.WAITLISTED), "DIRECTOR");
   assert.equal(W.reviewerRole(S.DRAFT), null);
 });
+
+// The queue's stamp, count and sort all rest on this one rule, so it is pinned here rather than in the
+// screen. Watching the buttons instead ("could I act on this?") puts every admitted application in a
+// Director's queue and every draft in an Admin's: they may reopen and withdraw, but nothing is waiting.
+test("a waiting file is the turn of the role that reviews that stage", () => {
+  assert.equal(W.isMyTurn(S.PENDING_THERAPY_HEAD, therapyHead()), true);
+  assert.equal(W.isMyTurn(S.PENDING_CENTRE_HEAD, centreHead()), true);
+  assert.equal(W.isMyTurn(S.PENDING_DIRECTOR, director()), true);
+  assert.equal(W.isMyTurn(S.WAITLISTED, director()), true, "a seat freeing up is the Director's move");
+  assert.equal(W.isMyTurn(S.PENDING_THERAPY_HEAD, centreHead()), false);
+  assert.equal(W.isMyTurn(S.PENDING_DIRECTOR, therapyHead()), false);
+  assert.equal(W.isMyTurn(S.PENDING_THERAPY_HEAD, owner), false, "filing it does not make reviewing it yours");
+});
+
+test("a draft or a file sent back is the owner's own turn", () => {
+  assert.equal(W.isMyTurn(S.DRAFT, owner), true);
+  assert.equal(W.isMyTurn(S.RETURNED, owner), true);
+  assert.equal(W.isMyTurn(S.DRAFT, actor("u-anand", ["ADMIN"])), false, "an Admin may withdraw it, but it is not theirs");
+  assert.equal(W.isMyTurn(S.RETURNED, actor("u-deepa", ["THERAPIST"])), false, "another therapist cannot even see it");
+});
+
+test("a file nobody is waiting on is nobody's turn", () => {
+  assert.equal(W.isMyTurn(S.ADMITTED, director()), false, "a Director may reopen it, but no queue is held up");
+  assert.equal(W.isMyTurn(S.ADMITTED, actor("u-anand", ["ADMIN"])), false);
+  assert.equal(W.isMyTurn(S.ADMITTED, owner), false, "admitted, with nothing left for the therapist to do");
+  assert.equal(W.isMyTurn(S.REJECTED, director()), false);
+  assert.equal(W.isMyTurn(S.WITHDRAWN, owner), false);
+});
+
+test("nobody is asked to review a file they filled in", () => {
+  const own = { actorId: "u-lakshmi", actorRoles: ["THERAPY_HEAD"], createdBy: "u-lakshmi" };
+  assert.equal(W.isMyTurn(S.PENDING_THERAPY_HEAD, own), false, "the server refuses OWN_APPLICATION");
+});
+
+// One person holding two reviewing roles was the over-count this rule replaces: they were stamped for
+// every stage they could reach, not only the one actually waiting on them.
+test("one person with two reviewing roles is stamped only for the stage waiting on them", () => {
+  const both = actor("u-mala", ["THERAPY_HEAD", "CENTRE_HEAD"]);
+  assert.equal(W.isMyTurn(S.PENDING_THERAPY_HEAD, both), true);
+  assert.equal(W.isMyTurn(S.PENDING_CENTRE_HEAD, both), true);
+  assert.equal(W.isMyTurn(S.PENDING_DIRECTOR, both), false);
+});

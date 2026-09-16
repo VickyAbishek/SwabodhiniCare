@@ -1,0 +1,82 @@
+<!-- scope: shared -->
+<!doctype html>
+<html lang="ta" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SwabodhiniCare</title>
+<script src="js/theme-boot.js"></script>
+<script src="shared/actions.js"></script>
+<script src="shared/workflow.js"></script>
+<link rel="stylesheet" href="css/app.css">
+<script type="module" src="js/pages/reopen.js"></script>
+</head>
+<body>
+<div class="app">
+  <header class="app-bar">
+    <a class="wordmark" href="home.html">Swabodhini<b>Care</b></a>
+    <button type="button" class="btn btn-outline btn-small" data-lang-toggle>தமிழ் / English</button>
+  </header>
+
+  <main class="screen">
+    <a class="back-link" id="back" href="application.html" data-i18n="common.backToApplication">Back to application</a>
+    <p class="muted" id="loading" data-i18n="common.loading">Loading…</p>
+    <p class="alert alert-bad" id="message" role="alert" hidden></p>
+
+    <!-- The reason box, the rule it answers (the lock note the decision screen carried), and the way
+         out. No mockup exists for this screen: the mockups' own list leaves reopen and withdraw to be
+         drawn, so the review screen's shell is reused. -->
+    <div class="review-body" id="reopen-body" hidden>
+      <div>
+        <h1 data-i18n="reopen.title">Reopen this application</h1>
+        <p class="app-sub"><span id="applicant"></span> · <span class="mono" id="app-no"></span></p>
+      </div>
+
+      <p class="note" data-i18n="decide.lockNote">After signing, this application is locked. Only you or the Admin can reopen it, with a reason.</p>
+
+      <form id="reopen-form" novalidate>
+        <div class="field">
+          <label for="reason" data-i18n="reopen.reason">Reason</label>
+          <textarea class="input" id="reason" rows="4"></textarea>
+          <p class="field-error" id="reason-error" hidden></p>
+        </div>
+      </form>
+    </div>
+
+    <!-- What the Director or Admin sees straight after reopening: where the file has gone, and the
+         registration number it keeps. Focused when it appears, so the answer to "what did that do?"
+         is read out rather than left below a form that is no longer there. -->
+    <div class="review-body success" id="done-body" tabindex="-1" hidden>
+      <h1 id="done-title"></h1>
+      <span class="stamp" id="done-stamp" data-status="RETURNED" data-i18n="status.RETURNED">Sent back</span>
+      <div class="field" id="done-regno-field" hidden>
+        <span class="label" data-i18n="decide.registrationNumber">Registration number</span>
+        <span class="mono reg-no" id="done-regno"></span>
+        <span class="hint" data-i18n="decide.regNoKept">This number was already issued. It is not issued again.</span>
+      </div>
+      <a class="btn btn-outline btn-block" href="home.html" data-i18n="common.backToQueue">Back to queue</a>
+    </div>
+  </main>
+
+  <div class="action-bar" id="action-bar" hidden>
+    <a class="btn btn-outline" id="back-btn" href="application.html" data-i18n="common.back">Back</a>
+    <button type="button" class="btn btn-primary" id="reopen"></button>
+  </div>
+
+  <!-- Reopening is confirmed first, in plain words, with the reason read back (main spec §12), in the
+       sheet the review, decision and application screens use. -->
+  <div class="scrim" id="confirm" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+      <h3 id="confirm-title"></h3>
+      <p class="muted" id="confirm-comment-label" hidden></p>
+      <p class="slip-note" id="confirm-comment" hidden></p>
+      <p id="confirm-body" hidden></p>
+      <div class="btns">
+        <button type="button" class="btn btn-primary" id="confirm-yes"></button>
+        <button type="button" class="btn btn-outline" id="confirm-no" data-i18n="confirm.noGoBack">No, go back</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

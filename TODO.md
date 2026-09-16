@@ -40,33 +40,48 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 - [x] `[SHARED]` Screens: Sign in, choose your password, Home (placeholder), Settings (language, appearance, change password, sign out)
 - [x] `[POC]` "Test version: sample data only" banner behind `IS_DEMO`
 
-### M5: Applications · plan: `docs/superpowers/plans/2026-09-15-m5-applications.md` · 🚧 7 of 8 (the conflict wording is parked)
+### M5: Applications · plan: `docs/superpowers/plans/2026-09-15-m5-applications.md` · ✅ done (293 tests; the conflict wording landed after M6)
 - [x] `[SHARED]` Autosave every 20 s + on step change; "Saving…" / "Saved ✓" / "Not saved" states; version-conflict message (`js/autosave.js` + tests)
 - [x] `[POC]` `Applications.gs`: create, get, save (optimistic lock), list (role-scoped) (+ `tests/poc/applications.test.js`, `tests/poc/people.js`)
 - [x] `[SHARED]` Form wizard rendered from the schema (one step per screen, progress, big tap choices, 3-dropdown DOB) — `js/form-view.js`, `js/form-render.js`, `application.html`, `js/pages/application.js`
 - [x] `[SHARED]` Home: "Start a new application" + the list of applications this person may see (`home.html`, `js/pages/home.js`)
 - [x] `[SHARED]` All-steps overview. The consent step's finger signature pad needs uploads, so it waits for M7
-- [ ] `[SHARED]` Version conflict: the "Not saved" line says "check Wi-Fi" when the real cause is someone else's save. Needs new EN + TA wording (`form.reload` and `form.continue` are defined but unused, and look meant for this)
+- [x] `[SHARED]` Version conflict: the "Not saved" line said "check Wi-Fi" when the real cause was someone else's save — it contradicted the alert below it, which had it right all along. `conflict` is now its own state with its own wording (`form.notSavedConflict`, EN + TA), and `autosave.js` owns the state → key mapping so the form screen cannot keep a second copy to drift
 - [x] `[POC]` Sample answers for demos: `public/js/seed/sample-applications.js` — invented, and must pass the submit check except the signature (test accounts are made by the Admin in the app)
 - [x] `[POC]` "Fill with sample data" button behind `IS_DEMO` — `SAMPLE_DATA` in `config.js`, named like `BACKEND` so no shared screen names POC code
 
-### M6: Workflow screens · plan: `docs/superpowers/plans/2026-09-16-m6-workflow-screens.md` · 🚧 in progress
-- [ ] `[POC]` Demo seed: the dev server starts with an application at every stage, so the queues can be shown before uploads exist (M7). Added by decision, not in the spec
-- [ ] `[SHARED]` My Queue (auto-refresh every 60 s while visible, Refresh button), review screen, routing slip
-- [ ] `[SHARED]` Approve / Send back / Reject with confirmations; sent-back view with "Fix and resend"
-- [ ] `[SHARED]` Director decision: Admit / Waitlist / Reject, password step-up, stored signature, registration number, lock
+### M6: Workflow screens · plan: `docs/superpowers/plans/2026-09-16-m6-workflow-screens.md` · ✅ done (289 tests; all five actions reviewed, every screen checked in a browser)
+- [x] `[POC]` Demo seed: the dev server starts with an application at every stage, so the queues can be shown before uploads exist (M7). Added by decision, not in the spec
+- [x] `[SHARED]` My Queue (auto-refresh every 60 s while visible, Refresh button), review screen, routing slip
+- [x] `[SHARED]` Approve / Send back / Reject with confirmations; sent-back view with "Fix and resend"
+- [x] `[SHARED]` Director decision: Admit / Waitlist / Reject, password step-up, stored signature, registration number, lock
 - [x] `[POC]` `Applications.gs`: submit, review, decide, reopen, withdraw (using `shared/workflow.js`), form fingerprint — all five actions done and reviewed (plan tasks 1–6)
-- [ ] `[SHARED]` Reopen and withdraw screens
+- [x] `[SHARED]` Reopen and withdraw screens — reopen is `reopen.html`; withdraw lives on the form screen's own file actions, next to the answers it promises not to delete
+- [x] `[SHARED]` A file that has left the therapist's hands opens with its status and, when a decision left one, that decision's reason — a rejection's reason is otherwise shown nowhere (close-out fix)
 
-### M7: Files
+### M7: Files · split into M7a (the signature, on the critical path) and M7b (everything else)
+
+#### M7a: The parent's consent signature · spec: `docs/superpowers/specs/2026-09-16-m7a-consent-signature-design.md` · 🚧 designed, plan next
+> Why first: `form-schema.js:184` marks the signature required and nothing can produce one, so **no application can pass the submit check today**. M5 seeded past that gate and M6 built the approval chain on files that never went through it.
+- [ ] `[SHARED]` `shared/consent.js`: the five consented fields + their normalized serialization. No hashing — `check-scope.mjs` bans platform APIs from `shared/`, so each side hashes the one shared payload (M6 plan, carry-forward 3)
+- [ ] `[SHARED]` `public/js/signature-pad.js`: canvas capture, PNG out. Pure geometry (`isBlank`, `trimToInk`, scale to a fixed box) tested apart from the DOM wrapper
+- [ ] `[POC]` `Attachments.gs` (M7a slice): `attachments.upload` / `.get`, `CONSENT_SIGNATURE` only, type checked by first bytes, Drive `attachments/<app_no>/`, new `consent_hash` column
+- [ ] `[POC]` `applications.get` ships `consentSigned` / `consentStale`; `submit` refuses a missing **or** stale signature — the server owns the rule, as M6's I2 fix established
+- [ ] `[SHARED]` The consent step renders the pad, and says **which** of the five facts changed when a signature goes stale
+- [ ] `[SHARED]` Re-signing soft-deletes the old row rather than overwriting it, so what was consented to stays answerable
+
+#### M7b: Photos, PDFs and the Director's signature
 - [ ] `[SHARED]` `image-compress.js` (canvas, ≤1600 px, ~300 KB), file pickers (camera and gallery)
-- [ ] `[POC]` `Attachments.gs`: base64 upload to Drive, file-type check by first bytes, view, soft delete; Director signature upload
+- [ ] `[POC]` `Attachments.gs` widened: `PHOTO`, `DIAGNOSIS`, `UDID`; view, soft delete; the 10-file cap and the 5 MB PDF limit
+- [ ] `[SHARED]` `s2_udid_file` (`kind: UDID`, showIf status = `HAVE`) — `attachments.kind` promises a UDID file that no question creates (M7a spec §9)
+- [ ] `[POC]` Director signature upload: `Signatures` tab, `signature.upload`
 
 ### M8: Reports, Excel, print
 - [ ] `[SHARED]` `shared/reports.js`: queue counts, register rows, by-centre totals, waitlist, turnaround, demographics (moved from M2)
 - [ ] `[SHARED]` Reports screens (R1–R7) with filters and CSS bar charts
 - [ ] `[SHARED]` `xlsx.js`: Excel built in the browser (UTF-8, Tamil-safe)
 - [ ] `[SHARED]` A4 Individual Assessment Report (`print.html` + `print.css`)
+- [ ] `[SHARED]` Pending & Turnaround (R5): take a rejection's date from its `Approvals` row, not from `decided_at`, which no rejection writes (M6 plan, carry-forward 2)
 - [ ] `[POC]` `Reports.gs`: reads rows, filters, pages of 50
 
 ### M9: Backups, alerts, admin
@@ -83,6 +98,7 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 - [ ] `[SHARED]` Security review before handing to staff
 
 ### POC close-out
+- [ ] `[POC]` Staffing: make sure every reviewing stage has someone who has not already approved the same round — main spec §4 forbids one person approving two stages, so a school with a single holder of a later role can leave a file stuck at that stage (see the M6 plan's carry-forwards)
 - [ ] `[POC]` Staff testing with one test account per role (POC spec §16 exit criteria)
 - [ ] `[POC]` Collect feedback on form wording, Tamil text, reports
 - [ ] `[POC]` Decide: stay on Sheets for a small pilot, or move to Phase 1
@@ -93,7 +109,7 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 ## Phase 1: Production on Cloudflare (only if the POC review decides to move)
 
 - [ ] `[PROD]` `prod/worker/`: Worker router with REST `/api/*`, same `shared/` modules
-- [ ] `[PROD]` D1 migration `0001_init.sql` (same columns as the Sheet tabs)
+- [ ] `[PROD]` D1 migration `0001_init.sql` (same columns as the Sheet tabs). The fingerprint must hash the same normalized serialization the POC hashes, or an approval taken before the port cannot be compared with a change made after it (M6 plan, carry-forward 3)
 - [ ] `[PROD]` `public/js/backends/prod.js`: REST calls, `HttpOnly` cookie session
 - [ ] `[PROD]` Per-IP login rate limit
 - [ ] `[PROD]` R2 uploads (streamed) + usage guard + Usage page
@@ -110,3 +126,4 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 - [ ] Rejections: therapist tells the family in person, with no automatic message in the POC. Is that OK?
 - [ ] Main spec §16 Q1–Q12 and POC spec §18 PQ1–PQ4
 - [ ] Tamil wording review by school staff (mockups, prompt, error messages)
+- [ ] An applicant aged 18+ still gets a **parent's** consent. DPDP's verifiable parental consent is a children's provision, and the schema's only age branch is `s8_work_experience`. One consent path assumed until staff say otherwise (M7a spec §8 CQ1)

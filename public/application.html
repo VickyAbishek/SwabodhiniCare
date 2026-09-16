@@ -8,6 +8,7 @@
 <script src="js/theme-boot.js"></script>
 <script src="shared/dates.js"></script>
 <script src="shared/actions.js"></script>
+<script src="shared/workflow.js"></script>
 <script src="shared/form-schema.js"></script>
 <script src="shared/form-rules.js"></script>
 <link rel="stylesheet" href="css/app.css">
@@ -30,12 +31,38 @@
       <div class="ticks" id="ticks" aria-hidden="true"></div>
     </div>
     <p class="app-ref mono" id="app-no"></p>
+
+    <!-- Why a file stands where it does (main spec §5): the status stamp and, when a decision put a
+         reason on the routing slip, who took it, when, and what they said — a send-back, a rejection
+         or a reopen. A file that was sent back adds the sections still to fix and where it goes next;
+         a rejected, settled or waiting file has nothing left to do, so it shows the reason and stops.
+         Everything with data in it is filled in by the screen; only the fixed wording stands here. -->
+    <section class="status-banner" id="status-banner" aria-labelledby="banner-stamp" hidden>
+      <span class="stamp" id="banner-stamp" data-status="RETURNED"></span>
+      <div class="banner" id="banner-words">
+        <p class="banner-title" id="banner-by"></p>
+        <p class="banner-comment" id="banner-comment"></p>
+      </div>
+      <h2 id="fix-title" data-i18n="sentBack.stepsToFix">Steps to fix</h2>
+      <ol class="sec-list" id="fix-list"></ol>
+      <p class="note" id="resend-note" data-i18n="sentBack.resendNote">When you resend, it goes to the Therapy Head again.</p>
+    </section>
+
     <button type="button" class="btn btn-outline btn-small demo-fill" id="fill-sample" data-i18n="form.fillSample" hidden>Fill with sample data</button>
     <h1 id="step-title"></h1>
     <p class="alert alert-bad" id="message" role="alert" hidden></p>
     <form id="step-form" novalidate>
       <div id="fields" class="questions"></div>
     </form>
+
+    <!-- The two moves that are not part of filling the form in (main spec §5): a draft or a file sent
+         back can be withdrawn by its owner or the Admin, and an admitted file can be reopened by the
+         Director or the Admin. Each is drawn only for the person the workflow would let take it, and
+         never both: no file is in both states at once. -->
+    <div class="file-actions" id="file-actions" hidden>
+      <button type="button" class="link-btn" id="withdraw-btn" data-i18n="withdraw.title" hidden>Withdraw this application</button>
+      <a class="link-btn" id="reopen-link" href="reopen.html" data-i18n="reopen.title" hidden>Reopen this application</a>
+    </div>
   </main>
 
   <main class="screen" id="overview-screen" hidden>
@@ -47,6 +74,21 @@
   <div class="action-bar" id="action-bar" hidden>
     <button type="button" class="btn btn-outline" id="back-btn" data-i18n="common.back">Back</button>
     <button type="button" class="btn btn-primary" id="next-btn" data-i18n="form.saveNext">Save &amp; Next</button>
+  </div>
+
+  <!-- Sending a returned file again is confirmed in plain words first (main spec §12). The sheet is
+       js/confirm-sheet.js, shared with the review and decision screens. -->
+  <div class="scrim" id="confirm" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+      <h3 id="confirm-title"></h3>
+      <p class="muted" id="confirm-comment-label" hidden></p>
+      <p class="slip-note" id="confirm-comment" hidden></p>
+      <p id="confirm-body" hidden></p>
+      <div class="btns">
+        <button type="button" class="btn btn-primary" id="confirm-yes"></button>
+        <button type="button" class="btn btn-outline" id="confirm-no" data-i18n="confirm.noGoBack">No, go back</button>
+      </div>
+    </div>
   </div>
 </div>
 </body>

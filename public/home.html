@@ -6,8 +6,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SwabodhiniCare</title>
 <script src="js/theme-boot.js"></script>
+<script src="shared/dates.js"></script>
 <script src="shared/actions.js"></script>
 <script src="shared/permissions.js"></script>
+<script src="shared/workflow.js"></script>
+<script src="shared/form-schema.js"></script>
 <link rel="stylesheet" href="css/app.css">
 <script type="module" src="js/pages/home.js"></script>
 </head>
@@ -25,8 +28,15 @@
     <p class="alert alert-bad" id="message" role="alert" hidden></p>
     <a class="btn btn-primary btn-block" id="new-application" href="application.html" data-i18n="home.newApplication" hidden>Start a new application</a>
 
-    <section aria-labelledby="list-title">
-      <h2 id="list-title" data-i18n="home.myApplications">Your applications</h2>
+    <section class="queue" aria-labelledby="queue-title">
+      <div class="queue-head">
+        <h2 id="queue-title" data-i18n="queue.title">My Queue</h2>
+        <button type="button" class="btn btn-outline btn-small" id="refresh" data-i18n="common.refresh">Refresh</button>
+      </div>
+      <div class="queue-hero">
+        <div class="queue-num" id="queue-count"></div>
+        <p class="queue-label" id="queue-state"></p>
+      </div>
       <p class="muted" id="list-empty" data-i18n="home.noneYet" hidden>No applications yet.</p>
       <ul class="app-list" id="app-list"></ul>
     </section>

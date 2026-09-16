@@ -1,12 +1,15 @@
 // scope: poc
 // Local POC server for development: serves public/ and /shared/, and answers POST /api by running the
 // real Apps Script code in Node with the test fakes. Data lives in memory and resets when it stops.
+// Start-up seeds one fictional application per workflow stage (SEED=0 to skip) and prints the demo
+// sign-in details, because nothing can be clicked through until something is waiting in a queue.
 // Usage: node poc/scripts/dev-server.mjs   (PORT=8787, HOST=127.0.0.1 by default)
 import http from "node:http";
 import { readFile, stat } from "node:fs/promises";
 import { extname, join, resolve, sep } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { createRequire } from "node:module";
+import { seedDemoData } from "../seed/demo-applications.mjs";
 
 const require = createRequire(import.meta.url);
 const { createContext } = require("../../tests/poc/harness.js");
@@ -83,9 +86,11 @@ async function handleApi(req, res, ctx) {
   res.end(out.getContent());
 }
 
-export function createDevServer({ root }) {
+export function createDevServer({ root, seed = false }) {
   const ctx = createContext({ clock: { get ms() { return Date.now(); } }, properties: { SHEET_ID: "" } });
   const { setupCode } = ctx.setup();
+  // Seeded into the same store the app reads, so what is printed is what a person signs in to.
+  const demo = seed ? seedDemoData(ctx) : null;
   const publicDir = join(root, "public");
   const sharedDir = join(root, "shared");
 
@@ -109,7 +114,17 @@ export function createDevServer({ root }) {
     });
   });
 
-  return { server, ctx, setupCode };
+  return { server, ctx, setupCode, demo };
+}
+
+// The demo accounts, so somebody opening the app knows who to sign in as and what to expect.
+function demoLines(demo) {
+  if (!demo) return [];
+  return [
+    `Demo sign-in — password for every demo account: ${demo.password}`,
+    ...demo.people.map((person) => `  ${person.roles.join(", ").padEnd(12)} ${person.email.padEnd(22)} ${person.fullName}`),
+    `Demo applications: ${demo.applicationIds.length} seeded, ending at ${demo.statuses.join(", ")}.`,
+  ];
 }
 
 const isMain = Boolean(process.argv[1]) && import.meta.url === pathToFileURL(process.argv[1]).href;
@@ -117,10 +132,11 @@ if (isMain) {
   const root = fileURLToPath(new URL("../..", import.meta.url));
   const port = Number(process.env.PORT) || 8787;
   const host = process.env.HOST || "127.0.0.1";
-  const { server, setupCode } = createDevServer({ root });
+  const { server, setupCode, demo } = createDevServer({ root, seed: process.env.SEED !== "0" });
   server.listen(port, host, () => {
     console.log(`SwabodhiniCare POC dev server: http://${host === "0.0.0.0" ? "localhost" : host}:${port}`);
     console.log(`First-admin setup code: ${setupCode}`);
+    demoLines(demo).forEach((line) => console.log(line));
     console.log("Data is kept in memory and resets when this server stops. Test data only.");
   });
 }
