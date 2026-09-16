@@ -41,7 +41,7 @@
 
 **`s11_signature` is deliberately absent from the list.** Its value is the attachment id (`form-rules.js:112` validates `signature` as a non-empty string). Including it would make the hash depend on the act of signing, so no signature could ever match its own payload.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `tests/shared/consent.test.js`:
 
@@ -107,12 +107,12 @@ test("key order does not depend on the caller's object", () => {
 });
 ```
 
-- [ ] **Step 2: Run the test and watch it fail**
+- [x] **Step 2: Run the test and watch it fail**
 
 Run: `node --test tests/shared/consent.test.js`
 Expected: FAIL — `Cannot find module '../../shared/consent.js'`.
 
-- [ ] **Step 3: Write the minimal implementation**
+- [x] **Step 3: Write the minimal implementation**
 
 Create `shared/consent.js`:
 
@@ -157,12 +157,12 @@ if (typeof module !== "undefined" && module.exports) {
 }
 ```
 
-- [ ] **Step 4: Run the test and watch it pass**
+- [x] **Step 4: Run the test and watch it pass**
 
 Run: `node --test tests/shared/consent.test.js`
 Expected: PASS, 5 tests.
 
-- [ ] **Step 5: Load it into the POC server**
+- [x] **Step 5: Load it into the POC server**
 
 `shared/consent.js` must be in the bundle or `Attachments.gs` cannot call it. In `poc/scripts/source-order.mjs`, change line 8 from:
 
@@ -178,12 +178,12 @@ to:
 
 (`consent` has no dependencies, so it may sit anywhere; placing it before the form modules keeps the answer-shaped files together.)
 
-- [ ] **Step 6: Run the whole suite**
+- [x] **Step 6: Run the whole suite**
 
 Run: `npm test`
 Expected: 298 passing, 0 failing. The scope check must pass — if it reports `shared/consent.js`, the header or a banned API is wrong.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add shared/consent.js tests/shared/consent.test.js poc/scripts/source-order.mjs
@@ -230,13 +230,13 @@ MSG
 
 **Why this task is separate:** `tests/poc/fakes.js:14-23` fakes `Utilities` but there is no `DriveApp` at all, so Task 3 cannot run a single test without it. Splitting it means a reviewer can reject the fake's shape without rejecting the upload logic built on it.
 
-- [ ] **Step 1: Read the existing fakes to match their style**
+- [x] **Step 1: Read the existing fakes to match their style**
 
 Run: `sed -n '1,40p' tests/poc/fakes.js` and `grep -n "makeUtilities\|globals\|sandbox" tests/poc/harness.js`
 
 The fakes are plain closures returning frozen objects, and `harness.js` installs them as globals before evaluating the `.gs` sources. Follow that exactly; do not introduce a mocking library.
 
-- [ ] **Step 2: Write the failing test**
+- [x] **Step 2: Write the failing test**
 
 Add to `tests/poc/fakes.test.js` (create it if absent, with the same imports the other `tests/poc/*.test.js` files use):
 
@@ -274,12 +274,12 @@ test("an unknown file id is an error, not a silent null", () => {
 });
 ```
 
-- [ ] **Step 3: Run it and watch it fail**
+- [x] **Step 3: Run it and watch it fail**
 
 Run: `node --test tests/poc/fakes.test.js`
 Expected: FAIL — `makeDriveApp` is not exported.
 
-- [ ] **Step 4: Implement the fake**
+- [x] **Step 4: Implement the fake**
 
 In `tests/poc/fakes.js`, add before the export block, and extend `makeUtilities` with `newBlob`:
 
@@ -352,16 +352,16 @@ In `makeUtilities`, add to the returned object:
 
 Add `makeDriveApp` to the module's export list at the bottom of `fakes.js`, alongside `makeUtilities`.
 
-- [ ] **Step 5: Install it in the harness**
+- [x] **Step 5: Install it in the harness**
 
 In `tests/poc/harness.js`, find where `Utilities` is put into the sandbox globals and add `DriveApp` the same way, importing `makeDriveApp` at the top. Each harness instance must get its own `makeDriveApp()` so tests cannot leak files into one another.
 
-- [ ] **Step 6: Run the suite**
+- [x] **Step 6: Run the suite**
 
 Run: `npm test`
 Expected: 301 passing, 0 failing.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add tests/poc/fakes.js tests/poc/harness.js tests/poc/fakes.test.js
@@ -396,7 +396,7 @@ MSG
 
 **M7a restricts `kind` to `CONSENT_SIGNATURE`.** M7b opens it to `PHOTO`, `DIAGNOSIS`, `UDID`.
 
-- [ ] **Step 1: Add the column**
+- [x] **Step 1: Add the column**
 
 In `poc/apps-script/Store.gs`, change the `Attachments` entry to:
 
@@ -407,7 +407,7 @@ In `poc/apps-script/Store.gs`, change the `Attachments` entry to:
 
 **Two columns, not one.** `consent_hash` is the cheap equality check that runs on every `applications.get`, and it is the column the Phase 1 port must reproduce byte-for-byte. `consent_payload` is the serialized text it was made from, kept so Task 5 can say *which* fact changed by comparing values directly instead of searching for a hash that matches. A hash can only answer "same or different"; naming the field that moved needs the values themselves.
 
-- [ ] **Step 2: Write the failing test**
+- [x] **Step 2: Write the failing test**
 
 Create `tests/poc/attachments.test.js`, following the shape of `tests/poc/applications.test.js` (same harness import, same `as(name)` helper from `tests/poc/people.js`):
 
@@ -507,12 +507,12 @@ test("M7a stores signatures only", () => {
 
 Check the exact helper names in `tests/poc/people.js` and `tests/poc/harness.js` first and match them; the names above follow `tests/poc/applications.test.js`. If the harness exposes globals under a different property than `h.global`, use that.
 
-- [ ] **Step 3: Run it and watch it fail**
+- [x] **Step 3: Run it and watch it fail**
 
 Run: `node --test tests/poc/attachments.test.js`
 Expected: FAIL — `attachments.upload` is an unknown action (`UNKNOWN_ACTION`).
 
-- [ ] **Step 4: Implement**
+- [x] **Step 4: Implement**
 
 Create `poc/apps-script/Attachments.gs`:
 
@@ -618,7 +618,7 @@ var SC_Attachments = (function () {
 SC_Api.register("attachments.upload", SC_Attachments.upload);
 ```
 
-- [ ] **Step 5: Export the two helpers `Attachments.gs` needs from `Applications.gs`**
+- [x] **Step 5: Export the two helpers `Attachments.gs` needs from `Applications.gs`**
 
 `loadVisible` and a values reader are currently private inside the `SC_Applications` IIFE (`poc/apps-script/Applications.gs:78-87` and `:35-45`). Add them to the frozen export at `Applications.gs:394-397`, which becomes:
 
@@ -634,14 +634,14 @@ SC_Api.register("attachments.upload", SC_Attachments.upload);
 
 Files load alphabetically (`poc/scripts/source-order.mjs:14`), so `Applications.gs` is evaluated before `Attachments.gs`. No ordering change is needed.
 
-- [ ] **Step 6: Run the tests and watch them pass**
+- [x] **Step 6: Run the tests and watch them pass**
 
 Run: `node --test tests/poc/attachments.test.js`
 Expected: PASS, 6 tests.
 
 Then: `npm test` → 307 passing, 0 failing.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add poc/apps-script/Attachments.gs poc/apps-script/Applications.gs poc/apps-script/Store.gs tests/poc/attachments.test.js
@@ -678,7 +678,7 @@ MSG
 
 **Re-signing soft-deletes.** POC spec §9 requires soft delete; spec §5.1 says the re-sign path is not an exception. Keeping the superseded signature is what lets anyone answer later *what* was consented to and *when* — the entire purpose of holding a consent record.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Append to `tests/poc/attachments.test.js`:
 
@@ -733,12 +733,12 @@ test("signing again keeps the mark it replaced", () => {
 });
 ```
 
-- [ ] **Step 2: Run and watch them fail**
+- [x] **Step 2: Run and watch them fail**
 
 Run: `node --test tests/poc/attachments.test.js`
 Expected: FAIL — `attachments.get` is unknown, and the re-sign test finds 2 live rows instead of one deleted and one live.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 In `Attachments.gs`, inside `upload`, immediately **before** `SC_Store.insert`, add:
 
@@ -774,12 +774,12 @@ Add `get: get` to the frozen export and register it:
 SC_Api.register("attachments.get", SC_Attachments.get);
 ```
 
-- [ ] **Step 4: Run and watch them pass**
+- [x] **Step 4: Run and watch them pass**
 
 Run: `node --test tests/poc/attachments.test.js`
 Expected: PASS, 9 tests. Then `npm test` → 310 passing.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add poc/apps-script/Attachments.gs tests/poc/attachments.test.js
@@ -816,7 +816,7 @@ MSG
 
 **Why the server and not the browser.** M6's final review found `review.js` recomputing the separation-of-duties rule in the browser and replaced it with `approvedThisRound` from `applications.get`. A rule with two implementations has two behaviours the moment one drifts. Staleness is the same shape of rule and gets the same treatment. It also avoids `crypto.subtle` being async on the render path.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Append to `tests/poc/applications.test.js`:
 
@@ -874,12 +874,12 @@ test("an application cannot be submitted without a signature that still stands",
 
 `submitReadyValues()` already exists in this file or in `tests/fixtures/sample-application.js` — check which and reuse it rather than writing a new fixture. The `s11_signature` value it carries must be set to the uploaded attachment id, or removed so the upload supplies it; read how the fixture is built before deciding.
 
-- [ ] **Step 2: Run and watch them fail**
+- [x] **Step 2: Run and watch them fail**
 
 Run: `node --test tests/poc/applications.test.js`
 Expected: FAIL — `consentSigned` is `undefined`.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 In `Applications.gs`, add above `view`:
 
@@ -937,12 +937,12 @@ In `submit`, before the transition check, add:
 
 Match the exact error-detail shape `checkValues` already produces (`Applications.gs:71-74`) — read it and copy it, so one screen can render both refusals.
 
-- [ ] **Step 4: Run and watch them pass**
+- [x] **Step 4: Run and watch them pass**
 
 Run: `node --test tests/poc/applications.test.js`
 Expected: PASS. Then `npm test` → 312 passing.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add poc/apps-script/Applications.gs poc/apps-script/Attachments.gs poc/apps-script/Store.gs tests/poc/applications.test.js
@@ -984,7 +984,7 @@ A stroke is `[{x, y}, …]`; strokes are `[stroke, …]`.
 
 **Why pure:** `tests/public/` covers only pure modules — every `pages/*.js` is untested. That is exactly how the version-conflict wording bug survived in `pages/application.js`. The DOM wrapper is Task 7 and stays thin enough to check by eye.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `tests/public/signature-pad.test.mjs`:
 
@@ -1044,12 +1044,12 @@ test("fitting ink with no size does not divide by zero", () => {
 });
 ```
 
-- [ ] **Step 2: Run it and watch it fail**
+- [x] **Step 2: Run it and watch it fail**
 
 Run: `node --test tests/public/signature-pad.test.mjs`
 Expected: FAIL — cannot find `../../public/js/signature-pad.js`.
 
-- [ ] **Step 3: Implement**
+- [x] **Step 3: Implement**
 
 Create `public/js/signature-pad.js`:
 
@@ -1115,12 +1115,12 @@ export function fitTo(strokes, box) {
 }
 ```
 
-- [ ] **Step 4: Run and watch it pass**
+- [x] **Step 4: Run and watch it pass**
 
 Run: `node --test tests/public/signature-pad.test.mjs`
 Expected: PASS, 6 tests. Then `npm test` → 318 passing.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add public/js/signature-pad.js tests/public/signature-pad.test.mjs
@@ -1182,7 +1182,7 @@ Tamil for all fourteen goes on the M6 close-out list of keys awaiting staff revi
 
 Use `SC_I18n`'s existing `joinNames(list, t)` helper (`public/js/i18n.js`, tested at `tests/public/i18n.test.mjs`) to build `{fields}` — it joins with the sentence's own language rather than an English "and".
 
-- [ ] **Step 1: Write the failing i18n test**
+- [x] **Step 1: Write the failing i18n test**
 
 Append to `tests/public/i18n.test.mjs`:
 
@@ -1204,16 +1204,16 @@ test("the stale-signature sentences say what changed", () => {
 });
 ```
 
-- [ ] **Step 2: Run and watch it fail**
+- [x] **Step 2: Run and watch it fail**
 
 Run: `node --test tests/public/i18n.test.mjs`
 Expected: FAIL — `s11_consent has no English name (sign.field.s11_consent)`.
 
-- [ ] **Step 3: Add the keys to both dictionaries, then run again**
+- [x] **Step 3: Add the keys to both dictionaries, then run again**
 
 Expected: PASS. `npm test` → 320 passing.
 
-- [ ] **Step 4: Render the pad**
+- [x] **Step 4: Render the pad**
 
 In `public/js/form-render.js`, add a `signature` branch to the type switch that renders:
 
@@ -1239,7 +1239,7 @@ Wire the canvas in `pages/application.js`:
 - **Save signature** rejects `isBlank(strokes)` with `sign.blank`; otherwise renders `fitTo(trimToInk(strokes, 8), { width: 560, height: 180 })` into an offscreen canvas, takes `toDataURL("image/png")`, strips the `data:image/png;base64,` prefix, and calls `attachments.upload`.
 - On success, write the returned `id` into the form value for `s11_signature` through the same path every other answer uses, so autosave persists it, and show `sign.saved`.
 
-- [ ] **Step 5: Render the stale notice**
+- [x] **Step 5: Render the stale notice**
 
 Where `bannerInfo()`/`renderBanner()` already handle a returned or rejected file (`pages/application.js`), add the consent notice on the `s11` step from `state.app.consentStale` and `state.app.consentChanged`:
 
@@ -1248,11 +1248,11 @@ Where `bannerInfo()`/`renderBanner()` already handle a returned or rejected file
 
 Never print "please sign again" with no reason. The screen has been handed the list; withholding it is the same defect M6 closed in the rejection banner.
 
-- [ ] **Step 6: Style it**
+- [x] **Step 6: Style it**
 
 In `public/css/app.css`, add `.sign-pad` with `touch-action: none` (without it the browser scrolls instead of drawing), a visible border, `width: 100%`, and a height that works at phone width. Use the existing design tokens — `var(--line)`, `var(--bad)`, `var(--ok)` — rather than new colours, and check the ≤440px query the M6 close-out widened.
 
-- [ ] **Step 7: Run the suite and commit**
+- [x] **Step 7: Run the suite and commit**
 
 Run: `npm test` → 320 passing, 0 failing.
 
@@ -1289,18 +1289,18 @@ MSG
 
 **Why the seed changes:** M5 seeded applications past the submit gate because no signature could exist. Now one can, so the seed should walk the real path — otherwise M7a ships with the demo still proving nothing.
 
-- [ ] **Step 1: Give the seeded applications a signature**
+- [x] **Step 1: Give the seeded applications a signature**
 
 In `poc/seed/demo-applications.mjs`, before each `applications.submit`, upload a small valid PNG as `CONSENT_SIGNATURE` for that application. A 1×1 PNG as a base64 constant is enough; put it next to the seed's other fixed data with a comment saying it stands in for a real mark.
 
 If `tests/poc/seed.test.mjs` asserts the seeded statuses, it should now also assert that every submitted application has a live signature — the seed's whole job is to be a truthful demo.
 
-- [ ] **Step 2: Run the suite**
+- [x] **Step 2: Run the suite**
 
 Run: `npm test`
 Expected: all green. Fix the seed, not the tests, if a status no longer reaches its stage.
 
-- [ ] **Step 3: Check it in a browser**
+- [x] **Step 3: Check it in a browser**
 
 Restart the dev server so it runs the edited `.gs` files — static files are served from disk, but Apps Script sources are evaluated at boot:
 
@@ -1320,13 +1320,13 @@ Sign in as `priya@example.com` / `demo-pass-2026` and confirm, in **both** langu
 
 Record a screenshot of the stale notice in `.playwright-mcp/` as the M6 fix wave did.
 
-- [ ] **Step 4: Update the records**
+- [x] **Step 4: Update the records**
 
 - `TODO.md`: tick M7a's six items; change its heading to `✅ done (<N> tests; checked in a browser)`; if anything was deferred, say so on its own line rather than silently leaving a box ticked.
 - Add the fourteen new `sign.*` keys to the M6 plan's Tamil-review list, which currently stands at 28 keys.
 - Tick this plan's checkboxes.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add -A
