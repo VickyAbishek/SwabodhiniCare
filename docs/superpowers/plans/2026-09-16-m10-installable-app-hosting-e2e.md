@@ -91,11 +91,11 @@ A dev-only suite (`@playwright/test`, `workers: 1` because the dev server is one
 - **Consumes:** `node poc/scripts/dev-server.mjs` (seeds one application per workflow stage); the demo people in `poc/seed/demo-data.mjs`.
 - **Produces:** `tests/e2e/playwright.config.mjs` (`webServer` boots the dev server, `workers: 1`, `fullyParallel: false`); `tests/e2e/helpers.mjs` (sign-in); `per-role.spec.mjs` (therapist/therapy-head/centre-head/director landing content), `send-back.spec.mjs` (fix + resend → reappears in the reviewer's queue), `tamil.spec.mjs` (labels switch to Tamil), `dark-mode.spec.mjs` (theme persists), `conflict.spec.mjs` (two contexts → second save shows the version-conflict message). Admin is out of scope: there is no seeded admin, and setup needs a per-boot code.
 
-- [ ] **Step 1: Add `@playwright/test` as a devDependency** (`npm install -D @playwright/test`).
-- [ ] **Step 2: Write `playwright.config.mjs` + `helpers.mjs`.**
-- [ ] **Step 3: Write the five spec files.**
-- [ ] **Step 4: Run `npx playwright test`** (install browsers with `npx playwright install` if needed) and fix until green.
-- [ ] **Step 5: Confirm `npm test` still passes** (E2E is not part of it) and commit (`feat: Playwright E2E — roles, send-back, Tamil, dark mode, conflict`).
+- [x] **Step 1: Add `@playwright/test` as a devDependency** (`npm install -D @playwright/test`).
+- [x] **Step 2: Write `playwright.config.mjs` + `helpers.mjs`.**
+- [x] **Step 3: Write the five spec files.**
+- [x] **Step 4: Run `npx playwright test`** (install browsers with `npx playwright install` if needed) and fix until green.
+- [x] **Step 5: Confirm `npm test` still passes** (E2E is not part of it) and commit (`feat: Playwright E2E — roles, send-back, Tamil, dark mode, conflict`).
 
 ### Task 5: Security review + TODO close-out
 

@@ -3,10 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "description": "Registration and admission app for Swabodhini Autism",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "check:scope": "node scripts/check-scope.mjs",
     "test": "node scripts/check-scope.mjs && node --test",
+    "test:e2e": "playwright test --config tests/e2e/playwright.config.mjs",
     "coverage": "node --test --experimental-test-coverage"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0"
   }
 }
