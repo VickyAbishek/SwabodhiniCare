@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { createI18n, applyTranslations, errorText, loadDictionaries, joinNames } from "../../public/js/i18n.js";
+import { saveStatusKey } from "../../public/js/autosave.js";
 import { readPrefs, savePrefs, applyPrefs } from "../../public/js/prefs.js";
 
 const require = createRequire(import.meta.url);
@@ -108,4 +109,20 @@ test("one name needs no joining word, and no names give no text at all", () => {
   assert.equal(joinNames(["Priya S"], en.t), "Priya S");
   assert.equal(joinNames([], en.t), "");
   assert.equal(joinNames(["", null, "Priya S"], en.t), "Priya S");
+});
+
+test("every save state the form can show has wording in both languages", () => {
+  for (const state of ["pending", "saving", "saved", "error", "conflict"]) {
+    const key = saveStatusKey(state);
+    assert.ok(EN[key], `${state} has no English wording (${key})`);
+    assert.ok(TA[key], `${state} has no Tamil wording (${key})`);
+  }
+});
+
+test("only a real network failure blames the network", () => {
+  // A version conflict is someone else's save, not a bad connection. Checking Wi-Fi
+  // cannot clear it, so neither language may send the person to look at their Wi-Fi.
+  assert.match(EN[saveStatusKey("error")], /Wi-Fi/);
+  assert.doesNotMatch(EN[saveStatusKey("conflict")], /Wi-Fi/);
+  assert.doesNotMatch(TA[saveStatusKey("conflict")], /Wi-Fi/);
 });

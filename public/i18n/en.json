@@ -72,6 +72,7 @@
   "form.saved": "Saved ✓ {time}",
   "form.pending": "Not saved yet",
   "form.notSaved": "Not saved — check Wi-Fi",
+  "form.notSavedConflict": "Not saved — someone else saved first",
   "form.reload": "Reload",
   "form.stepsDone": "{done} of {total} steps done",
   "form.state.done": "Done",

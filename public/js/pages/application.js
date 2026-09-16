@@ -10,7 +10,7 @@
 import { startPage, showMessage, setBusy, goTo, PAGES } from "../page.js";
 import { CONFIG } from "../config.js";
 import { createFormView } from "../form-view.js";
-import { createAutosave } from "../autosave.js";
+import { createAutosave, saveStatusKey } from "../autosave.js";
 import { createConfirmSheet } from "../confirm-sheet.js";
 import { renderQuestion } from "../form-render.js";
 
@@ -286,9 +286,9 @@ function showStatus(status) {
   const { t } = state.page;
   const box = $("save-status");
   const time = status.at ? status.at.toLocaleTimeString(lang() === "en" ? "en-IN" : "ta-IN", { hour: "2-digit", minute: "2-digit" }) : "";
-  const texts = { pending: t("form.pending"), saving: t("form.saving"), saved: t("form.saved", { time }), error: t("form.notSaved"), conflict: t("form.notSaved") };
+  const key = saveStatusKey(status.state); // autosave.js owns the states, so it owns their wording
   box.dataset.state = status.state;
-  box.textContent = texts[status.state] || "";
+  box.textContent = key ? t(key, { time }) : "";
   if (status.state === "conflict") showMessage($("message"), state.page.errorMessage({ code: "VERSION_CONFLICT" }));
 }
 

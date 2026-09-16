@@ -40,13 +40,13 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 - [x] `[SHARED]` Screens: Sign in, choose your password, Home (placeholder), Settings (language, appearance, change password, sign out)
 - [x] `[POC]` "Test version: sample data only" banner behind `IS_DEMO`
 
-### M5: Applications · plan: `docs/superpowers/plans/2026-09-15-m5-applications.md` · 🚧 7 of 8 (the conflict wording is parked)
+### M5: Applications · plan: `docs/superpowers/plans/2026-09-15-m5-applications.md` · ✅ done (293 tests; the conflict wording landed after M6)
 - [x] `[SHARED]` Autosave every 20 s + on step change; "Saving…" / "Saved ✓" / "Not saved" states; version-conflict message (`js/autosave.js` + tests)
 - [x] `[POC]` `Applications.gs`: create, get, save (optimistic lock), list (role-scoped) (+ `tests/poc/applications.test.js`, `tests/poc/people.js`)
 - [x] `[SHARED]` Form wizard rendered from the schema (one step per screen, progress, big tap choices, 3-dropdown DOB) — `js/form-view.js`, `js/form-render.js`, `application.html`, `js/pages/application.js`
 - [x] `[SHARED]` Home: "Start a new application" + the list of applications this person may see (`home.html`, `js/pages/home.js`)
 - [x] `[SHARED]` All-steps overview. The consent step's finger signature pad needs uploads, so it waits for M7
-- [ ] `[SHARED]` Version conflict: the "Not saved" line says "check Wi-Fi" when the real cause is someone else's save. Needs new EN + TA wording (`form.reload` and `form.continue` are defined but unused, and look meant for this)
+- [x] `[SHARED]` Version conflict: the "Not saved" line said "check Wi-Fi" when the real cause was someone else's save — it contradicted the alert below it, which had it right all along. `conflict` is now its own state with its own wording (`form.notSavedConflict`, EN + TA), and `autosave.js` owns the state → key mapping so the form screen cannot keep a second copy to drift
 - [x] `[POC]` Sample answers for demos: `public/js/seed/sample-applications.js` — invented, and must pass the submit check except the signature (test accounts are made by the Admin in the app)
 - [x] `[POC]` "Fill with sample data" button behind `IS_DEMO` — `SAMPLE_DATA` in `config.js`, named like `BACKEND` so no shared screen names POC code
 

@@ -72,6 +72,7 @@
   "form.saved": "சேமிக்கப்பட்டது ✓ {time}",
   "form.pending": "இன்னும் சேமிக்கப்படவில்லை",
   "form.notSaved": "சேமிக்கப்படவில்லை — Wi-Fi-ஐ சரிபார்க்கவும்",
+  "form.notSavedConflict": "சேமிக்கப்படவில்லை — வேறொருவர் முன்பே சேமித்துவிட்டார்",
   "form.reload": "மீண்டும் ஏற்று",
   "form.stepsDone": "{total}-இல் {done} படிகள் முடிந்தன",
   "form.state.done": "முடிந்தது",

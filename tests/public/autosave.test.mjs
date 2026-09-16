@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createAutosave } from "../../public/js/autosave.js";
+import { createAutosave, saveStatusKey } from "../../public/js/autosave.js";
 
 function diff(before, after) {
   const out = {};
@@ -143,4 +143,20 @@ test("stop cancels a waiting save", () => {
   autosave.update({ s1_centre: "TVM" });
   autosave.stop();
   assert.deepEqual(timers.delays, []);
+});
+
+test("each save state names its own wording, so a clash is never blamed on the network", () => {
+  assert.equal(saveStatusKey("pending"), "form.pending");
+  assert.equal(saveStatusKey("saving"), "form.saving");
+  assert.equal(saveStatusKey("saved"), "form.saved");
+  assert.equal(saveStatusKey("error"), "form.notSaved");
+  // The one this test exists for: someone else's save is not a Wi-Fi problem,
+  // and checking Wi-Fi will never clear it.
+  assert.equal(saveStatusKey("conflict"), "form.notSavedConflict");
+  assert.notEqual(saveStatusKey("conflict"), saveStatusKey("error"));
+});
+
+test("a state with no wording of its own says nothing rather than guessing", () => {
+  assert.equal(saveStatusKey("something-new"), "");
+  assert.equal(saveStatusKey(undefined), "");
 });
