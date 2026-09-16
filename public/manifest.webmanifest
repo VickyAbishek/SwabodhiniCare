@@ -1,0 +1,12 @@
+{
+  "name": "SwabodhiniCare",
+  "short_name": "SwabodhiniCare",
+  "description": "Swabodhini Autism · Staff app",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#EEF3F1",
+  "theme_color": "#0F5C6E",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

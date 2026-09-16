@@ -63,12 +63,12 @@ The app shell is cached; navigations are network-first with an offline fallback;
 - **Consumes:** `public/index.html`/`app.css` (shell); the routing decision is factored into `sw-route.js` so it is unit-testable.
 - **Produces:** `manifest.webmanifest`; `sw.js` (cache `swabodhinicare-shell-v1`; `install` → precache `/offline.html`, `/manifest.webmanifest`, `/index.html`; `activate` → delete old + `clients.claim()`; `fetch` → route); `js/sw-route.js` (`routeRequest({ method, pathname, origin, mode })` → `"network"` | `"offline"` | `"stale-while-revalidate"`); `js/sw-register.js` (register `/sw.js` `{type:"module"}` only when hostname is not `127.0.0.1`/`localhost`); `offline.html` (self-contained EN + TA, retry button, no shared JS so it works with a cold cache); `icon.svg`.
 
-- [ ] **Step 1: Write the failing test** (`tests/public/sw-route.test.mjs`): `GET` `/api` → `network`; non-`GET` → `network`; cross-origin → `network`; `navigate` → `offline`; same-origin static `GET` → `stale-while-revalidate`.
-- [ ] **Step 2: Run to verify it fails** (no `sw-route.js`).
-- [ ] **Step 3: Implement** `js/sw-route.js`, then `sw.js`, `sw-register.js`, `manifest.webmanifest`, `offline.html`, `icon.svg` — and register the SW from `js/page.js` (or import `sw-register.js` there).
-- [ ] **Step 4: Run the scope check and the suite** (the `sw-route` test passes; scope stays green).
-- [ ] **Step 5: Verify in a browser** (dev server serves the manifest with the right MIME type; the offline page renders).
-- [ ] **Step 6: Commit** (`feat: PWA — manifest, app-shell service worker, offline page`).
+- [x] **Step 1: Write the failing test** (`tests/public/sw-route.test.mjs`): `GET` `/api` → `network`; non-`GET` → `network`; cross-origin → `network`; `navigate` → `offline`; same-origin static `GET` → `stale-while-revalidate`.
+- [x] **Step 2: Run to verify it fails** (no `sw-route.js`).
+- [x] **Step 3: Implement** `js/sw-route.js`, then `sw.js`, `sw-register.js`, `manifest.webmanifest`, `offline.html`, `icon.svg` — and register the SW from `js/page.js` (or import `sw-register.js` there).
+- [x] **Step 4: Run the scope check and the suite** (the `sw-route` test passes; scope stays green).
+- [x] **Step 5: Verify in a browser** (dev server serves the manifest with the right MIME type; the offline page renders).
+- [x] **Step 6: Commit** (`feat: PWA — manifest, app-shell service worker, offline page`).
 
 ### Task 3: CSP headers + prepare-deploy + `config.deploy.js` + runbook
 
