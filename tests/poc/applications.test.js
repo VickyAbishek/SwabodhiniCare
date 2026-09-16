@@ -175,9 +175,13 @@ test("creating, viewing by others and saving are recorded in the audit log", () 
 test("only the owner can send an application for review", () => {
   const { as } = setupPeople();
   const { id } = draftFor(as, "priya", {});
+  // Lakshmi is a Therapy Head, so she can see the application and is refused only for not having
+  // written it. Deepa is a plain therapist, so its existence is not revealed to her at all — the same
+  // pair the existing "only the author can save" test establishes.
   const result = as("lakshmi")("applications.submit", { id });
   assert.equal(result.ok, false);
   assert.equal(result.error.code, "NOT_ALLOWED");
+  assert.equal(as("deepa")("applications.submit", { id }).error.code, "NOT_FOUND");
 });
 
 test("sending for review needs every answer the submit check wants", () => {
@@ -227,6 +231,30 @@ test("a withdrawn application cannot be sent for review", () => {
   assert.equal(as("priya")("applications.submit", { id }).error.code, "INVALID_TRANSITION");
 });
 
+// Main spec §16 Q7 and the withdraw screen's own sentence: nothing is deleted. Today that holds
+// structurally — withdraw patches three fields and SC_Store.update merges — but save in this same
+// file writes a whole row (emptyForm() with the merged answers patched over it), so giving withdraw
+// that shape would empty every answer and lose the routing slip with the suite still green.
+test("withdrawing keeps every answer and the routing slip, and logs it once", () => {
+  const { ctx, as } = setupPeople();
+  const { id } = submitReady(as, "priya");
+  as("lakshmi")("applications.review", { id, action: "SEND_BACK", comment: "Please add the report." });
+  const before = as("priya")("applications.get", { id }).data;
+
+  const withdrawn = as("priya")("applications.withdraw", { id });
+  assert.equal(withdrawn.data.status, "WITHDRAWN");
+
+  const after = as("priya")("applications.get", { id }).data;
+  assert.equal(after.version, before.version + 1, "one bump, as every move bumps once");
+  assert.deepEqual(plain(after.values), plain(before.values), "every answer is still there");
+  assert.equal(after.applicantName, before.applicantName);
+  assert.deepEqual(plain(after.approvals.map((r) => r.action)), ["SEND_BACK"], "and so is the routing slip");
+
+  const logged = ctx.SC_Store.filter("Audit", (r) => r.action === "applications.withdrawn" && r.entity_id === id);
+  assert.equal(logged.length, 1);
+  assert.equal(logged[0].user_id, "u-priya");
+});
+
 test("the Therapy Head approves and it moves to the Centre Head", () => {
   const { ctx, as } = setupPeople();
   const { id } = submitReady(as, "priya");
@@ -261,7 +289,11 @@ test("a review cannot be the Director's admit or waitlist", () => {
   assert.equal(as("revathi")("applications.get", { id }).data.status, "PENDING_DIRECTOR");
 });
 
-test("nobody reviews their own application, and nobody approves two stages", () => {
+// Two rules, and this test pins them one each: the second half is a stage this person's role does not
+// hold any more, refused by the role check before the round check is ever reached. The round rule
+// itself — one person may not approve two stages of the same application — is pinned by the two
+// dual-role tests further down, which are the only shape that can reach it.
+test("nobody reviews their own application, and only the stage's own role may review", () => {
   const { as } = setupPeople();
   const { id } = submitReady(as, "lakshmi"); // the Therapy Head filed it themselves
   assert.equal(as("lakshmi")("applications.review", { id, action: "APPROVE" }).error.code, "OWN_APPLICATION");
@@ -310,12 +342,22 @@ test("a redeeming reviewer is not blocked by their own earlier approval in a new
   assert.equal(again.data.status, "PENDING_CENTRE_HEAD");
 });
 
-test("a decision is written to the audit log", () => {
+// The reason as well as the action (main spec §10.4). A rejection's comment is the only place its why
+// is written down, and once the file has left every queue the audit log is where a school looks.
+test("a decision is written to the audit log, with the reason it was taken for", () => {
   const { ctx, as } = setupPeople();
   const { id } = submitReady(as, "priya");
   as("lakshmi")("applications.review", { id, action: "APPROVE" });
   const logged = ctx.SC_Store.filter("Audit", (r) => r.action === "applications.reviewed" && r.entity_id === id);
   assert.equal(logged.length, 1);
+  assert.deepEqual(plain(logged[0].details), { action: "APPROVE", comment: null });
+
+  const rejected = atDirector(as);
+  assert.equal(as("revathi")("applications.review", { id: rejected, action: "REJECT", comment: "Not eligible." }).data.status, "REJECTED");
+  const rows = ctx.SC_Store.filter("Audit", (r) => r.action === "applications.reviewed" && r.entity_id === rejected);
+  assert.deepEqual(plain(rows.map((r) => r.details)), [
+    { action: "APPROVE", comment: null }, { action: "APPROVE", comment: null }, { action: "REJECT", comment: "Not eligible." },
+  ]);
 });
 
 // RETURNED is unreachable until SEND_BACK exists, so Task 3 left this half of withdraw unverified.
@@ -352,11 +394,19 @@ test("the Director admits with their password and a registration number is issue
 });
 
 test("the wrong password refuses the decision and changes nothing", () => {
-  const { as } = setupPeople();
+  const { ctx, as } = setupPeople();
   const id = atDirector(as);
   const result = as("revathi")("applications.decide", { id, action: "ADMIT", key: "not-the-key" });
   assert.equal(result.error.code, "INVALID_CREDENTIALS");
   assert.equal(as("revathi")("applications.get", { id }).data.status, "PENDING_DIRECTOR");
+
+  // A refused step-up is an event the school can see (main spec §10.4). Nothing follows from it: the
+  // account is not locked — locking a Director out mid-decision is the worse failure — so the very
+  // next try with the right password stands.
+  const failed = ctx.SC_Store.filter("Audit", (r) => r.action === "applications.decide_failed" && r.entity_id === id);
+  assert.equal(failed.length, 1);
+  assert.deepEqual(plain(failed[0].details), { action: "ADMIT" });
+  assert.equal(as("revathi")("applications.decide", { id, action: "ADMIT", key: directorKey() }).data.status, "ADMITTED");
 });
 
 test("waitlisting needs no registration number, and the Director may admit later", () => {
@@ -438,6 +488,10 @@ test("one person holding two reviewing roles cannot approve two stages of one ap
   const { id } = submitReady(as, "priya");
   assert.equal(asMala("applications.review", { id, action: "APPROVE" }).data.status, "PENDING_CENTRE_HEAD");
 
+  // The screens read this list from the file instead of working the rule out again, so it is pinned
+  // where they read it: a copy that drifted from the guard above would hide nothing but the refusal.
+  assert.deepEqual(plain(asMala("applications.get", { id }).data.approvedThisRound), ["u-mala"]);
+
   const second = asMala("applications.review", { id, action: "APPROVE" });
   assert.equal(second.error.code, "ALREADY_APPROVED_STAGE");
   assert.equal(as("priya")("applications.get", { id }).data.status, "PENDING_CENTRE_HEAD");
@@ -457,8 +511,27 @@ test("only the Director or an Admin reopens, and only with a reason", () => {
   assert.equal(reopened.data.registrationNo, "SWB/VLC/2026/0001", "a registration number is issued once");
 });
 
-test("the routing slip keeps every decision, oldest first", () => {
+// The Admin's positive reopen, which no test drove until now, and the role it is recorded in. The row
+// keeps the DIRECTOR stage — a reopen really does happen at that stage of authority — but an Admin
+// does not hold DIRECTOR, and the therapist's banner names the role it is handed: "Anand (Director)"
+// would be a job title against a real name.
+test("an Admin reopens a signed application, and the slip names a role they hold", () => {
   const { as } = setupPeople();
+  const id = atDirector(as);
+  as("revathi")("applications.decide", { id, action: "ADMIT", key: directorKey() });
+
+  const reopened = as("anand")("applications.reopen", { id, reason: "Home address changed." });
+  assert.equal(reopened.data.status, "RETURNED", "an Admin acting for the family gets the file back to the therapist");
+
+  const slip = as("priya")("applications.get", { id }).data.approvals;
+  assert.equal(slip[3].action, "REOPEN");
+  assert.equal(slip[3].stage, "DIRECTOR", "the stage of authority is still what the data records");
+  assert.equal(slip[3].userName, "Anand");
+  assert.equal(slip[3].role, "ADMIN", "but the role named is one the person really holds");
+});
+
+test("the routing slip keeps every decision, oldest first", () => {
+  const { ctx, as } = setupPeople();
   const id = atDirector(as);
   as("revathi")("applications.decide", { id, action: "ADMIT", key: directorKey() });
   const slip = as("priya")("applications.get", { id }).data.approvals;
@@ -469,6 +542,14 @@ test("the routing slip keeps every decision, oldest first", () => {
   // The id as well as the name: the review screen works out whether this person has already approved
   // a stage of this round, and a display name cannot answer that.
   assert.deepEqual(plain(slip.map((s) => s.userId)), ["u-lakshmi", "u-suresh", "u-revathi"]);
+  // Every row's time is the one the decision was taken at, in the same order: the slip dates each
+  // step from it, and the therapist's banner dates the comment it quotes.
+  assert.deepEqual(
+    plain(slip.map((s) => s.at)),
+    plain(ctx.SC_Store.filter("Approvals", (r) => r.application_id === id).map((r) => r.created_at))
+  );
+  // And the role each decision was taken in, which is the stage's own whenever the person holds it.
+  assert.deepEqual(plain(slip.map((s) => s.role)), ["THERAPY_HEAD", "CENTRE_HEAD", "DIRECTOR"]);
 });
 
 // The slip is built for the application screen alone. save is the autosave — every few seconds while

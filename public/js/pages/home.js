@@ -77,8 +77,10 @@ function cardHref(item, me) {
   return `${page}?id=${encodeURIComponent(item.id)}`;
 }
 
-// "19 yrs · Male · Selaiyur". The age is worked out from the date of birth every time it is drawn,
-// so it is right even when the application has sat in the queue since a birthday.
+// "6 yrs 6 mths · Male · Selaiyur", the line mockup S6 draws. The age is worked out from the date of
+// birth every time it is drawn, so it is right even when the application has sat in the queue since a
+// birthday — and the months are shown, because a queue with children in it is not all whole years: a
+// ten-month-old reading "0 yrs" says nothing true about them.
 function subtitle(page, item) {
   const lang = page.prefs().lang;
   return [
@@ -91,7 +93,8 @@ function subtitle(page, item) {
 function ageText(page, item) {
   if (!item.dob) return "";
   try {
-    return page.t("queue.ageYears", { n: SC_Dates.ageFrom(item.dob, today()).years });
+    const age = SC_Dates.ageFrom(item.dob, today());
+    return page.t("queue.age", { y: age.years, m: age.months });
   } catch (err) {
     return ""; // a date that is not a real one: the card shows the rest of the line without it
   }
@@ -136,13 +139,16 @@ function order(items, me) {
   return items.slice().sort((a, b) => Number(myTurn(b, me)) - Number(myTurn(a, me)));
 }
 
-// The count keeps its own big element (the mockup makes the number the point of this screen), so the
-// sentence beside it is the same key with the count taken out. The sentence is chosen by the count
-// because "{n} applications are waiting" is wrong in both languages when one is waiting — a therapist
-// with a single application in their queue is the common case, not a corner.
+/* The sentence beside the count, which keeps its own big element — the mockup makes the number the
+   point of this screen. Main spec §7 R1 words it "3 waiting for you", and that wording is the one this
+   queue can honestly use: the count is everybody's work, only some of which is a review somebody
+   gives. The mockup's "applications are waiting for your review" was drawn for a Therapy Head's queue
+   alone, and a therapist with one of her own drafts in it read it as a review that never happens.
+   With the number living outside the sentence, one wording is also right at every count — there is no
+   "1 applications are waiting" to work around. */
 function heroText(page, waiting) {
   if (waiting === 0) return page.t("queue.empty");
-  return page.t(waiting === 1 ? "queue.waitingOne" : "queue.waiting", { n: "" }).trim();
+  return page.t("queue.waiting");
 }
 
 function draw() {

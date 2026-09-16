@@ -352,21 +352,24 @@ textarea.input { min-height: 120px; resize: vertical; }
   border-top: 1px solid var(--line);
 }
 
-/* ---------- Sent back (application.html, main spec §5) ---------- */
-/* The reviewer's reason comes first, above the questions: who sent it back and when, what they said,
-   which sections still need work and where the file goes when it is sent again. The banner wears the
-   same warn tone the RETURNED stamp does, so the screen says "this one came back" before a word of it
-   is read — and the sections to fix reuse the overview's own list. */
-.sent-back { display: grid; gap: 12px; }
-.sent-back .banner {
+/* ---------- The status banner (application.html, main spec §5) ---------- */
+/* What the file's own screen says about where it stands, above the questions: the status stamp and,
+   when a decision left a reason on the routing slip, who took it and what they said. The words wear
+   the warn tone a send-back wears, because that is the news they are usually carrying — and the bad
+   tone when a rejection is what is being quoted. The sections to fix below reuse the overview's list,
+   and only a file that was sent back has any. */
+.status-banner { display: grid; gap: 12px; }
+.status-banner .banner {
   display: grid;
   gap: 6px;
   background: var(--warn-soft);
   border-radius: var(--r-lg);
   padding: 14px 16px;
 }
-.sent-back .banner-title { font-weight: 700; color: var(--warn); }
-.sent-back .banner-comment { overflow-wrap: anywhere; }
+.status-banner .banner-title { font-weight: 700; color: var(--warn); }
+.status-banner .banner-comment { overflow-wrap: anywhere; }
+.status-banner[data-status="REJECTED"] .banner { background: var(--bad-soft); }
+.status-banner[data-status="REJECTED"] .banner-title { color: var(--bad); }
 
 /* ---------- All steps ---------- */
 .sec-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }

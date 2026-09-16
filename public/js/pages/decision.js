@@ -40,15 +40,27 @@ const stampOf = (iso) => new Date(iso).toLocaleString(locale(), {
   timeZone: "Asia/Kolkata", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false,
 });
 
-// What the workflow is told about this person to decide what they may do with this file. This round's
-// separation of duties is not asked here: applications.get carries the approvals, but reading them
-// into this rule would be the third copy of it (Applications.gs has one, the review screen another),
-// and the case it settles — one person holding two reviewing roles — is latent. Such a person signs
-// and hears ALREADY_APPROVED_STAGE from the server, which is the designed fallback and reads in both
-// languages. What is asked here is what this stage offers this person at all, so the screen never
-// draws a password box that could only be refused.
+// What the workflow is told about this person to decide what they may do with this file, this round's
+// separation of duties included: applications.get ships the approvers with the file, so a Director who
+// approved an earlier stage of this round is not drawn a password box the server would refuse. The
+// list comes from the server rather than being worked out here, because it is the same one the refusal
+// is decided with.
 function ctx() {
-  return { actorId: state.me.id, actorRoles: state.me.roles, createdBy: state.app.createdBy, approvedThisRound: [] };
+  return {
+    actorId: state.me.id, actorRoles: state.me.roles, createdBy: state.app.createdBy,
+    approvedThisRound: state.app.approvedThisRound || [],
+  };
+}
+
+/* Why there is nothing to sign: the workflow's own answer about the two moves this screen signs, so
+   the sentence names the real cause rather than a blanket refusal. A status that does not offer them
+   at all answers INVALID_TRANSITION, which is not a thing to tell a person, so the screen shows the
+   first answer that is about this person's part in the file: ALREADY_APPROVED_STAGE for a Director who
+   approved an earlier stage of this round, OWN_APPLICATION for the person who filled the file in
+   themselves, and NOT_ALLOWED when the stage is simply not theirs to sign. */
+function blockedCode() {
+  const codes = Object.keys(DECISIONS).map((action) => SC_Workflow.next(state.app.status, action, ctx()).error);
+  return codes.find((code) => code && code !== "INVALID_TRANSITION") || "NOT_ALLOWED";
 }
 
 /* Who can see the decision, as far as this screen can honestly say (D1's sentence): the people whose
@@ -119,13 +131,14 @@ function draw() {
   $("review-instead").href = `review.html?id=${encodeURIComponent(app.id)}`;
 
   // Only the moves the workflow allows this person at this stage, in its own order, and nothing at
-  // all when it allows none: then the screen is a sentence saying so rather than a form.
+  // all when it allows none: then the screen is a sentence saying why, rather than a form that could
+  // only be refused.
   const offered = SC_Workflow.availableActions(app.status, ctx());
   state.actions = offered.filter((action) => DECISIONS[action]);
   if (state.actions.length === 0) {
     $("decision-body").hidden = true;
     $("action-bar").hidden = true;
-    showMessage($("message"), state.page.errorMessage({ code: "NOT_ALLOWED" }));
+    showMessage($("message"), state.page.errorMessage({ code: blockedCode() }));
     return;
   }
   if (state.actions.indexOf(state.choice) === -1) state.choice = state.actions[0];

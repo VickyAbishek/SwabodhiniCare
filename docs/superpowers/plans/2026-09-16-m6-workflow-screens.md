@@ -57,7 +57,7 @@ Main §5: on approve the system *"stores a SHA-256 hash of the form data with th
 
 The hash is taken over `formValues(row)`, which rebuilds the answers in `SC_FormSchema.allFields()` order, so the same answers always give the same hash and `JSON.stringify` is deterministic.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```js
 test("the form fingerprint follows the answers and nothing else", () => {
@@ -77,12 +77,12 @@ test("the form fingerprint follows the answers and nothing else", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `node --test tests/poc/applications.test.js`
 Expected: FAIL — `ctx.SC_Applications.formHash is not a function`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```js
   // Main spec §5: a SHA-256 of the answers, stored with every decision so a later change shows up.
@@ -93,12 +93,12 @@ Expected: FAIL — `ctx.SC_Applications.formHash is not a function`.
 
 Add `formHash: formHash` to the frozen object the module returns.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `node --test tests/poc/applications.test.js`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add poc/apps-script/Applications.gs tests/poc/applications.test.js
@@ -122,7 +122,7 @@ Moves `DRAFT` or `RETURNED` to `PENDING_THERAPY_HEAD`, owner only, after the **s
 
 A signature is just a non-empty string to the validator (`shared/form-rules.js` line 112), so this action is fully testable now even though no screen can produce one until M7.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```js
 test("only the owner can send an application for review", () => {
@@ -173,12 +173,12 @@ function submitReady(as, who) {
 
 Remember `plain()` (already imported) whenever a test deep-compares an array or object that came out of the vm context.
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `node --test tests/poc/applications.test.js`
 Expected: FAIL — `UNKNOWN_ACTION: applications.submit`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```js
   // DRAFT or RETURNED -> PENDING_THERAPY_HEAD. Only the owner; every answer is checked again in
@@ -210,12 +210,12 @@ Expected: FAIL — `UNKNOWN_ACTION: applications.submit`.
 
 Register it: `SC_Api.register("applications.submit", SC_Applications.submit);` and add `submit: submit` to the module's frozen return.
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `node --test tests/poc/applications.test.js`
 Expected: PASS (all four).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add poc/apps-script/Applications.gs shared/actions.js tests/poc/applications.test.js
@@ -235,7 +235,7 @@ git commit -m "feat: let the owner send an application for review"
 **Interfaces:**
 - Produces: `applications.withdraw { id } -> { ok, data: view }`, errors `NOT_ALLOWED`, `INVALID_TRANSITION`, `NOT_FOUND`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```js
 test("the owning therapist withdraws a draft; another therapist cannot", () => {
@@ -264,12 +264,12 @@ test("a withdrawn application cannot be sent for review", () => {
 
 `submitReady` is the helper added in Task 2, so Task 2 lands before this one.
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `node --test tests/poc/applications.test.js`
 Expected: FAIL — `UNKNOWN_ACTION: applications.withdraw`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```js
   // DRAFT or RETURNED -> WITHDRAWN. The owner, or an Admin acting for the family. Nothing is
@@ -293,12 +293,12 @@ Expected: FAIL — `UNKNOWN_ACTION: applications.withdraw`.
   }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `node --test tests/poc/applications.test.js`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add poc/apps-script/Applications.gs shared/actions.js tests/poc/applications.test.js
@@ -322,7 +322,7 @@ The heart of M6. Also writes the routing slip.
 
 `ADMIT` and `WAITLIST` are **refused here** and belong to Task 5, which additionally demands the Director's password.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```js
 test("the Therapy Head approves and it moves to the Centre Head", () => {
@@ -404,12 +404,12 @@ test("a decision is written to the audit log", () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `node --test tests/poc/applications.test.js`
 Expected: FAIL — `UNKNOWN_ACTION: applications.review`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```js
   // Which stage a waiting application is at, for the routing slip.
@@ -458,12 +458,12 @@ Expected: FAIL — `UNKNOWN_ACTION: applications.review`.
   }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `node --test tests/poc/applications.test.js`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add poc/apps-script/Applications.gs shared/actions.js tests/poc/applications.test.js
@@ -483,7 +483,7 @@ git commit -m "feat: let each reviewer approve, send back or reject"
 - Consumes: `SC_Auth.verifyKey(user, key) -> boolean` (new), `SC_Numbers.formatRegNo`, `SC_Store.nextSeq`
 - Produces: `applications.decide { id, action, comment, key } -> { ok, data: view }` where `action` is `ADMIT` or `WAITLIST`; errors `INVALID_REQUEST`, `NOT_ALLOWED`, `INVALID_CREDENTIALS`, `COMMENT_REQUIRED`, `INVALID_TRANSITION`, `NOT_FOUND`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 First, `verifyKey` (in `tests/poc/auth.test.js`):
 
@@ -574,12 +574,12 @@ test("registration numbers run per centre and per year, and never repeat", () =>
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `node --test tests/poc/auth.test.js tests/poc/applications.test.js`
 Expected: FAIL — `ctx.SC_Auth.verifyKey is not a function`, then `UNKNOWN_ACTION: applications.decide`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 In `Auth.gs`, extract the check `changePassword` already makes and export it:
 
@@ -643,12 +643,12 @@ In `Applications.gs`:
 
 Add `registrationNo: row.registration_no || null` and `decidedAt: row.decided_at || null` to `view()` if they are not already there (`registrationNo` is; `decidedAt` is not — add it).
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `node --test tests/poc/auth.test.js tests/poc/applications.test.js`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add poc/apps-script/Auth.gs poc/apps-script/Applications.gs shared/actions.js tests/poc/auth.test.js tests/poc/applications.test.js
@@ -667,7 +667,7 @@ git commit -m "feat: let the Director admit or waitlist with their password"
 - Produces: `applications.reopen { id, reason } -> { ok, data: view }`; errors `NOT_ALLOWED`, `COMMENT_REQUIRED`, `INVALID_TRANSITION`, `NOT_FOUND`
 - Produces: `applications.get` now returns `approvals: [{ stage, action, comment, userName, at }]`, oldest first — the routing slip
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 ```js
 test("only the Director or an Admin reopens, and only with a reason", () => {
@@ -709,12 +709,12 @@ test("a reopened application goes through the chain again but keeps its history"
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `node --test tests/poc/applications.test.js`
 Expected: FAIL — `UNKNOWN_ACTION: applications.reopen`, and `approvals` undefined.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 ```js
   // ADMITTED -> RETURNED, for corrections after signing. Director or Admin, reason required.
@@ -757,12 +757,12 @@ Expected: FAIL — `UNKNOWN_ACTION: applications.reopen`, and `approvals` undefi
 
 Add `approvals: approvalsFor(row.id)` to the object `view()` returns.
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `node --test tests/poc/applications.test.js`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add poc/apps-script/Applications.gs shared/actions.js tests/poc/applications.test.js
@@ -786,7 +786,7 @@ No screen can produce a signature until M7, so without a seed there is nothing i
 - Consumes: `tests/poc/harness.js` `createContext`, `plain`; `tests/poc/people.js` `PEOPLE`, `sha`
 - Produces: `seedDemoData(ctx, { call, today }) -> { people, applicationIds }` where `call(personName, action, data)` runs one API call and `today` is an ISO date
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```js
 test("the demo seed leaves work in every queue", () => {
@@ -809,12 +809,12 @@ test("the admitted demo application has a registration number", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `node --test tests/poc/seed.test.mjs`
 Expected: FAIL — cannot find module `poc/seed/demo-applications.mjs`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 `poc/seed/demo-applications.mjs` builds on `public/js/seed/sample-applications.js` (already held to the submit check), varies the applicant name per case, adds the signature string M7 will replace, and walks each case to its target stage through the real endpoints. Shape:
 
@@ -842,16 +842,16 @@ const CASES = [
 
 In `poc/scripts/dev-server.mjs`, call the seed during start-up and log the first-admin code **and** the demo sign-in details, so a person opening the app knows what to try. Keep the seed behind an env var (`SEED=0` to skip) so the test suite and a clean run are unaffected.
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `node --test tests/poc/seed.test.mjs`
 Expected: PASS.
 
-- [ ] **Step 5: Check it in the browser**
+- [x] **Step 5: Check it in the browser**
 
 Restart the dev server, open `home.html`, sign in as each role in turn and confirm each queue has the expected application.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add poc/seed/demo-applications.mjs poc/scripts/dev-server.mjs tests/poc/seed.test.mjs
@@ -872,8 +872,16 @@ Add, in both files: `queue.title`, `queue.waiting` (`{n}` applications waiting),
 
 The English wording is in the mockups and in the spec extract above; take it from there rather than inventing. The Tamil is a first draft (already flagged for school-staff review).
 
-- [ ] Add the keys, then run `node --test tests/public/i18n.test.mjs` — it already asserts the two files hold the same keys. Expected: PASS.
-- [ ] Commit: `git commit -m "feat: add the workflow screens' English and Tamil text"`
+> **Corrected at M6 close-out — two of those keys were never added.** `slip.therapist` shipped as
+> `role.THERAPIST` ("Therapist" / "சிகிச்சையாளர்") and `sentBack.title` as `status.RETURNED` ("Sent
+> back" / "திருப்பி அனுப்பப்பட்டது"); in both cases the key already held the same words in both
+> languages, so a second one would have been a duplicate. Task 8 shipped **171 keys each** (113 → 171),
+> and its block above names 58 of the 86 added — the other **28 are listed under "Carry-forwards
+> recorded at M6 close-out"** below, because the Tamil review has to read them: they were written by
+> the implementers rather than lifted from a mockup.
+
+- [x] Add the keys, then run `node --test tests/public/i18n.test.mjs` — it already asserts the two files hold the same keys. Expected: PASS.
+- [x] Commit: `git commit -m "feat: add the workflow screens' English and Tamil text"`
 
 ---
 
@@ -883,7 +891,7 @@ The English wording is in the mockups and in the spec extract above; take it fro
 
 Start with the one server change this screen needs. `listItem` carries no `dob`, so the card cannot show the age the mockup asks for (`"19 yrs · Male · Selaiyur"`). Add it and let the client work the age out with `SC_Dates`, rather than a second round-trip per card or a stored age that goes stale.
 
-- [ ] **Step 1: Write the failing server test**
+- [x] **Step 1: Write the failing server test**
 
 ```js
 test("the list carries the date of birth so a queue card can show the age", () => {
@@ -894,12 +902,12 @@ test("the list carries the date of birth so a queue card can show the age", () =
 });
 ```
 
-- [ ] **Step 2: Run it, watch it fail**
+- [x] **Step 2: Run it, watch it fail**
 
 Run: `node --test tests/poc/applications.test.js`
 Expected: FAIL — `undefined !== "2020-03-14"`.
 
-- [ ] **Step 3: Add `dob` to `listItem`**
+- [x] **Step 3: Add `dob` to `listItem`**
 
 ```js
   function listItem(row) {
@@ -914,7 +922,7 @@ Expected: FAIL — `undefined !== "2020-03-14"`.
 
 `gender` comes along free from the same summary columns and saves a second lookup for the same line of the card.
 
-- [ ] **Step 4: Run it, watch it pass**
+- [x] **Step 4: Run it, watch it pass**
 
 Run: `node --test tests/poc/applications.test.js`
 Expected: PASS.
@@ -929,10 +937,10 @@ Main §7 + POC §8 govern this screen:
 - Empty state: "No applications are waiting for you."
 - Rows needing *this* person's action sort first; `SC_Workflow.reviewerRole(status)` says whose turn it is, and `SC_Workflow.availableActions(status, ctx)` says whether this person may act.
 
-- [ ] TDD the two pure functions in `routing-slip.js` (track position per status; slip states from approvals) — they are testable without a DOM.
-- [ ] Build the queue on Home, replacing the "My Queue arrives in M6" note.
-- [ ] Browser pass: sign in as Lakshmi and confirm the Therapy Head card is stamped "Your turn" and the admitted one is not.
-- [ ] Commit: `git commit -m "feat: show each person the work waiting for them"`
+- [x] TDD the two pure functions in `routing-slip.js` (track position per status; slip states from approvals) — they are testable without a DOM.
+- [x] Build the queue on Home, replacing the "My Queue arrives in M6" note.
+- [x] Browser pass: sign in as Lakshmi and confirm the Therapy Head card is stamped "Your turn" and the admitted one is not.
+- [x] Commit: `git commit -m "feat: show each person the work waiting for them"`
 
 ---
 
@@ -947,7 +955,7 @@ Shows the applicant summary, the key facts (diagnosis, the therapist's view, rec
 - Errors map through `page.errorMessage()`, so `OWN_APPLICATION`, `ALREADY_APPROVED_STAGE` and `COMMENT_REQUIRED` already read correctly in both languages.
 - Browser pass: approve as Lakshmi, then send back as Suresh and confirm the comment is required.
 
-- [ ] Commit: `git commit -m "feat: add the review screen with approve, send back and reject"`
+- [x] Commit: `git commit -m "feat: add the review screen with approve, send back and reject"`
 
 ---
 
@@ -962,7 +970,7 @@ In the order S7 sets out: the Admit / Waitlist choice; the **registration number
 - After signing, show the D1 confirmation: the registration number, "Signed by you", and the lock note.
 - Browser pass: sign in as Revathi, admit the seeded application, and confirm the wrong password is refused.
 
-- [ ] Commit: `git commit -m "feat: add the Director's decision screen with password step-up"`
+- [x] Commit: `git commit -m "feat: add the Director's decision screen with password step-up"`
 
 ---
 
@@ -977,7 +985,7 @@ When `status === "RETURNED"`, the form opens with a banner above the questions: 
 - The submit button stays hidden while `CONFIG` cannot produce a signature (M7); everything else on this screen works now.
 - Browser pass: open the seeded sent-back application as Priya and confirm the comment shows and the form is editable.
 
-- [ ] Commit: `git commit -m "feat: show a sent-back application with its reviewer's comment"`
+- [x] Commit: `git commit -m "feat: show a sent-back application with its reviewer's comment"`
 
 ---
 
@@ -991,7 +999,12 @@ No mockup exists for either — the mockups' own footer lists them as still to d
 - **Withdraw** (owner or Admin, from DRAFT or RETURNED): a confirmation that says plainly that nothing is deleted, and that the family can ask again later. Calls `applications.withdraw`.
 - Browser pass: reopen the admitted demo application as Revathi and confirm it returns to Priya's queue as "Sent back".
 
-- [ ] Commit: `git commit -m "feat: add the reopen and withdraw screens"`
+- [x] Commit: `git commit -m "feat: add the reopen and withdraw screens"`
+
+> **As built:** only `public/js/pages/reopen.js` was created. Withdraw shipped inside the form screen's
+> own file actions (`application.html`'s `#file-actions`, rendered by `pages/application.js`) — the
+> second of the two options above, and the better one: the control sits on the file whose answers it
+> promises not to delete. There is no `pages/withdraw.js`.
 
 ---
 
@@ -1003,3 +1016,64 @@ No mockup exists for either — the mockups' own footer lists them as still to d
 - The **signature upload** and the **photo** are M7. Task 11's preview and Task 12's submit button both stop at "available in a later update", exactly as the form already does.
 - **Reopen keeps the registration number** (Decision #5). This interacts with the still-open question in TODO.md about whether a reopened application repeats every approval, and should be re-checked when that is settled.
 **Resolved during the pre-flight scan** (see the ledger for the full table): `applications.list` carried neither `dob` nor `gender`, so Task 9 now starts by adding both to `listItem` and working the age out on the client. Five other conflicts between a task's own tests and its own code were found and fixed in place: `submit` now checks who may act before what the answers say (else a non-owner got `VALIDATION_FAILED` instead of `NOT_ALLOWED`); the sent-back test saves at `version: 4`, not 3, because submit, approve and send-back each bump it; the Director's **Reject** goes through `review`, not `decide`, since rejecting is not signing; and a Centre Head reopening someone else's admitted application gets `NOT_ALLOWED`, not `NOT_FOUND`, because he is allowed to see it.
+
+---
+
+## Carry-forwards recorded at M6 close-out
+
+Four things the milestone settled that no tracked file said, copied here from the milestone ledger so
+they travel with the repository rather than with one developer's working copy. Each one is a rule for
+work that has not started yet.
+
+**1. Two-role staffing is a requirement, not just a UI gap.** Main spec §4 forbids one person approving
+two stages of the same round, so if the only holder of a later reviewing role also approved an earlier
+stage of that application, **nobody can move it**: `REVIEWER[PENDING_DIRECTOR]` is `DIRECTOR`, and an
+Admin is refused there unless they also carry `DIRECTOR`. This is inherent to `shared/workflow.js` and
+predates M6, so no code change is proposed — but it belongs in the POC close-out checklist as an
+operational ask: **each reviewing stage needs at least one person who has not already approved that
+round.** The demo seed cannot show the gap, because every demo person holds exactly one role.
+
+**2. Carry into M8: a rejection's date comes from its `Approvals` row, not from `decided_at`.** A
+rejection goes through `applications.review`, not `decide`, so a rejected application has no
+`decided_at` — and stamping it there would make a Director-scoped field mean "when any reviewer made a
+terminal decision", which is the ambiguity `decided_at` was narrowed to avoid. Every decision's action,
+reviewer and time is already on the routing slip, so the turnaround report (R5) must take a
+rejection's date from it. A report that reads `decided_at` instead shows a blank column rather than
+wrong data.
+
+**3. `[PROD]` The port must hash the same normalized serialization the POC does.** Main spec §5 promises
+that "any later change can be detected" from the SHA-256 stored with an approval. Main spec §8 names
+the production column `form_json`, which has no POC counterpart: the POC keeps one Sheet column per
+question, and `SC_Applications.formHash` reconstructs the object through `formValues(row)` in
+`SC_FormSchema.allFields()` order. If the port hashes a differently-shaped object, an approval taken
+before the port and a change made after it cannot be compared with each other, and the promise breaks
+silently at the moment of the port. (No POC impact.)
+
+**4. The Tamil review list is 28 keys, not the 10 first recorded.** Task 8's block above accounts for 58
+of the 86 keys it added; the other 28 shipped without ever appearing in the plan, so nothing has
+reviewed their Tamil — and, unlike the ten whose *wording* an implementer wrote for a key the plan did
+name, these names were never in front of a reviewer at all. They were found by diffing this plan's Task
+8 key block against `public/i18n/en.json` at `c00f12e` (before M6c: 113 keys) and at `91bbd68` (the
+milestone's last commit: 199 keys — Task 8 shipped 171 of them, the screens after it the rest):
+
+`action.reopen`, `action.signAndWaitlist`, `common.and`, `common.refresh`,
+`confirm.approveToCentreHead`, `confirm.decideWaitlistTitle`, `confirm.rejectBody`,
+`confirm.rejectTitle`, `confirm.reopenBody`, `confirm.reopenTitle`, `confirm.sendBackBody`,
+`confirm.sendBackTitle`, `confirm.yesReject`, `confirm.yesReopen`, `confirm.yesSendBack`,
+`confirm.yesSign`, `confirm.yesWithdraw`, `decide.regNoKept`, `decide.regNoPreview`,
+`decide.sendBackInstead`, `decide.waitlisted`, `queue.ageYears`, `queue.waitingOne`, `reopen.done`,
+`reopen.reasonMissing`, `review.noSafety`, `sentBack.by`, `sentBack.fix`.
+
+Three of the sentences those keys hold have since been re-decided, so the Tamil reviewer should read
+the list against the file as it stands rather than against this milestone's end: `queue.waitingOne` has
+been deleted (the queue sentence no longer carries a number, so it needs no singular form to go with
+it), `queue.ageYears` has become `queue.age` and now shows months (`{y} yrs {m} mths`, as mockup S6
+draws it), and `review.title`, `common.open` and `home.comingSoon` were removed as keys with nothing
+left to claim. `common.printReport` stays: M8's report screen is what it was written for.
+
+Also settled at close-out, and worth stating because two of them were recorded in the ledger the wrong
+way round: `approversThisRound`'s `>=` **is** pinned by the two dual-role tests, which never tick the
+clock (so no test change was ever owed for it), and an Admin's reopen keeps `stage: "DIRECTOR"` on its
+`Approvals` row — that data is right — while the role a screen names comes from the payload's `role`
+field, because the therapist's banner used to read "Anand (Director)" for an Admin who holds no such
+role.

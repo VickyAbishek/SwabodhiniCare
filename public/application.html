@@ -32,18 +32,20 @@
     </div>
     <p class="app-ref mono" id="app-no"></p>
 
-    <!-- A file that was sent back opens with why (main spec §5): who sent it, when, and what they
-         said, above the questions. Everything with data in it is filled in by the screen; only the
-         fixed wording stands here. -->
-    <section class="sent-back" id="sent-back" aria-labelledby="sent-back-stamp" hidden>
-      <span class="stamp" id="sent-back-stamp" data-status="RETURNED"></span>
-      <div class="banner">
-        <p class="banner-title" id="sent-back-by"></p>
-        <p class="banner-comment" id="sent-back-comment"></p>
+    <!-- Why a file stands where it does (main spec §5): the status stamp and, when a decision put a
+         reason on the routing slip, who took it, when, and what they said — a send-back, a rejection
+         or a reopen. A file that was sent back adds the sections still to fix and where it goes next;
+         a rejected, settled or waiting file has nothing left to do, so it shows the reason and stops.
+         Everything with data in it is filled in by the screen; only the fixed wording stands here. -->
+    <section class="status-banner" id="status-banner" aria-labelledby="banner-stamp" hidden>
+      <span class="stamp" id="banner-stamp" data-status="RETURNED"></span>
+      <div class="banner" id="banner-words">
+        <p class="banner-title" id="banner-by"></p>
+        <p class="banner-comment" id="banner-comment"></p>
       </div>
       <h2 id="fix-title" data-i18n="sentBack.stepsToFix">Steps to fix</h2>
       <ol class="sec-list" id="fix-list"></ol>
-      <p class="note" data-i18n="sentBack.resendNote">When you resend, it goes to the Therapy Head again.</p>
+      <p class="note" id="resend-note" data-i18n="sentBack.resendNote">When you resend, it goes to the Therapy Head again.</p>
     </section>
 
     <button type="button" class="btn btn-outline btn-small demo-fill" id="fill-sample" data-i18n="form.fillSample" hidden>Fill with sample data</button>

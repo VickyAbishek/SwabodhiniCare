@@ -50,13 +50,14 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 - [x] `[POC]` Sample answers for demos: `public/js/seed/sample-applications.js` — invented, and must pass the submit check except the signature (test accounts are made by the Admin in the app)
 - [x] `[POC]` "Fill with sample data" button behind `IS_DEMO` — `SAMPLE_DATA` in `config.js`, named like `BACKEND` so no shared screen names POC code
 
-### M6: Workflow screens · plan: `docs/superpowers/plans/2026-09-16-m6-workflow-screens.md` · 🚧 in progress
-- [ ] `[POC]` Demo seed: the dev server starts with an application at every stage, so the queues can be shown before uploads exist (M7). Added by decision, not in the spec
-- [ ] `[SHARED]` My Queue (auto-refresh every 60 s while visible, Refresh button), review screen, routing slip
-- [ ] `[SHARED]` Approve / Send back / Reject with confirmations; sent-back view with "Fix and resend"
-- [ ] `[SHARED]` Director decision: Admit / Waitlist / Reject, password step-up, stored signature, registration number, lock
+### M6: Workflow screens · plan: `docs/superpowers/plans/2026-09-16-m6-workflow-screens.md` · ✅ done (289 tests; all five actions reviewed, every screen checked in a browser)
+- [x] `[POC]` Demo seed: the dev server starts with an application at every stage, so the queues can be shown before uploads exist (M7). Added by decision, not in the spec
+- [x] `[SHARED]` My Queue (auto-refresh every 60 s while visible, Refresh button), review screen, routing slip
+- [x] `[SHARED]` Approve / Send back / Reject with confirmations; sent-back view with "Fix and resend"
+- [x] `[SHARED]` Director decision: Admit / Waitlist / Reject, password step-up, stored signature, registration number, lock
 - [x] `[POC]` `Applications.gs`: submit, review, decide, reopen, withdraw (using `shared/workflow.js`), form fingerprint — all five actions done and reviewed (plan tasks 1–6)
-- [ ] `[SHARED]` Reopen and withdraw screens
+- [x] `[SHARED]` Reopen and withdraw screens — reopen is `reopen.html`; withdraw lives on the form screen's own file actions, next to the answers it promises not to delete
+- [x] `[SHARED]` A file that has left the therapist's hands opens with its status and, when a decision left one, that decision's reason — a rejection's reason is otherwise shown nowhere (close-out fix)
 
 ### M7: Files
 - [ ] `[SHARED]` `image-compress.js` (canvas, ≤1600 px, ~300 KB), file pickers (camera and gallery)
@@ -67,6 +68,7 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 - [ ] `[SHARED]` Reports screens (R1–R7) with filters and CSS bar charts
 - [ ] `[SHARED]` `xlsx.js`: Excel built in the browser (UTF-8, Tamil-safe)
 - [ ] `[SHARED]` A4 Individual Assessment Report (`print.html` + `print.css`)
+- [ ] `[SHARED]` Pending & Turnaround (R5): take a rejection's date from its `Approvals` row, not from `decided_at`, which no rejection writes (M6 plan, carry-forward 2)
 - [ ] `[POC]` `Reports.gs`: reads rows, filters, pages of 50
 
 ### M9: Backups, alerts, admin
@@ -83,6 +85,7 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 - [ ] `[SHARED]` Security review before handing to staff
 
 ### POC close-out
+- [ ] `[POC]` Staffing: make sure every reviewing stage has someone who has not already approved the same round — main spec §4 forbids one person approving two stages, so a school with a single holder of a later role can leave a file stuck at that stage (see the M6 plan's carry-forwards)
 - [ ] `[POC]` Staff testing with one test account per role (POC spec §16 exit criteria)
 - [ ] `[POC]` Collect feedback on form wording, Tamil text, reports
 - [ ] `[POC]` Decide: stay on Sheets for a small pilot, or move to Phase 1
@@ -93,7 +96,7 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 ## Phase 1: Production on Cloudflare (only if the POC review decides to move)
 
 - [ ] `[PROD]` `prod/worker/`: Worker router with REST `/api/*`, same `shared/` modules
-- [ ] `[PROD]` D1 migration `0001_init.sql` (same columns as the Sheet tabs)
+- [ ] `[PROD]` D1 migration `0001_init.sql` (same columns as the Sheet tabs). The fingerprint must hash the same normalized serialization the POC hashes, or an approval taken before the port cannot be compared with a change made after it (M6 plan, carry-forward 3)
 - [ ] `[PROD]` `public/js/backends/prod.js`: REST calls, `HttpOnly` cookie session
 - [ ] `[PROD]` Per-IP login rate limit
 - [ ] `[PROD]` R2 uploads (streamed) + usage guard + Usage page

@@ -44,17 +44,13 @@ function span(className, text) {
 }
 
 /* Who has already approved this round — one person may not approve two stages of the same
-   application, which is what matters for anybody holding two reviewing roles. The browser's twin of
-   approversThisRound in poc/apps-script/Applications.gs, and the two must stay in step: the rule is
-   written twice only because applications.get does not carry the answer ready-made. It is the ids on
-   the Approvals rows whose action approves (APPROVE or ADMIT — a WAITLIST is not an approval, or a
-   Director who waitlisted could never admit later) and whose time is at or after submittedAt. Each
-   SUBMIT re-stamps submittedAt, so a send-back and resend clears the round by itself. */
+   application, which is what matters for anybody holding two reviewing roles. The server answers it on
+   the file, from the same list its own refusal is decided with, so this screen shows the rule the
+   server would apply. It used to work the answer out here from the slip, which made the browser a
+   second copy of approversThisRound in poc/apps-script/Applications.gs: a separation-of-duties guard
+   written twice, with only a browser pass able to catch the two drifting apart. */
 function approversThisRound() {
-  const submittedAt = state.app.submittedAt;
-  return (state.app.approvals || [])
-    .filter((row) => (row.action === "APPROVE" || row.action === "ADMIT") && (!submittedAt || row.at >= submittedAt))
-    .map((row) => row.userId);
+  return state.app.approvedThisRound || [];
 }
 
 // The context SC_Workflow checks an action against, from what this screen knows: the person signed in,
@@ -89,8 +85,10 @@ function optionLabel(list, value) {
   return value ? SC_FormSchema.optionLabel(list, value, lang()) || "" : "";
 }
 
-// "19 yrs · Male · Velachery", the line the queue card shows too, worked out from the date of birth
-// every time it is drawn so it stays right while a file sits in the queue.
+// "6 yrs 6 mths · Male · Velachery", the line the queue card shows too — mockup S6's own line, months
+// and all: this is the age a reviewer reads before deciding, and a child of ten months is not "0 yrs".
+// Worked out from the date of birth every time it is drawn, so it stays right while a file sits in the
+// queue.
 function subtitle() {
   const app = state.app;
   const values = app.values || {};
@@ -98,7 +96,8 @@ function subtitle() {
   let age = "";
   if (dob) {
     try {
-      age = state.page.t("queue.ageYears", { n: SC_Dates.ageFrom(dob, today()).years });
+      const born = SC_Dates.ageFrom(dob, today());
+      age = state.page.t("queue.age", { y: born.years, m: born.months });
     } catch (err) {
       age = ""; // a date that is not a real one: the line shows the rest of it without the age
     }
@@ -194,9 +193,12 @@ function slipList() {
   });
 }
 
-// The wording of the confirmation. Approving names who decides next, which each destination words
-// for itself; every other action uses the one title it has. Which of them applies comes from the
-// workflow's own call, the one the server makes, so it cannot outlive a change to the route.
+// The wording of the confirmation. Approving names who decides next, which each destination words for
+// itself; every other action uses the one title it has. Which of them applies comes from the
+// workflow's own call, the one the server makes, so a change to the route is answered here and not by
+// a copy of the route. The fallback is the action's own title, and for Approve that title names the
+// Director — so a destination nobody has worded yet would be confirmed with the wrong person named,
+// which is why a new route has to arrive with the sentence it needs.
 function titleKey(action) {
   const move = SC_Workflow.next(state.app.status, action, ctx($("comment").value.trim()));
   const to = move.ok ? APPROVE_TITLES[move.status] : null;

@@ -1,10 +1,11 @@
 // scope: shared
 // The 11-step application form: one step per screen, big tap answers, automatic saving and the
 // all-steps overview. The server checks every answer; the same shared rules run here for progress.
-// A file that was sent back opens with the reviewer's comment above the questions and, in place of
-// Save & Next, the button that sends it to the Therapy Head again (main spec §5). A draft or a file
-// sent back can also be withdrawn from here and an admitted one reopened, each offered only to the
-// people the workflow would let take it (main spec §5).
+// A file opens with a banner saying where it stands and, when a decision left a reason behind — sent
+// back, reopened, rejected — who took it and what they said (main spec §5). A file that was sent back
+// adds the sections still to fix and, in place of Save & Next, the button that sends it to the Therapy
+// Head again. A draft or a file sent back can also be withdrawn from here and an admitted one
+// reopened, each offered only to the people the workflow would let take it (main spec §5).
 // Uses the SC_* shared scripts loaded by application.html.
 import { startPage, showMessage, setBusy, goTo, PAGES } from "../page.js";
 import { CONFIG } from "../config.js";
@@ -18,15 +19,16 @@ const view = createFormView({ schema: SC_FormSchema, rules: SC_FormRules, dates:
 const $ = (id) => document.getElementById(id);
 const EDITABLE = ["DRAFT", "RETURNED"];
 const TEXT_TYPES = ["text", "textarea", "phone", "pincode", "number"];
-// The decisions that put a file back on the therapist's desk with a reason. A file is RETURNED
-// because one of these was taken, so the banner reads the last of them: what it has to answer now.
-const RETURN_ACTIONS = ["SEND_BACK", "REOPEN"];
+// The decisions that leave a reason on the slip: a file is RETURNED because a reviewer sent it back or
+// the Director reopened it, and REJECTED because one rejected it. The banner shows the last of them —
+// what the family has to answer now — and an earlier round's reason stays on the routing slip.
+const REASON_ACTIONS = ["SEND_BACK", "REOPEN", "REJECT"];
 // Typed answers that show or hide other questions on the same step.
 const SHOW_IF_SOURCES = new Set(SC_FormSchema.allFields().filter((f) => f.showIf && f.showIf.field).map((f) => f.showIf.field));
 
 const state = {
   page: null, me: null, app: null, values: {}, errors: {}, step: "s1", mode: "step",
-  readOnly: false, resend: false, sentBack: null, autosave: null, sheet: null, status: null,
+  readOnly: false, resend: false, banner: null, autosave: null, sheet: null, status: null,
 };
 // Reloading after a clash is the fix the message asks for, so leaving is meant and not warned about.
 let leavingOnPurpose = false;
@@ -42,18 +44,34 @@ const shortDate = (iso) => new Date(iso).toLocaleDateString(lang() === "en" ? "e
    carries the routing slip and `applications.save` — the autosave — does not, so this is taken from
    the loaded copy and kept: reading it off state.app would lose it on the first save.
 
-   `by` is the last send-back or reopen, the decision the therapist has to answer now; an earlier
-   round's comment stays on the routing slip, which the review screen shows in full. `therapyHead` is
-   the name this file's slip carries for the stage it is going back to — the person who last handled
-   it there — because the staff list is the Admin's to read and nobody else can be looked up. */
-function returnInfo(app) {
-  if (app.status !== "RETURNED") return null;
+   It is drawn for every status a draft is not: a file with a reviewer, a rejected one, a settled one.
+   The stamp says where the file stands, which is the one thing a therapist opening a file that has
+   left her hands cannot otherwise see, and a rejection's reason is written down nowhere else she can
+   reach. `returned` is the only one of those states that is also work, and it is what the "Steps to
+   fix" list and the resend button hang off.
+
+   `by` is the last send-back, reopen or rejection, the decision the family has to answer now; an
+   earlier round's reason stays on the routing slip, which the review screen shows in full.
+   `therapyHead` is the name this file's slip carries for the stage it is going back to — the person
+   who last handled it there — because the staff list is the Admin's to read and nobody else can be
+   looked up. */
+function bannerInfo(app) {
+  if (app.status === "DRAFT") return null;
   const rows = app.approvals || [];
   const head = rows.filter((row) => row.stage === "THERAPY_HEAD").pop();
   return {
-    by: rows.filter((row) => RETURN_ACTIONS.includes(row.action)).pop() || null,
+    status: app.status,
+    returned: app.status === "RETURNED",
+    by: rows.filter((row) => REASON_ACTIONS.includes(row.action)).pop() || null,
     therapyHead: (head && head.userName) || "",
   };
+}
+
+// The role to name for the person on a slip row: the role the server recorded with the decision, which
+// is the stage's own wherever they hold it, and their own role otherwise — an Admin's reopen is
+// recorded at the DIRECTOR stage, and naming that stage would give them a job title they do not have.
+function rowRole(row) {
+  return `role.${row.role || row.stage}`;
 }
 
 function setUrl() {
@@ -115,28 +133,33 @@ function span(className, text) {
   return node;
 }
 
-// The banner above the questions: "Sent back", who sent it back and when, and their words in full.
-// Nothing of it is drawn for a file that was not sent back, so a draft, a file waiting on a reviewer
-// and a settled one all open exactly as they did before.
-function renderSentBack() {
+// The banner above the questions: the status the file stands in and, when a decision left a reason,
+// who took it and when, with their words in full. A draft has none of this — nothing has happened to
+// it yet — and every other status has at least the stamp: a file waiting on a reviewer says so, and a
+// rejected one carries the reason the family was never able to read before.
+function renderBanner() {
   const { t } = state.page;
-  const info = state.sentBack;
-  $("sent-back").hidden = !info;
+  const info = state.banner;
+  $("status-banner").hidden = !info;
   if (!info) return;
-  $("sent-back-stamp").textContent = t("status.RETURNED");
+  $("status-banner").dataset.status = info.status;
+  $("banner-stamp").textContent = t(`status.${info.status}`);
+  $("banner-stamp").dataset.status = info.status;
   const row = info.by;
-  // A returned file has the decision that returned it on its slip; if that row were ever missing,
-  // the banner says only what it can rather than naming a stage nobody decided at.
-  $("sent-back-by").textContent = row
-    ? t("sentBack.by", {
-      name: row.userName || t(`role.${row.stage}`),
-      role: t(`role.${row.stage}`),
-      date: shortDate(row.at),
-    })
-    : t("status.RETURNED");
+  // The words are quoted with the person who gave them. A file with no such row — one waiting on its
+  // first reviewer — says only what it can rather than naming a stage nobody has decided at.
+  $("banner-by").textContent = row
+    ? t("sentBack.by", { name: row.userName || t(rowRole(row)), role: t(rowRole(row)), date: shortDate(row.at) })
+    : "";
+  $("banner-by").hidden = !row;
   const comment = row ? row.comment || "" : "";
-  $("sent-back-comment").textContent = comment;
-  $("sent-back-comment").hidden = !comment;
+  $("banner-comment").textContent = comment;
+  $("banner-comment").hidden = !comment;
+  $("banner-words").hidden = !row && !comment;
+  // Only a file that was sent back has work left on it, so only a returned file is told where to go
+  // next and shown the sections to fix. Everything below this line belongs to that state alone.
+  $("fix-title").hidden = !info.returned;
+  $("resend-note").hidden = !info.returned;
   renderFixList();
 }
 
@@ -145,7 +168,7 @@ function renderSentBack() {
    "done" belong here: a section nobody has started is as much work as one with answers missing.
    Nothing left to fix leaves the heading and the list out rather than showing an empty one. */
 function renderFixList() {
-  if (!state.sentBack) return;
+  if (!state.banner || !state.banner.returned) return;
   const steps = SC_FormRules.completion(state.values, today()).steps;
   const toFix = view.stepIds.filter((id) => steps[id] !== "done");
   $("fix-title").hidden = toFix.length === 0;
@@ -218,7 +241,7 @@ function renderStep() {
   const ctx = { t, today: today(), view, readOnly: state.readOnly, errorText, onAnswer };
   $("fields").replaceChildren(...model.fields.map((field) => renderQuestion(field, ctx)));
   drawPrimary(model);
-  renderSentBack();
+  renderBanner();
   renderFileActions();
   if (state.status) showStatus(state.status);
 }
@@ -298,8 +321,8 @@ function askToResend() {
   // T4's sheet names the Therapy Head who will read it: this file's slip carries that name when it
   // has been through the stage. When it has not, the confirmation says what happens without naming
   // anybody, rather than leaving an unfilled {name} in the sentence.
-  const body = state.sentBack.therapyHead
-    ? t("confirm.sendBody", { name: state.sentBack.therapyHead })
+  const body = state.banner.therapyHead
+    ? t("confirm.sendBody", { name: state.banner.therapyHead })
     : t("sentBack.resendNote");
   state.sheet.open({
     title: t("confirm.sendTitle"),
@@ -387,7 +410,7 @@ async function withdraw() {
     state.app = result.data;
     state.readOnly = true;
     state.resend = false;
-    state.sentBack = returnInfo(state.app);
+    state.banner = bannerInfo(state.app);
     state.sheet.close();
     show(state.mode);
     showMessage($("message"), page.t("withdraw.done"), "ok");
@@ -472,10 +495,10 @@ async function main() {
   state.step = loaded.step;
   state.mode = loaded.mode;
   state.readOnly = loaded.app.createdBy !== me.data.id || !EDITABLE.includes(loaded.app.status);
-  state.sentBack = returnInfo(loaded.app);
+  state.banner = bannerInfo(loaded.app);
   // Only the file's own therapist sends it again: anyone else reading a returned file sees the
   // reason, and nothing on the screen pretends they could act on it.
-  state.resend = Boolean(state.sentBack) && !state.readOnly;
+  state.resend = Boolean(state.banner && state.banner.returned) && !state.readOnly;
   state.autosave = createAutosave({ diff: view.changedValues, save: saveAnswers, onStatus: showStatus });
   state.autosave.start({ values: state.values, version: loaded.app.version });
   state.sheet = createConfirmSheet();
