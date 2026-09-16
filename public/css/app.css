@@ -576,3 +576,17 @@ textarea.input { min-height: 120px; resize: vertical; }
   .report-filters { grid-template-columns: 1fr; }
   .bar-row { grid-template-columns: 6rem 1fr 2rem; }
 }
+
+/* ---------- Admin ---------- */
+.admin-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.admin-head h2 { margin: 0; font-size: 1.05rem; }
+.staff-form { display: grid; gap: 10px; }
+.staff-form .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.temp-password { display: grid; gap: 8px; padding: 14px; background: var(--ok-soft); border-radius: var(--r-lg); }
+.temp-password-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-weight: 700; color: var(--ok); }
+.temp-password code { font-family: var(--f-mono); font-size: 1.15rem; font-weight: 700; letter-spacing: 0.08em; overflow-wrap: anywhere; }
+.pager { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 12px; }
+.pager .page-info { color: var(--ink-2); font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+@media (max-width: 480px) {
+  .staff-form .row { grid-template-columns: 1fr; }
+}

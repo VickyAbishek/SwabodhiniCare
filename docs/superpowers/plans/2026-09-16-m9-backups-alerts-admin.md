@@ -64,14 +64,14 @@ One screen, three sections (Staff / Backups / Audit) each gated by its capabilit
 - **Consumes:** `startPage`/`showMessage`/`setBusy` from `../page.js`; `window.SC_Permissions.can(me.roles, cap)`; `users.list`/`users.create`, `admin.backups.list`/`admin.backups.runNow`, `admin.audit.list`; the `{ ok, data, error }` envelope and `page.errorMessage`.
 - **Produces:** the Staff list + add form (temp password shown once with a copy button and a "not saved anywhere" note), the Backups list + Backup-now button behind a confirmation, and the paged Audit log.
 
-- [ ] **Step 1: Add the i18n keys** to `en.json`/`ta.json` (`admin.*`: nav, section titles, staff table, add-staff form and its one-time-password note, backups table + Backup-now + confirmation, audit columns, and paging).
-- [ ] **Step 2: Append the admin styles to `public/css/app.css`** (section cards, the one-time-password callout, table styles shared with reports).
-- [ ] **Step 3: Create `public/admin.html`** (the three `<section>`s with `hidden` toggles).
-- [ ] **Step 4: Create `public/js/pages/admin.js`** — render each section from its action; `users.create` captures and shows the returned temporary password once; `admin.backups.runNow` refreshes the list on success; audit pages forward/back.
-- [ ] **Step 5: Add the gated Admin link to the home screen** (`home.js`), visible for any of `users.manage`, `backups.view`, `audit.view`.
-- [ ] **Step 6: Run the scope check and the suite.**
-- [ ] **Step 7: Verify in a browser** (Admin sees all three; Director sees Backups + Audit but not Staff and no Backup-now; Therapist sees no Admin link).
-- [ ] **Step 8: Commit** (`feat: admin screen — staff, backups and audit`).
+- [x] **Step 1: Add the i18n keys** to `en.json`/`ta.json` (`admin.*`: nav, section titles, staff table, add-staff form and its one-time-password note, backups table + Backup-now + confirmation, audit columns, and paging).
+- [x] **Step 2: Append the admin styles to `public/css/app.css`** (section cards, the one-time-password callout, table styles shared with reports).
+- [x] **Step 3: Create `public/admin.html`** (the three `<section>`s with `hidden` toggles).
+- [x] **Step 4: Create `public/js/pages/admin.js`** — render each section from its action; `users.create` captures and shows the returned temporary password once; `admin.backups.runNow` refreshes the list on success; audit pages forward/back.
+- [x] **Step 5: Add the gated Admin link to the home screen** (`home.js`), visible for any of `users.manage`, `backups.view`, `audit.view`.
+- [x] **Step 6: Run the scope check and the suite.**
+- [x] **Step 7: Verify in a browser** (Admin sees all three; Director sees Backups + Audit but not Staff and no Backup-now; Therapist sees no Admin link).
+- [x] **Step 8: Commit** (`feat: admin screen — staff, backups and audit`).
 
 ---
 

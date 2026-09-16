@@ -233,6 +233,7 @@ async function main() {
   page.onRender(draw);
   $("new-application").hidden = !SC_Permissions.can(user.roles, "application.create");
   $("nav-reports").hidden = !SC_Permissions.can(user.roles, "reports.view");
+  $("nav-admin").hidden = !["users.manage", "backups.view", "audit.view"].some((cap) => SC_Permissions.can(user.roles, cap));
   $("refresh").addEventListener("click", () => refresh());
   keepFresh();
   await load();

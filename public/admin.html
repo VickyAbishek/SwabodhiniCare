@@ -1,0 +1,117 @@
+<!-- scope: shared -->
+<!doctype html>
+<html lang="ta" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SwabodhiniCare</title>
+<script src="js/theme-boot.js"></script>
+<script src="shared/dates.js"></script>
+<script src="shared/actions.js"></script>
+<script src="shared/permissions.js"></script>
+<script src="shared/workflow.js"></script>
+<script src="shared/form-schema.js"></script>
+<link rel="stylesheet" href="css/app.css">
+<script type="module" src="js/pages/admin.js"></script>
+</head>
+<body>
+<div class="app">
+  <header class="app-bar">
+    <span class="wordmark">Swabodhini<b>Care</b></span>
+    <button type="button" class="btn btn-outline btn-small" data-lang-toggle>தமிழ் / English</button>
+  </header>
+  <main class="screen">
+    <div class="brand">
+      <h1 data-i18n="admin.title">Admin</h1>
+      <p class="muted" data-i18n="admin.subtitle">Staff accounts, backups and the audit log</p>
+    </div>
+    <p class="alert alert-bad" id="message" role="alert" hidden></p>
+
+    <section class="panel" id="staff-section" aria-labelledby="staff-title" hidden>
+      <div class="admin-head">
+        <h2 id="staff-title" data-i18n="admin.staff">Staff</h2>
+      </div>
+      <h3 class="muted" data-i18n="admin.addStaff">Add staff</h3>
+      <form class="staff-form" id="staff-form" autocomplete="off">
+        <div class="row">
+          <div class="field">
+            <label for="staff-name" data-i18n="admin.fname">Full name</label>
+            <input id="staff-name" class="input" required>
+          </div>
+          <div class="field">
+            <label for="staff-email" data-i18n="admin.femail">Email</label>
+            <input id="staff-email" class="input" type="email" required>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label for="staff-phone" data-i18n="admin.fphone">Phone</label>
+            <input id="staff-phone" class="input" type="tel">
+          </div>
+          <div class="field">
+            <label for="staff-role" data-i18n="admin.frole">Role</label>
+            <select id="staff-role" class="select"></select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="staff-centre" data-i18n="admin.col.centre">Centre</label>
+          <select id="staff-centre" class="select"></select>
+        </div>
+        <button type="submit" class="btn btn-primary" id="staff-create" data-i18n="admin.create">Create account</button>
+      </form>
+      <div class="temp-password" id="temp-password" hidden>
+        <div class="temp-password-head">
+          <span data-i18n="admin.tempPassword">Temporary password</span>
+          <button type="button" class="btn btn-outline btn-small" id="temp-copy" data-i18n="admin.copy">Copy</button>
+        </div>
+        <code id="temp-password-value"></code>
+        <p class="muted" data-i18n="admin.tempPasswordNote">Show this to the person once — it is not saved anywhere. They will choose their own password at their first sign-in.</p>
+      </div>
+      <p class="muted" id="staff-empty" data-i18n="admin.staffEmpty" hidden>No staff accounts yet.</p>
+      <div id="staff-list"></div>
+    </section>
+
+    <section class="panel" id="backups-section" aria-labelledby="backups-title" hidden>
+      <div class="admin-head">
+        <h2 id="backups-title" data-i18n="admin.backups">Backups</h2>
+        <button type="button" class="btn btn-outline btn-small" id="backup-now" data-i18n="admin.backupNow" hidden>Backup now</button>
+      </div>
+      <p class="muted" id="backups-empty" data-i18n="admin.backupsEmpty" hidden>No backups yet.</p>
+      <div id="backups-list"></div>
+    </section>
+
+    <section class="panel" id="audit-section" aria-labelledby="audit-title" hidden>
+      <div class="admin-head">
+        <h2 id="audit-title" data-i18n="admin.audit">Audit log</h2>
+      </div>
+      <p class="muted" id="audit-empty" data-i18n="admin.auditEmpty" hidden>Nothing recorded yet.</p>
+      <div id="audit-list"></div>
+      <div class="pager" id="audit-pager" hidden>
+        <button type="button" class="btn btn-outline btn-small" id="audit-prev" data-i18n="admin.prev">Newer</button>
+        <span class="page-info" id="audit-page"></span>
+        <button type="button" class="btn btn-outline btn-small" id="audit-next" data-i18n="admin.next">Older</button>
+      </div>
+    </section>
+  </main>
+  <nav class="bottom-nav" aria-label="Main">
+    <a href="home.html" data-i18n="nav.home">Home</a>
+    <a href="reports.html" id="nav-reports" data-i18n="nav.reports" hidden>Reports</a>
+    <a href="settings.html" data-i18n="nav.settings">Settings</a>
+    <a href="admin.html" aria-current="page" data-i18n="nav.admin">Admin</a>
+  </nav>
+
+  <div class="scrim" id="confirm" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+      <h3 id="confirm-title"></h3>
+      <p class="muted" id="confirm-comment-label" hidden></p>
+      <p class="slip-note" id="confirm-comment" hidden></p>
+      <p id="confirm-body" hidden></p>
+      <div class="btns">
+        <button type="button" class="btn btn-ok" id="confirm-yes"></button>
+        <button type="button" class="btn btn-outline" id="confirm-no" data-i18n="confirm.noGoBack">No, go back</button>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
