@@ -533,3 +533,22 @@ textarea.input { min-height: 120px; resize: vertical; }
   background: var(--ok-soft); color: var(--ok);
   font: 800 2rem/1 var(--f-head);
 }
+
+/* The consent signature pad (M7a). touch-action: none, or the page scrolls under the parent's
+   finger instead of drawing. */
+.sign { display: flex; flex-direction: column; gap: 10px; }
+.sign-hint { color: var(--ink-2); margin: 0; }
+.sign-pad {
+  touch-action: none;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 1;
+  background: #fff;
+  border: 2px dashed var(--line);
+  border-radius: var(--r-md);
+  cursor: crosshair;
+}
+.sign-pad.is-readonly { cursor: default; opacity: 0.7; }
+.sign-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.sign-state { font-weight: 700; color: var(--ok); margin: 0; }
+.sign-state.is-stale { color: var(--bad); }

@@ -194,5 +194,19 @@
   "withdraw.done": "Application withdrawn. Nothing has been deleted.",
   "common.backToQueue": "Back to queue",
   "common.backToApplication": "Back to application",
-  "common.printReport": "Print the report"
+  "common.printReport": "Print the report",
+  "sign.hint": "Ask the parent to sign in the box below.",
+  "sign.clear": "Clear",
+  "sign.save": "Save signature",
+  "sign.saved": "Signed ✓",
+  "sign.saving": "Saving the signature…",
+  "sign.blank": "Please sign in the box before saving.",
+  "sign.failed": "The signature could not be saved. Please try again.",
+  "sign.changedOne": "{field} changed after the parent signed, so the signature needs taking again.",
+  "sign.changedMany": "These changed after the parent signed, so the signature needs taking again: {fields}",
+  "sign.field.s11_consent": "the consent wording",
+  "sign.field.s11_parent_name": "the parent's name",
+  "sign.field.s11_relationship": "the relationship",
+  "sign.field.s2_full_name": "the applicant's name",
+  "sign.field.s2_dob": "the date of birth"
 }
