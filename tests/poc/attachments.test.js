@@ -183,3 +183,46 @@ test("an unknown attachment id is not found", () => {
   assert.equal(as("priya")("attachments.get", { id: "no-such-id" }).error.code, "NOT_FOUND");
   assert.equal(as("priya")("attachments.get", { id: "" }).error.code, "INVALID_REQUEST");
 });
+
+test("the owner may delete an attachment; it is marked, not removed", () => {
+  const { ctx, as } = setupPeople();
+  const app = draft(as, "priya");
+  const up = as("priya")("attachments.upload", { applicationId: app.id, kind: "PHOTO", filename: "face.png", base64: b64(PNG) });
+  const del = as("priya")("attachments.delete", { id: up.data.id });
+  assert.equal(del.ok, true);
+  assert.ok(ctx.SC_Store.find("Attachments", "id", up.data.id).deleted_at, "the row is marked deleted, not removed");
+  const got = as("priya")("applications.get", { id: app.id });
+  assert.equal(got.data.attachments.length, 0, "deleted files are no longer listed");
+});
+
+test("someone who may see but not edit may not delete", () => {
+  const { as } = setupPeople();
+  const app = draft(as, "priya");
+  const up = as("priya")("attachments.upload", { applicationId: app.id, kind: "PHOTO", filename: "face.png", base64: b64(PNG) });
+  const del = as("lakshmi")("attachments.delete", { id: up.data.id });
+  assert.equal(del.ok, false);
+  assert.equal(del.error.code, "NOT_ALLOWED");
+});
+
+test("someone who may not see the application is told NOT_FOUND on delete", () => {
+  const { as } = setupPeople();
+  const app = draft(as, "priya");
+  const up = as("priya")("attachments.upload", { applicationId: app.id, kind: "PHOTO", filename: "face.png", base64: b64(PNG) });
+  assert.equal(as("deepa")("attachments.delete", { id: up.data.id }).error.code, "NOT_FOUND");
+});
+
+test("applications.get ships attachment metadata, not bytes", () => {
+  const { as } = setupPeople();
+  const app = draft(as, "priya");
+  const up = as("priya")("attachments.upload", { applicationId: app.id, kind: "PHOTO", filename: "face.png", base64: b64(PNG) });
+  const got = as("priya")("applications.get", { id: app.id });
+  assert.equal(got.ok, true);
+  assert.equal(got.data.attachments.length, 1);
+  const meta = got.data.attachments[0];
+  assert.equal(meta.id, up.data.id);
+  assert.equal(meta.kind, "PHOTO");
+  assert.equal(meta.filename, "face.png");
+  assert.equal(meta.mime, "image/png");
+  assert.equal(meta.size, PNG.length);
+  assert.ok(typeof meta.uploadedAt === "string" && meta.uploadedAt.length > 0);
+});

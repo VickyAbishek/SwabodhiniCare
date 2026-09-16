@@ -135,8 +135,25 @@ var SC_Attachments = (function () {
     });
   }
 
-  return Object.freeze({ upload: upload, get: get, sniff: sniff, liveFor: liveFor, liveList: liveList });
+  function remove(data, session) {
+    if (typeof data.id !== "string" || !data.id) return fail("INVALID_REQUEST");
+    var row = SC_Store.find("Attachments", "id", data.id);
+    if (!row || row.deleted_at) return fail("NOT_FOUND");
+    // The permission lives on the application, so ask about that — as get() does. The edit check is
+    // the one save() uses (Applications.gs:162): the owner, on a file they may still change.
+    var app = SC_Applications.loadVisible(row.application_id, session);
+    if (app.error) return app.error;
+    if (app.row.created_by !== session.user.id || !SC_Workflow.isEditable(app.row.status)) {
+      return fail("NOT_ALLOWED");
+    }
+    SC_Store.update("Attachments", row.id, { deleted_at: SC_Store.nowIso() });
+    SC_Audit.log(session.user.id, "attachments.deleted", "Attachments", row.id, { kind: row.kind });
+    return ok({ id: row.id });
+  }
+
+  return Object.freeze({ upload: upload, get: get, remove: remove, sniff: sniff, liveFor: liveFor, liveList: liveList });
 })();
 
 SC_Api.register("attachments.upload", SC_Attachments.upload);
 SC_Api.register("attachments.get", SC_Attachments.get);
+SC_Api.register("attachments.delete", SC_Attachments.remove);

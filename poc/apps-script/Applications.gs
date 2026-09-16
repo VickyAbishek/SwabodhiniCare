@@ -150,6 +150,12 @@ var SC_Applications = (function () {
     // the rule rather than keeping a second copy of it. A screen that recomputes "one person may not
     // approve two stages" can only drift from the guard it is showing, and nothing would notice.
     shown.approvedThisRound = approversThisRound(found.row.id, found.row.submitted_at);
+    // File metadata travels without the bytes, so the form can draw chips and thumbnails before
+    // fetching anything; the bytes stay behind attachments.get. Left out of view() on purpose:
+    // view() runs on every save, and this would charge a full Attachments scan to the autosave.
+    shown.attachments = SC_Attachments.liveList(found.row.id).map(function (r) {
+      return { id: r.id, kind: r.kind, filename: r.filename, mime: r.mime, size: r.size, uploadedAt: r.created_at };
+    });
     return SC_Actions.ok(shown);
   }
 
