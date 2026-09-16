@@ -77,12 +77,12 @@ A strict CSP for Pages, and a deploy script that sets `API_BASE` without editing
 - **Consumes:** the `config.js` shape; the Apps Script web-app origin (`script.google.com` / `script.googleusercontent.com`).
 - **Produces:** `public/_headers` (CSP + HSTS + frame/CT/referrer/permissions headers); `scripts/prepare-deploy.mjs` (runs `runDeployCheck`, then writes `config.deploy.js` from `SC_API_BASE` or a prompt); `public/js/config.deploy.js` (committed `export const DEPLOY = {}`); `config.js` spreading `DEPLOY`; the `docs/runbook.md` deploy + install section.
 
-- [ ] **Step 1: Write the failing test** (`tests/scripts/prepare-deploy.test.mjs`): writing `config.deploy.js` from a URL, and `config.js` merging `DEPLOY` (assert `CONFIG.API_BASE` reflects the override and is `"/api"` by default).
-- [ ] **Step 2: Run to verify it fails** (no `prepare-deploy.mjs` / no `DEPLOY` merge).
-- [ ] **Step 3: Implement** `config.deploy.js` + the `config.js` merge, then `prepare-deploy.mjs`, then `public/_headers`.
-- [ ] **Step 4: Extend `docs/runbook.md`** with the deploy steps (deploy-check, prepare-deploy with the `/exec` URL, `wrangler pages deploy public`, `clasp push` + deploy the Apps Script web app, set `API_BASE`) and the install-as-PWA steps.
-- [ ] **Step 5: Run the scope check and the suite.**
-- [ ] **Step 6: Commit** (`feat: CSP headers + prepare-deploy — set API_BASE via config.deploy.js`).
+- [x] **Step 1: Write the failing test** (`tests/scripts/prepare-deploy.test.mjs`): writing `config.deploy.js` from a URL, and `config.js` merging `DEPLOY` (assert `CONFIG.API_BASE` reflects the override and is `"/api"` by default).
+- [x] **Step 2: Run to verify it fails** (no `prepare-deploy.mjs` / no `DEPLOY` merge).
+- [x] **Step 3: Implement** `config.deploy.js` + the `config.js` merge, then `prepare-deploy.mjs`, then `public/_headers`.
+- [x] **Step 4: Extend `docs/runbook.md`** with the deploy steps (deploy-check, prepare-deploy with the `/exec` URL, `wrangler pages deploy public`, `clasp push` + deploy the Apps Script web app, set `API_BASE`) and the install-as-PWA steps.
+- [x] **Step 5: Run the scope check and the suite.**
+- [x] **Step 6: Commit** (`feat: CSP headers + prepare-deploy — set API_BASE via config.deploy.js`).
 
 ### Task 4: Committed Playwright E2E suite
 

@@ -59,3 +59,47 @@ Sheet directly and must not race a member of staff entering data.
 - Note: the browser dev server's fake Drive does not seed a Sheet file, so "Backup now" there returns a
   **FAILED** row (`no file with id sheet-1`). That is the dev harness, not the product — and it
   exercised the failure path: the error reaches the screen, is logged, and is emailed.
+
+---
+
+## Deploy to Cloudflare Pages + Apps Script
+
+The POC runs as two pieces: the **web app** (this repo's `public/`, served by Cloudflare Pages) and
+the **server** (the Apps Script web app in `poc/apps-script/`). `poc/README.md` covers the Apps Script
+build/push steps; this section adds the Pages side and the `API_BASE` wiring that M10 introduced.
+
+### 1. Deploy the server (Apps Script)
+
+1. Build the bundle: `node poc/scripts/build.mjs` → `build/apps-script/Code.js`.
+2. Push: `npx @google/clasp push` (login + create are one-time — see `poc/README.md`).
+3. In the Apps Script editor: **Deploy → Manage deployments → Edit → New version** (or **New
+   deployment → Web app**, *Execute as: Me*, *Who has access: Anyone*). Note the **`/exec` URL** —
+   that is `API_BASE` for the deployed web app.
+
+### 2. Prepare `public/` for Pages
+
+The dev server serves `/shared/` straight from the repo root, but Pages serves only `public/`. So:
+
+1. `node scripts/deploy-check.mjs` — copies every `shared/*.js` into `public/shared/` (gitignored)
+   and fails loudly if any `<script src="shared/…">` no longer resolves.
+2. `SC_API_BASE=<the /exec URL> node scripts/prepare-deploy.mjs` — re-runs the check, then writes
+   `public/js/config.deploy.js` with `DEPLOY = { API_BASE: "<url>" }`. `config.js` spreads that over
+   its defaults, so the deployed app points at Apps Script **without editing `config.js`**.
+   (`config.deploy.js` is committed empty; the written value is an uncommitted change — never commit it.)
+
+### 3. Deploy the web app (Pages)
+
+1. `npx wrangler pages deploy public` (from the repo root). `public/_headers` ships the CSP and the
+   security headers; `manifest.webmanifest`, `sw.js`, `offline.html` and `icon.svg` make it installable.
+2. Sanity-check: open the Pages URL, sign in, and load one application. The browser calls the Apps
+   Script `/exec` URL directly (cross-origin), which the CSP's `connect-src` already allows.
+
+### 4. Install as a PWA
+
+On the deployed Pages URL — not `127.0.0.1`/`localhost`, where the service worker is deliberately off:
+
+1. Open the site; the manifest and `sw.js` register automatically.
+2. **Install:** Chrome/Edge → browser menu → **Install SwabodhiniCare** (or the install icon in the
+   address bar); Safari → Share → **Add to Home Screen**. It opens standalone with the teal icon.
+3. **Offline:** turn the network off and reload — you get the bilingual "You're offline" page. `/api`
+   (and all data) is never cached, so staff records stay network-only.

@@ -1,7 +1,10 @@
 // scope: shared
-// App settings. For the deployed POC, set API_BASE to the Apps Script web app's /exec URL.
+// App settings. For the deployed POC, set API_BASE to the Apps Script web app's /exec URL —
+// scripts/prepare-deploy.mjs writes config.deploy.js, which is spread over these defaults below.
 // In production: BACKEND "prod", API_BASE "/api", IS_DEMO false, SAMPLE_DATA "".
-export const CONFIG = Object.freeze({
+import { DEPLOY } from "./config.deploy.js";
+
+export const DEFAULTS = Object.freeze({
   BACKEND: "poc",
   API_BASE: "/api", // local dev server (poc/scripts/dev-server.mjs)
   IS_DEMO: true, // shows the "Test version: sample data only" banner [POC]
@@ -10,3 +13,11 @@ export const CONFIG = Object.freeze({
   SAMPLE_DATA: "seed/sample-applications",
   KDF_ITERATIONS: 600000,
 });
+
+// Merges deploy-time overrides over the defaults without mutating either. Frozen so no screen
+// can change settings at runtime.
+export function buildConfig(deploy = {}) {
+  return Object.freeze({ ...DEFAULTS, ...deploy });
+}
+
+export const CONFIG = buildConfig(DEPLOY);
