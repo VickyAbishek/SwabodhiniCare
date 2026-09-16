@@ -265,5 +265,15 @@
   "reports.col.rejected": "Rejected",
   "reports.col.dimension": "Dimension",
   "reports.col.category": "Category",
-  "reports.col.count": "Count"
+  "reports.col.count": "Count",
+  "print.title": "Individual Assessment Report",
+  "print.print": "Print",
+  "print.reviewTrail": "Review trail",
+  "print.signature": "Director's signature",
+  "print.notSigned": "Not yet decided",
+  "print.noSignature": "No signature stored",
+  "print.signedBy": "Signed by {name} · {date}",
+  "print.consentSigned": "Consent signed",
+  "print.consentNotSigned": "Consent not signed",
+  "print.date": "Date"
 }

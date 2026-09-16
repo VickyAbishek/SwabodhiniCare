@@ -265,5 +265,15 @@
   "reports.col.rejected": "நிராகரிப்பு",
   "reports.col.dimension": "பரிமாணம்",
   "reports.col.category": "வகை",
-  "reports.col.count": "எண்ணிக்கை"
+  "reports.col.count": "எண்ணிக்கை",
+  "print.title": "தனிநபர் மதிப்பீட்டு அறிக்கை",
+  "print.print": "அச்சிடு",
+  "print.reviewTrail": "மதிப்பாய்வுப் பாதை",
+  "print.signature": "இயக்குநரின் கையொப்பம்",
+  "print.notSigned": "இன்னும் முடிவு செய்யப்படவில்லை",
+  "print.noSignature": "கையொப்பம் சேமிக்கப்படவில்லை",
+  "print.signedBy": "{name} · {date} கையொப்பம்",
+  "print.consentSigned": "ஒப்புதல் கையொப்பமிடப்பட்டது",
+  "print.consentNotSigned": "ஒப்புதல் கையொப்பமிடப்படவில்லை",
+  "print.date": "தேதி"
 }

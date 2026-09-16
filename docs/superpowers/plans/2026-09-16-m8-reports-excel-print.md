@@ -1502,7 +1502,7 @@ git commit -m "feat: reports screen with filters, CSS bar charts and Excel downl
 - Consumes: `startPage`/`showMessage` from `../page.js`; `createFormView` from `../form-view.js` (its `stepModel(stepId, values, today, lang)` returns `{ title, fields: [{ id, type, label, value, options }] }`); `window.SC_FormSchema`, `window.SC_Dates`; the `reports.get { name: "print", id }` envelope from Task 3 (`{ app, signature, signerName, signedAt }`).
 - Produces: the A4 Individual Assessment Report.
 
-- [ ] **Step 1: Add the print i18n keys**
+- [x] **Step 1: Add the print i18n keys**
 
 Append to `public/i18n/en.json`:
 
@@ -1532,7 +1532,7 @@ Append to `public/i18n/ta.json`:
   "print.consentNotSigned": "ஒப்புதல் கையொப்பமிடப்படவில்லை"
 ```
 
-- [ ] **Step 2: Create `public/css/print.css`**
+- [x] **Step 2: Create `public/css/print.css`**
 
 ```css
 /* scope: shared */
@@ -1558,7 +1558,7 @@ Append to `public/i18n/ta.json`:
 }
 ```
 
-- [ ] **Step 3: Create `public/print.html`**
+- [x] **Step 3: Create `public/print.html`**
 
 ```html
 <!-- scope: shared -->
@@ -1601,7 +1601,7 @@ Append to `public/i18n/ta.json`:
 </html>
 ```
 
-- [ ] **Step 4: Create `public/js/pages/print.js`**
+- [x] **Step 4: Create `public/js/pages/print.js`**
 
 ```js
 // scope: shared
@@ -1750,22 +1750,22 @@ async function main() {
 main().catch((err) => console.error("The print screen could not start", err));
 ```
 
-- [ ] **Step 5: Add the `print.date` key**
+- [x] **Step 5: Add the `print.date` key**
 
 The print header uses `print.date`, which was not in Task 6 Step 1. Add to both files:
 
 `en.json`: `"print.date": "Date",` · `ta.json`: `"print.date": "தேதி",`
 
-- [ ] **Step 6: Run the scope check and the suite**
+- [x] **Step 6: Run the scope check and the suite**
 
 Run: `npm test`
 Expected: all pass.
 
-- [ ] **Step 7: Verify in a browser**
+- [x] **Step 7: Verify in a browser**
 
 Run `node poc/scripts/dev-server.mjs`, sign in as `revathi@example.com` / `demo-pass-2026`, open an admitted application's `print.html?id=…`, confirm all 11 sections, the review trail, the Director's signature and name appear, and Print → Save as PDF produces a light A4 page.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add public/print.html public/js/pages/print.js public/css/print.css public/i18n/en.json public/i18n/ta.json

@@ -1,0 +1,23 @@
+/* scope: shared */
+/* The A4 report is always light — dark text on white — whatever the screen's theme (spec D2). */
+.print-report { background: #ffffff; color: #111111; max-width: 700px; margin: 0 auto; padding: 24px; font-family: var(--f-body); }
+.print-report h1 { font-size: 1.5rem; margin: 0 0 16px; }
+.print-report h2 { font-size: 1.1rem; margin: 20px 0 8px; border-bottom: 1px solid #999; }
+.print-report .print-head { display: flex; flex-wrap: wrap; gap: 6px 24px; margin-bottom: 8px; font-size: 0.9rem; }
+.print-report .print-head .mono { font-family: var(--f-mono); }
+.print-report dl { margin: 0; }
+.print-report .fact { display: grid; grid-template-columns: 11rem 1fr; gap: 4px 12px; padding: 4px 0; border-bottom: 1px solid #eee; }
+.print-report .fact dt { font-weight: 700; }
+.print-report .fact dd { margin: 0; }
+.print-report .review-row { padding: 6px 0; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+.print-report .review-row .who { font-weight: 700; }
+.print-report .review-row .when { color: #666; font-size: 0.8rem; }
+.print-report .signature { margin-top: 8px; }
+.print-report .signature img { max-height: 90px; }
+@media print {
+  body { background: #ffffff; }
+  .app-bar, .bottom-nav, .back-link, .no-print { display: none !important; }
+  .screen { padding: 0; }
+  .print-report { max-width: none; padding: 0; }
+  .print-report h2, .print-report .fact, .print-report .review-row { break-inside: avoid; }
+}
