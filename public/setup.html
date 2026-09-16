@@ -1,0 +1,63 @@
+<!-- scope: shared -->
+<!doctype html>
+<html lang="ta" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SwabodhiniCare</title>
+<script src="js/theme-boot.js"></script>
+<script src="shared/actions.js"></script>
+<link rel="stylesheet" href="css/app.css">
+<script type="module" src="js/pages/setup.js"></script>
+</head>
+<body>
+<div class="app">
+  <header class="app-bar">
+    <a class="wordmark" href="index.html">Swabodhini<b>Care</b></a>
+    <button type="button" class="btn btn-outline btn-small" data-lang-toggle>தமிழ் / English</button>
+  </header>
+  <main class="screen">
+    <h1 data-i18n="setup.title">First-time setup</h1>
+    <p class="muted" data-i18n="setup.intro">Use this once, to create the first Admin account.</p>
+
+    <form id="setup-form" novalidate>
+      <div class="field">
+        <label for="code" data-i18n="setup.code">Setup code</label>
+        <input class="input mono" id="code" name="code" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="12" required>
+        <p class="hint" data-i18n="setup.codeHint">12 letters and numbers, from the Apps Script log.</p>
+        <p class="field-error" id="code-error" hidden></p>
+      </div>
+      <div class="field">
+        <label for="fullName" data-i18n="setup.name">Your full name</label>
+        <input class="input" id="fullName" name="fullName" type="text" autocomplete="name" maxlength="120" required>
+        <p class="field-error" id="fullName-error" hidden></p>
+      </div>
+      <div class="field">
+        <label for="email" data-i18n="signin.email">Email</label>
+        <input class="input" id="email" name="email" type="email" autocomplete="username" inputmode="email" required>
+        <p class="field-error" id="email-error" hidden></p>
+      </div>
+      <div class="field">
+        <label for="password" data-i18n="password.new">New password</label>
+        <div class="with-action">
+          <input class="input" id="password" name="password" type="password" autocomplete="new-password" required>
+          <button type="button" class="btn btn-outline btn-small" data-show-password="password" aria-pressed="false">
+            <span data-i18n="common.show">Show</span>
+          </button>
+        </div>
+        <p class="hint" data-i18n="password.hint">At least 8 letters or numbers.</p>
+        <p class="field-error" id="password-error" hidden></p>
+      </div>
+      <div class="field">
+        <label for="password2" data-i18n="password.again">Type it again</label>
+        <input class="input" id="password2" name="password2" type="password" autocomplete="new-password" required>
+        <p class="field-error" id="password2-error" hidden></p>
+      </div>
+      <p class="alert alert-bad" id="message" role="alert" hidden></p>
+      <button type="submit" class="btn btn-primary btn-block" id="submit" data-i18n="setup.button">Create Admin account</button>
+    </form>
+    <a class="link-btn" href="index.html" data-i18n="common.back">Back</a>
+  </main>
+</div>
+</body>
+</html>

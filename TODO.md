@@ -30,14 +30,16 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 - [x] `[POC]` M3c: `Audit.gs`: sign-in and account events, paged list for Director and Admin
 - [x] `[POC]` M3c: `Setup.gs` (`setup()` + one-time first-Admin code), `poc/scripts/build.mjs` + `source-order.mjs`, `appsscript.json`, `poc/README.md` deploy steps
 
-### M4: Screens core
-- [ ] `[POC]` First-time setup screen: setup code → first Admin (`setup.firstAdmin`)
-- [ ] `[SHARED]` `public/css/`: design tokens from `docs/mockups/mockups.css` (light default, dark via Settings), print CSS
-- [ ] `[SHARED]` `public/js/config.js`, `api.js` (loads `backends/${BACKEND}.js`), i18n (EN/TA), theme bootstrap in `<head>`
-- [ ] `[POC]` `public/js/backends/poc.js`: `{action, token, data}` over `text/plain`, token in `localStorage`
-- [ ] `[SHARED]` `public/js/kdf.js`: PBKDF2 600k on the device
-- [ ] `[SHARED]` Screens: Sign in, first sign-in (set password), Settings (language, appearance, change password, sign out)
-- [ ] `[POC]` "Test version: sample data only" banner behind `IS_DEMO`
+### M4: Screens core · plan: `docs/superpowers/plans/2026-09-15-m4-screens.md` · ✅ done (192 tests; flow checked in a browser)
+- [x] `[SHARED]` First-time setup screen: setup code → first Admin (`setup.firstAdmin`; code issued by `[POC]` `setup()` now, a Worker secret in production)
+- [x] `[POC]` Local dev server (`poc/scripts/dev-server.mjs`): real server code in memory, for testing screens without Google
+- [x] `[SHARED]` `public/css/app.css`: design tokens from the mockups (light default, dark via Settings). Print CSS comes with the A4 report in M8
+- [x] `[SHARED]` `public/js/config.js`, `api.js` (loads `backends/${BACKEND}.js`), `i18n.js` + `i18n/en.json`/`ta.json`, `prefs.js`, `theme-boot.js`, `page.js`
+- [x] `[POC]` `public/js/backends/poc.js`: `{action, token, data}` over `text/plain`, token in `localStorage` (memory if blocked)
+- [x] `[SHARED]` `public/js/kdf.js`: PBKDF2 600k on the device, password rules
+- [x] `[SHARED]` Screens: Sign in, choose your password, Home (placeholder), Settings (language, appearance, change password, sign out)
+- [x] `[POC]` "Test version: sample data only" banner behind `IS_DEMO`
+- [ ] `[SHARED]` Deploy check: copy `shared/*.js` to `public/shared/` for Cloudflare Pages (M10 hosting task)
 
 ### M5: Applications
 - [ ] `[POC]` `poc/seed/`: fictional sample applicants for demos (moved from M3; test accounts are created by the Admin in the app)

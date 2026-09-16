@@ -1,0 +1,33 @@
+<!-- scope: shared -->
+<!doctype html>
+<html lang="ta" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SwabodhiniCare</title>
+<script src="js/theme-boot.js"></script>
+<script src="shared/actions.js"></script>
+<link rel="stylesheet" href="css/app.css">
+<script type="module" src="js/pages/home.js"></script>
+</head>
+<body>
+<div class="app">
+  <header class="app-bar">
+    <span class="wordmark">Swabodhini<b>Care</b></span>
+    <button type="button" class="btn btn-outline btn-small" data-lang-toggle>தமிழ் / English</button>
+  </header>
+  <main class="screen">
+    <div class="brand">
+      <h1 id="greeting"></h1>
+      <p class="muted" id="role-line"></p>
+    </div>
+    <p class="alert alert-bad" id="message" role="alert" hidden></p>
+    <p class="note" data-i18n="home.comingSoon">Applications and your queue will appear here in the next update.</p>
+  </main>
+  <nav class="bottom-nav" aria-label="Main">
+    <a href="home.html" aria-current="page" data-i18n="nav.home">Home</a>
+    <a href="settings.html" data-i18n="nav.settings">Settings</a>
+  </nav>
+</div>
+</body>
+</html>

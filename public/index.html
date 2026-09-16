@@ -1,0 +1,56 @@
+<!-- scope: shared -->
+<!doctype html>
+<html lang="ta" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SwabodhiniCare</title>
+<script src="js/theme-boot.js"></script>
+<script src="shared/actions.js"></script>
+<link rel="stylesheet" href="css/app.css">
+<script type="module" src="js/pages/signin.js"></script>
+</head>
+<body>
+<div class="app">
+  <main class="screen">
+    <div class="brand">
+      <h1>Swabodhini<b>Care</b></h1>
+      <p class="muted" data-i18n="app.school">Swabodhini Autism · Staff app</p>
+    </div>
+
+    <div class="field">
+      <span class="label" id="lang-label" data-i18n="common.language">Language</span>
+      <div class="choices" role="group" aria-labelledby="lang-label">
+        <button type="button" class="choice" data-set-lang="ta" lang="ta">தமிழ்</button>
+        <button type="button" class="choice" data-set-lang="en" lang="en">English</button>
+      </div>
+    </div>
+
+    <form id="signin-form" novalidate>
+      <h2 data-i18n="signin.title">Sign in</h2>
+      <div class="field">
+        <label for="email" data-i18n="signin.email">Email</label>
+        <input class="input" id="email" name="email" type="email" autocomplete="username" inputmode="email" required>
+        <p class="field-error" id="email-error" hidden></p>
+      </div>
+      <div class="field">
+        <label for="password" data-i18n="signin.password">Password</label>
+        <div class="with-action">
+          <input class="input" id="password" name="password" type="password" autocomplete="current-password" required>
+          <button type="button" class="btn btn-outline btn-small" data-show-password="password" aria-pressed="false">
+            <span data-i18n="common.show">Show</span>
+          </button>
+        </div>
+        <p class="field-error" id="password-error" hidden></p>
+      </div>
+      <p class="alert alert-bad" id="message" role="alert" hidden></p>
+      <button type="submit" class="btn btn-primary btn-block" id="submit" data-i18n="signin.button">Sign in</button>
+    </form>
+
+    <p class="hint" data-i18n="signin.forgot">Forgot your password? Ask the Admin at your centre to reset it.</p>
+    <a class="link-btn" href="setup.html" data-i18n="signin.firstTime">First-time setup</a>
+    <p class="muted" data-i18n="app.staffOnly">For Swabodhini staff only</p>
+  </main>
+</div>
+</body>
+</html>
