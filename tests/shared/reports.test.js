@@ -86,3 +86,50 @@ test("demographics narrows to one age band when asked", () => {
   ], TODAY, "18+");
   assert.deepEqual(d.age.map((b) => [b.id, b.count]), [["0-3", 0], ["4-6", 0], ["7-12", 0], ["13-17", 0], ["18+", 1]]);
 });
+
+function approval(id, stage, action, createdAt) {
+  return { application_id: id, stage: stage, action: action, created_at: createdAt };
+}
+
+test("rejectionDate reads the Approvals row, not decided_at", () => {
+  const approvals = [approval("a1", "DIRECTOR", "REJECT", "2026-09-10T10:00:00.000Z")];
+  const rejected = app({ id: "a1", status: "REJECTED", decided_at: null });
+  assert.equal(SC_Reports.rejectionDate("a1", approvals), "2026-09-10T10:00:00.000Z");
+  assert.equal(rejected.decided_at, null); // the field a rejection never writes
+  assert.equal(SC_Reports.rejectionDate("a2", approvals), null);
+});
+
+test("turnaround lists waiting files most-overdue first and flags overdue", () => {
+  const approvals = [approval("a1", "THERAPY_HEAD", "APPROVE", "2026-09-10T10:00:00.000Z")];
+  const rows = [
+    app({ id: "a1", status: "PENDING_CENTRE_HEAD", submitted_at: "2026-09-01", decided_at: null }),
+    app({ id: "a2", status: "PENDING_THERAPY_HEAD", submitted_at: "2026-09-15", decided_at: null }),
+    app({ id: "a3", status: "ADMITTED" }), // not in flight
+    app({ id: "a9", status: "PENDING_DIRECTOR", submitted_at: "2026-08-01", decided_at: null }),
+  ];
+  const more = [approval("a9", "CENTRE_HEAD", "APPROVE", "2026-08-05T10:00:00.000Z")];
+  const turn = SC_Reports.turnaround(rows, approvals.concat(more), {}, TODAY);
+  assert.equal(turn.pending.length, 3);
+  assert.equal(turn.pending[0].id, "a9"); // 42 days in stage
+  assert.equal(turn.pending[0].daysInStage, 42);
+  assert.equal(turn.pending[0].overdue, true);
+  assert.equal(turn.pending[1].id, "a1"); // 6 days
+  assert.equal(turn.pending[1].daysInStage, 6);
+  assert.equal(turn.pending[1].overdue, false);
+  assert.equal(turn.pending[2].id, "a2"); // 1 day
+});
+
+test("avgDaysPerStage averages each completed stage's span", () => {
+  const approvals = [
+    approval("a1", "THERAPY_HEAD", "APPROVE", "2026-09-03T10:00:00.000Z"),
+    approval("a1", "CENTRE_HEAD", "APPROVE", "2026-09-06T10:00:00.000Z"),
+    approval("a1", "DIRECTOR", "ADMIT", "2026-09-11T10:00:00.000Z"),
+  ];
+  const rows = [app({ id: "a1", status: "ADMITTED", submitted_at: "2026-09-01", decided_at: "2026-09-11" })];
+  const avg = SC_Reports.turnaround(rows, approvals, {}, TODAY).avgDaysPerStage;
+  assert.deepEqual(avg, [
+    { stage: "THERAPY_HEAD", avgDays: 2 },   // 09-01 → 09-03
+    { stage: "CENTRE_HEAD", avgDays: 3 },    // 09-03 → 09-06
+    { stage: "DIRECTOR", avgDays: 5 },       // 09-06 → 09-11
+  ]);
+});
