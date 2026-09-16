@@ -59,9 +59,22 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 - [x] `[SHARED]` Reopen and withdraw screens — reopen is `reopen.html`; withdraw lives on the form screen's own file actions, next to the answers it promises not to delete
 - [x] `[SHARED]` A file that has left the therapist's hands opens with its status and, when a decision left one, that decision's reason — a rejection's reason is otherwise shown nowhere (close-out fix)
 
-### M7: Files
+### M7: Files · split into M7a (the signature, on the critical path) and M7b (everything else)
+
+#### M7a: The parent's consent signature · spec: `docs/superpowers/specs/2026-09-16-m7a-consent-signature-design.md` · 🚧 designed, plan next
+> Why first: `form-schema.js:184` marks the signature required and nothing can produce one, so **no application can pass the submit check today**. M5 seeded past that gate and M6 built the approval chain on files that never went through it.
+- [ ] `[SHARED]` `shared/consent.js`: the five consented fields + their normalized serialization. No hashing — `check-scope.mjs` bans platform APIs from `shared/`, so each side hashes the one shared payload (M6 plan, carry-forward 3)
+- [ ] `[SHARED]` `public/js/signature-pad.js`: canvas capture, PNG out. Pure geometry (`isBlank`, `trimToInk`, scale to a fixed box) tested apart from the DOM wrapper
+- [ ] `[POC]` `Attachments.gs` (M7a slice): `attachments.upload` / `.get`, `CONSENT_SIGNATURE` only, type checked by first bytes, Drive `attachments/<app_no>/`, new `consent_hash` column
+- [ ] `[POC]` `applications.get` ships `consentSigned` / `consentStale`; `submit` refuses a missing **or** stale signature — the server owns the rule, as M6's I2 fix established
+- [ ] `[SHARED]` The consent step renders the pad, and says **which** of the five facts changed when a signature goes stale
+- [ ] `[SHARED]` Re-signing soft-deletes the old row rather than overwriting it, so what was consented to stays answerable
+
+#### M7b: Photos, PDFs and the Director's signature
 - [ ] `[SHARED]` `image-compress.js` (canvas, ≤1600 px, ~300 KB), file pickers (camera and gallery)
-- [ ] `[POC]` `Attachments.gs`: base64 upload to Drive, file-type check by first bytes, view, soft delete; Director signature upload
+- [ ] `[POC]` `Attachments.gs` widened: `PHOTO`, `DIAGNOSIS`, `UDID`; view, soft delete; the 10-file cap and the 5 MB PDF limit
+- [ ] `[SHARED]` `s2_udid_file` (`kind: UDID`, showIf status = `HAVE`) — `attachments.kind` promises a UDID file that no question creates (M7a spec §9)
+- [ ] `[POC]` Director signature upload: `Signatures` tab, `signature.upload`
 
 ### M8: Reports, Excel, print
 - [ ] `[SHARED]` `shared/reports.js`: queue counts, register rows, by-centre totals, waitlist, turnaround, demographics (moved from M2)
@@ -113,3 +126,4 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 - [ ] Rejections: therapist tells the family in person, with no automatic message in the POC. Is that OK?
 - [ ] Main spec §16 Q1–Q12 and POC spec §18 PQ1–PQ4
 - [ ] Tamil wording review by school staff (mockups, prompt, error messages)
+- [ ] An applicant aged 18+ still gets a **parent's** consent. DPDP's verifiable parental consent is a children's provision, and the schema's only age branch is `s8_work_experience`. One consent path assumed until staff say otherwise (M7a spec §8 CQ1)
