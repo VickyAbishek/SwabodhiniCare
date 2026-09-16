@@ -17,10 +17,9 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 - [x] `[SHARED]` `shared/workflow.js`: status machine and separation of duties (main spec §5)
 - [x] `[SHARED]` `shared/actions.js`: API contract, EN/TA error messages, envelope
 
-### M2: Form definition and report maths
-- [ ] `[SHARED]` `shared/form-schema.js`: all 11 steps, fields, EN/TA labels, required rules, show-if (adult path 18+)
-- [ ] `[SHARED]` `shared/validate.js`: draft vs submit validation, error codes per field
-- [ ] `[SHARED]` `shared/reports.js`: queue counts, register rows, by-centre totals, waitlist, turnaround, demographics
+### M2: Form definition and answer rules · plan: `docs/superpowers/plans/2026-09-15-m2-form-definition.md` · ✅ done (85 tests total, 98.87% line coverage)
+- [x] `[SHARED]` `shared/form-schema.js`: all 11 steps, 82 questions, EN/TA labels, required rules, show-if (adult path 18+)
+- [x] `[SHARED]` `shared/form-rules.js`: draft vs submit checks with EN/TA error text, show-if, step progress, safety flags, summary columns
 
 ### M3: POC server (Apps Script) core
 - [ ] `[POC]` `poc/apps-script/`: `appsscript.json`, `Api.gs` router + envelope + token/role checks
@@ -59,6 +58,7 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 - [ ] `[POC]` `Attachments.gs`: base64 upload to Drive, file-type check by first bytes, view, soft delete; Director signature upload
 
 ### M8: Reports, Excel, print
+- [ ] `[SHARED]` `shared/reports.js`: queue counts, register rows, by-centre totals, waitlist, turnaround, demographics (moved from M2)
 - [ ] `[SHARED]` Reports screens (R1–R7) with filters and CSS bar charts
 - [ ] `[SHARED]` `xlsx.js`: Excel built in the browser (UTF-8, Tamil-safe)
 - [ ] `[SHARED]` A4 Individual Assessment Report (`print.html` + `print.css`)
