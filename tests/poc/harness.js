@@ -20,6 +20,7 @@ function createContext(options = {}) {
     CacheService: fakes.makeCacheService(clock),
     PropertiesService: fakes.makePropertiesService(Object.assign({ SHEET_ID: "test-sheet" }, options.properties)),
     ContentService: fakes.makeContentService(),
+    DriveApp: fakes.makeDriveApp(),
     console: fakes.makeConsole(logs),
     Date: fakes.makeDate(clock),
   });
