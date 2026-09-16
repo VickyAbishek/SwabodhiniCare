@@ -202,7 +202,10 @@ function fixRow(stepId, stepState) {
 // again instead of saving and stepping forward (main spec §5); on a file this person may only read it
 // is drawn in the same read-only state every field is — present, and plainly not for them.
 function drawPrimary(model) {
-  const label = state.resend ? "sentBack.fixAndResend" : model.number === model.total ? "form.finish" : "form.saveNext";
+  const isLast = model.number === model.total;
+  const label = state.resend
+    ? "sentBack.fixAndResend"
+    : isLast && state.app.status === "DRAFT" ? "form.sendToHead" : isLast ? "form.finish" : "form.saveNext";
   $("next-btn").textContent = state.page.t(label);
   $("next-btn").disabled = state.readOnly;
 }
@@ -528,6 +531,19 @@ function askToResend() {
   }, $("next-btn"));
 }
 
+/* Sending a fresh draft on (M7b spec §3.6). Same send as resend(), with the draft's wording: a fresh
+   draft has no Therapy Head on its slip yet, so the sheet says what happens without naming one. */
+function askToSubmit() {
+  const { t } = state.page;
+  state.sheet.open({
+    title: t("confirm.sendTitle"),
+    body: t("confirm.sendDraft"),
+    yes: t("confirm.yesSend"),
+    yesClass: "btn-primary",
+    onYes: resend,
+  }, $("next-btn"));
+}
+
 async function resend() {
   const page = state.page;
   setBusy($("confirm-yes"), page.t("common.working"), true);
@@ -639,6 +655,10 @@ function wireButtons() {
   $("next-btn").addEventListener("click", () => {
     if (state.resend) {
       askToResend();
+      return;
+    }
+    if (state.app.status === "DRAFT" && !stepAt(1)) {
+      askToSubmit();
       return;
     }
     saveThen(() => (stepAt(1) ? show("step", stepAt(1)) : show("overview")));
