@@ -9,16 +9,16 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 
 ## ▶ Start here (updated 2026-09-16)
 
-**M8 (reports, Excel, print) is done and merged** (PR #12, 360 tests). **M9 (backups, alerts, admin) is done** (365 tests; checked in a browser) — runbook written, PR #13 open. **Next: M10 (installable app, hosting, end-to-end).**
+**M10 (installable app, hosting, end-to-end) is done** (377 tests) — prepare-only: the Cloudflare/Apps Script deploy is written up but not run. **Next: POC close-out** — staffing, staff testing, feedback, and the decide-Sheets-vs-production step before Phase 1.
 
 Run tasks **inline, not with subagents** (token cost).
 
 | | |
 |---|---|
-| M9 spec (the *why*) | `docs/superpowers/specs/2026-09-16-m9-backups-alerts-admin-design.md` |
-| M9 plan (the *how*) | ✅ done — `docs/superpowers/plans/2026-09-16-m9-backups-alerts-admin.md` |
+| M10 spec (the *why*) | `docs/superpowers/specs/2026-09-16-m10-installable-app-hosting-e2e-design.md` |
+| M10 plan (the *how*) | ✅ done — `docs/superpowers/plans/2026-09-16-m10-installable-app-hosting-e2e.md` |
 | Runbook | `docs/runbook.md` |
-| Tests now | **365 pass, 0 fail** — `npm test` (runs the scope check, then `node --test`) |
+| Tests now | **377 pass, 0 fail** — `npm test` (scope check, then `node --test`); E2E via `npm run test:e2e` (8 specs) |
 | Dev server | `node poc/scripts/dev-server.mjs` → http://127.0.0.1:8787 · sign in `priya@example.com` / `demo-pass-2026` (all demo staff share it; see `poc/seed/demo-data.mjs`) |
 
 ---
@@ -115,13 +115,13 @@ Run tasks **inline, not with subagents** (token cost).
 - [x] `[SHARED]` Admin screens: staff list, add staff (temporary password shown once), backups list + Backup now, audit log
 - [x] `[POC]` Restore steps in `docs/runbook.md` + one practice restore
 
-### M10: Installable app, hosting, end-to-end
-- [ ] `[SHARED]` Deploy check: copy `shared/*.js` to `public/shared/` for Cloudflare Pages (moved here from M4 — `application.html` loads `shared/form-rules.js`, and the dev server serves `/shared/` from the repo, but Cloudflare Pages will not)
-- [ ] `[SHARED]` PWA: `manifest.webmanifest`, `sw.js` (app shell only, network-first), offline page
-- [ ] `[POC]` `public/_headers` for Cloudflare Pages (CSP with Apps Script `connect-src`, HSTS, etc.)
-- [ ] `[POC]` Deploy: Cloudflare Pages (static) + Apps Script web app; `API_BASE` set
-- [ ] `[SHARED]` Playwright E2E (dev-only): main path per role, send-back loop, Tamil, dark mode, two-browser save test
-- [ ] `[SHARED]` Security review before handing to staff
+### M10: Installable app, hosting, end-to-end · spec: `docs/superpowers/specs/2026-09-16-m10-installable-app-hosting-e2e-design.md` · plan: `docs/superpowers/plans/2026-09-16-m10-installable-app-hosting-e2e.md` · ✅ done (377 tests) — **prepare-only**: the deploy is prepared, not run
+- [x] `[SHARED]` Deploy check: copy `shared/*.js` to `public/shared/` for Cloudflare Pages (moved here from M4 — `application.html` loads `shared/form-rules.js`, and the dev server serves `/shared/` from the repo, but Cloudflare Pages will not)
+- [x] `[SHARED]` PWA: `manifest.webmanifest`, `sw.js` (app shell only, network-first), offline page
+- [x] `[POC]` `public/_headers` for Cloudflare Pages (CSP with Apps Script `connect-src`, HSTS, etc.)
+- [x] `[POC]` Deploy prep: `scripts/prepare-deploy.mjs` + runbook steps for Cloudflare Pages (static) + Apps Script web app with `API_BASE` set — the deploy itself is deferred (M10 decision: prepare, don't deploy)
+- [x] `[SHARED]` Playwright E2E (dev-only, `npm run test:e2e`): main path per role, send-back loop, Tamil, dark mode, two-browser save test
+- [x] `[SHARED]` Security review before handing to staff (`docs/security-review.md`)
 
 ### POC close-out
 - [ ] `[POC]` Staffing: make sure every reviewing stage has someone who has not already approved the same round — main spec §4 forbids one person approving two stages, so a school with a single holder of a later role can leave a file stuck at that stage (see the M6 plan's carry-forwards)

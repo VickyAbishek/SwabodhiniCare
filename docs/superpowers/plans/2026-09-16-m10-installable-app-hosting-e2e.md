@@ -104,11 +104,11 @@ A written, checklist-driven review, then tick M10 off.
 - **Consumes:** the whole app; the `rules/common/security.md` checklist.
 - **Produces:** `docs/security-review.md` (findings + what was fixed vs. recorded); the `TODO.md` update (tick M10, point "Start here" at the POC close-out, note 365 → N tests).
 
-- [ ] **Step 1: Review** inline against the security checklist (hardcoded secrets, input validation, XSS, CSRF, authn/authz, rate limiting, error leakage); fix CRITICAL/HIGH, record the rest.
-- [ ] **Step 2: Write `docs/security-review.md`.**
-- [ ] **Step 3: Update `TODO.md`** (tick the six M10 lines, update "Start here" and the test count).
-- [ ] **Step 4: Run `npm test`** and confirm the full count, 0 fail.
-- [ ] **Step 5: Commit** (`docs: security review + tick off M10`), push, and open the PR.
+- [x] **Step 1: Review** inline against the security checklist (hardcoded secrets, input validation, XSS, CSRF, authn/authz, rate limiting, error leakage); fix CRITICAL/HIGH, record the rest.
+- [x] **Step 2: Write `docs/security-review.md`.**
+- [x] **Step 3: Update `TODO.md`** (tick the six M10 lines, update "Start here" and the test count).
+- [x] **Step 4: Run `npm test`** and confirm the full count, 0 fail.
+- [x] **Step 5: Commit** (`docs: security review + tick off M10`), push, and open the PR.
 
 ---
 
