@@ -40,15 +40,29 @@ test("the admitted demo application has a registration number", () => {
   assert.match(admitted.registrationNo, /^SWB\/[A-Z]{3}\/20\d\d\/\d{4}$/);
 });
 
-test("the sent-back demo application still has a step to fix", () => {
+test("the sent-back demo application still has work to do", () => {
   const { call, ids } = seedDemoData();
   const app = call("lakshmi", "applications.get", { id: ids[3] }).data;
   assert.equal(app.status, "RETURNED");
-  // The therapist's screen lists the sections the form itself would not accept. A demo case with
-  // every answer in place has nothing to list, so the screen's "Steps to fix" is never seen.
-  const toFix = Object.keys(app.completion.steps).filter((step) => app.completion.steps[step] !== "done");
-  assert.ok(toFix.length > 0, "the therapist should have something to fix on the sent-back case");
-  assert.ok(!app.values.s5_birth_term, "the section the reviewer asked for should be the one left blank");
+  // The therapist's screen lists every section the form itself would not accept, in both of the
+  // states it draws: the diagnosis answer the therapist is still to fill in again, and the
+  // development history nobody has started. A demo case with every answer in place lists nothing, so
+  // that part of the screen is never seen.
+  const steps = app.completion.steps;
+  assert.deepEqual(Object.keys(steps).filter((step) => steps[step] !== "done"), ["s4", "s5"]);
+  assert.equal(steps.s4, "incomplete");
+  assert.equal(steps.s5, "empty");
+});
+
+test("the sent-back demo application is refused until its missing answer is filled in", () => {
+  const { call, ids } = seedDemoData();
+  // Sending it again is what the "Fix and resend" button does, and it is refused with the answer it
+  // names — the one thing a screen that sends a file on has to get right. Nothing else about the case
+  // is incomplete, so this is the whole of the complaint.
+  const sent = call("deepa", "applications.submit", { id: ids[3] });
+  assert.equal(sent.ok, false);
+  assert.equal(sent.error.code, "VALIDATION_FAILED");
+  assert.deepEqual(plain(sent.error.details.errors), { s4_asd_diagnosed: "REQUIRED" });
 });
 
 test("a sent-back application carries the reason on its routing slip", () => {

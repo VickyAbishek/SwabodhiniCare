@@ -60,9 +60,8 @@ function signIn(ctx, person) {
 
 // The answers for one case: the shared sample, renamed and moved to that case's centre, so the list
 // and the reports are not five identical rows — minus whatever sections the case leaves blank (see
-// `clear` in demo-data.mjs). Taken out here rather than saved away later: answers can only be added
-// through applications.save, never emptied, and a case that must not have an answer must never be
-// created with one.
+// `clear` in demo-data.mjs). A section is dropped here, as the row is made; an answer that has to be
+// there to submit and gone afterwards is cleared by a save instead, where the case's steps say so.
 function answersFor(ctx, demoCase) {
   const answers = Object.assign({}, SAMPLE_APPLICANT, {
     s1_centre: demoCase.centre,
@@ -104,6 +103,16 @@ function walkCase(ctx, people, call, demoCase) {
   let application = run(demoCase.therapist, "applications.create", { values: answersFor(ctx, demoCase) });
   application = run(demoCase.therapist, "applications.submit", { id: application.id });
   for (const step of demoCase.steps) {
+    // A save is the owner's own edit, not a decision: no stage is waiting on it, so no role is asked
+    // for — the therapist who filed the form takes it. Clearing an answer is how a file comes to have
+    // a gap in it that submit refuses, and it is the only way one can: a required answer cannot be
+    // left out at create time, and the file it is cleared from must be draft or sent back.
+    if (step.action === "SAVE") {
+      application = run(demoCase.therapist, "applications.save", {
+        id: application.id, version: application.version, values: step.values,
+      });
+      continue;
+    }
     const actor = actorFor(ctx, people, application.status);
     const data = { id: application.id, action: step.action, comment: step.comment };
     // Admitting is the Director's own decision and asks for their password again (spec §10.1).
