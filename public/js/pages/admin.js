@@ -6,7 +6,7 @@
 // password itself (main §10.1).
 import { startPage, showMessage, setBusy, goTo, PAGES } from "../page.js";
 import { CONFIG } from "../config.js";
-import { deriveKey, newSalt } from "../kdf.js";
+import { deriveKey, newSalt, newPassword } from "../kdf.js";
 import { createConfirmSheet } from "../confirm-sheet.js";
 
 const { SC_Permissions, SC_FormSchema } = window;
@@ -111,7 +111,7 @@ async function loadStaff() {
 async function createStaff(event) {
   event.preventDefault();
   const button = $("staff-create");
-  const tempPassword = newSalt().slice(0, 12);
+  const tempPassword = newPassword();
   const salt = newSalt();
   const key = await deriveKey(tempPassword, salt, CONFIG.KDF_ITERATIONS);
   setBusy(button, t("admin.creating"), true);

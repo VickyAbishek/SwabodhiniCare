@@ -39,6 +39,17 @@ export function newSalt(cryptoObj = globalThis.crypto) {
   return bytesToHex(bytes);
 }
 
+// A one-time temporary password: 16 random bytes (128 bits) from the CSPRNG, base64url-encoded so it
+// is short enough to copy or read aloud yet far too long to guess. The Admin shows it once; the new
+// person sets their own password at first sign-in, so it never has to be remembered for long.
+export function newPassword(cryptoObj = globalThis.crypto) {
+  const bytes = new Uint8Array(16);
+  cryptoObj.getRandomValues(bytes);
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += 1) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
 // Returns null when the password is acceptable, otherwise a message key for the screen.
 export function checkPassword(password) {
   const value = typeof password === "string" ? password : "";
