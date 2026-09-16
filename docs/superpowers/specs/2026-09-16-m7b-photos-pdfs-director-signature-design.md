@@ -83,7 +83,13 @@ already exists (`MAX_BYTES`) and stays the universal ceiling for every kind.
 `attachments.delete` soft-deletes a row (stamps `deleted_at`). It asks the application for
 permission first (`loadVisible`), then applies the same edit check `save()` uses: the owner on an
 editable file (`Applications.gs:162`). Someone who may not even see it is told `NOT_FOUND`, in the
-M7a convention. Re-signing's soft-delete behaviour (M7a §5.1) is unchanged.
+M7a convention.
+
+Re-signing's soft-delete behaviour (M7a §5.1) is unchanged **and stays scoped to
+`CONSENT_SIGNATURE`**: that is the one kind where a new upload supersedes the old. The other kinds
+are additive — a second diagnosis report must not erase the first — so `upload`'s implicit
+soft-delete runs only for the signature. Removing or replacing a photo is an explicit
+`attachments.delete` by the client.
 
 `applications.get` gains an `attachments` list of live rows — id, kind, filename, mime, size,
 uploaded_at — so the form can render photos and PDFs without a round trip per file. Bytes stay
