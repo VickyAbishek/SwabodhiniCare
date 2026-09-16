@@ -4,7 +4,7 @@
 // public/shared/ (gitignored) and verifies that every <script src="shared/…"> in public/*.html
 // resolves to a file that exists — drift is caught here, not on a broken page.
 // Usage: node scripts/deploy-check.mjs   (also importable; exports the pieces for tests)
-import { readdirSync, readFileSync, mkdirSync, writeFileSync, existsSync } from "node:fs";
+import { readdirSync, readFileSync, mkdirSync, writeFileSync, existsSync, lstatSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -12,7 +12,10 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 export function copyShared(root) {
   const sharedDir = join(root, "shared");
   const outDir = join(root, "public", "shared");
-  const names = readdirSync(sharedDir).filter((name) => name.endsWith(".js"));
+  const names = readdirSync(sharedDir).filter((name) => {
+    if (!name.endsWith(".js")) return false;
+    return lstatSync(join(sharedDir, name)).isFile(); // skip subdirectories and symlinks
+  });
   mkdirSync(outDir, { recursive: true });
   for (const name of names) {
     writeFileSync(join(outDir, name), readFileSync(join(sharedDir, name)));
