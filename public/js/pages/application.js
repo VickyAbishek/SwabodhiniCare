@@ -13,7 +13,9 @@ import { createFormView } from "../form-view.js";
 import { createAutosave, saveStatusKey } from "../autosave.js";
 import { createConfirmSheet } from "../confirm-sheet.js";
 import { renderQuestion } from "../form-render.js";
-import { isBlank, trimToInk, fitTo } from "../signature-pad.js";
+import { isBlank } from "../signature-pad.js";
+import { strokesToPng } from "../signature-image.js";
+import { compress, blobToBase64 } from "../image-compress.js";
 import { joinNames } from "../i18n.js";
 
 const { SC_FormSchema, SC_FormRules, SC_Dates, SC_Workflow } = window;
@@ -200,7 +202,10 @@ function fixRow(stepId, stepState) {
 // again instead of saving and stepping forward (main spec §5); on a file this person may only read it
 // is drawn in the same read-only state every field is — present, and plainly not for them.
 function drawPrimary(model) {
-  const label = state.resend ? "sentBack.fixAndResend" : model.number === model.total ? "form.finish" : "form.saveNext";
+  const isLast = model.number === model.total;
+  const label = state.resend
+    ? "sentBack.fixAndResend"
+    : isLast && state.app.status === "DRAFT" ? "form.sendToHead" : isLast ? "form.finish" : "form.saveNext";
   $("next-btn").textContent = state.page.t(label);
   $("next-btn").disabled = state.readOnly;
 }
@@ -238,8 +243,6 @@ function renderTicks(current) {
 
    The parent signs with a finger, so touch-action: none on the canvas and preventDefault here
    both matter — without them the page scrolls under their hand instead of drawing. */
-const SIGN_BOX = { width: 560, height: 180 };
-
 function wireSignaturePad(field) {
   const { t } = state.page;
   const pad = $(`${field.id}-pad`);
@@ -320,7 +323,7 @@ function wireSignaturePad(field) {
         applicationId: state.app.id,
         kind: "CONSENT_SIGNATURE",
         filename: "signature.png",
-        base64: signaturePng(strokes),
+        base64: strokesToPng(strokes),
       });
       if (!result.ok) {
         state$.textContent = state.page.errorMessage(result.error);
@@ -340,25 +343,74 @@ function wireSignaturePad(field) {
   });
 }
 
-// Trimmed of its empty margin and scaled to one size, so every stored signature prints alike.
-function signaturePng(strokes) {
-  const fitted = fitTo(trimToInk(strokes, 0), SIGN_BOX);
-  const out = document.createElement("canvas");
-  out.width = SIGN_BOX.width + 16;
-  out.height = SIGN_BOX.height + 16;
-  const pen = out.getContext("2d");
-  pen.lineWidth = 2.5;
-  pen.lineCap = "round";
-  pen.lineJoin = "round";
-  pen.strokeStyle = "#111";
-  for (const stroke of fitted) {
-    if (stroke.length < 2) continue;
-    pen.beginPath();
-    pen.moveTo(stroke[0].x + 8, stroke[0].y + 8);
-    for (const point of stroke.slice(1)) pen.lineTo(point.x + 8, point.y + 8);
-    pen.stroke();
+/* A file question's browser half: the pickers and the remove buttons, plus loading image bytes for
+   thumbnails. The pure geometry is in image-compress.js; this owns the upload and the calls. */
+function wireFileQuestion(field) {
+  const makePicker = (accept, capture) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = accept;
+    if (capture) input.setAttribute("capture", "environment");
+    input.hidden = true;
+    input.addEventListener("change", () => {
+      const file = input.files && input.files[0];
+      if (file) uploadFile(field, file);
+      input.value = "";
+    });
+    document.body.append(input);
+    return input;
+  };
+  const accept = field.kind === "PHOTO" ? "image/*" : "image/*,application/pdf";
+  const camera = $(`${field.id}-camera`);
+  if (camera) camera.addEventListener("click", () => makePicker("image/*", true).click());
+  const choose = $(`${field.id}-choose`);
+  if (choose) choose.addEventListener("click", () => makePicker(accept, false).click());
+  const ids = Array.isArray(field.value) ? field.value : [];
+  ids.forEach((id) => {
+    const remove = $(`${field.id}-remove-${id}`);
+    if (remove) remove.addEventListener("click", () => removeFile(field, id));
+    loadThumb(field, id);
+  });
+}
+
+async function uploadFile(field, file) {
+  const page = state.page;
+  let blob = file;
+  if (file.type.indexOf("image/") === 0) {
+    try { blob = await compress(file, { maxDim: 1600, target: 300 * 1024 }); }
+    catch (err) { console.error("The photo could not be compressed", err); }
   }
-  return out.toDataURL("image/png").split(",")[1];
+  const base64 = await blobToBase64(blob);
+  const result = await page.api.call("attachments.upload", {
+    applicationId: state.app.id, kind: field.kind, filename: file.name || "file", base64,
+  });
+  if (!result.ok) { showMessage($("message"), page.errorMessage(result.error)); return; }
+  const current = Array.isArray(state.values[field.id]) ? state.values[field.id] : [];
+  // Replacing (maxFiles 1) removes the old file explicitly, so it does not linger on the cap.
+  if (field.maxFiles === 1 && current.length > 0) {
+    await page.api.call("attachments.delete", { id: current[0] });
+  }
+  const next = field.maxFiles === 1 ? [result.data.id] : current.concat(result.data.id);
+  const fresh = await page.api.call("applications.get", { id: state.app.id });
+  if (fresh.ok) state.app = fresh.data;
+  onAnswer(field.id, next, true);
+}
+
+async function removeFile(field, id) {
+  const page = state.page;
+  const result = await page.api.call("attachments.delete", { id });
+  if (!result.ok) { showMessage($("message"), page.errorMessage(result.error)); return; }
+  const next = (state.values[field.id] || []).filter((x) => x !== id);
+  const fresh = await page.api.call("applications.get", { id: state.app.id });
+  if (fresh.ok) state.app = fresh.data;
+  onAnswer(field.id, next, true);
+}
+
+async function loadThumb(field, id) {
+  const img = $(`${field.id}-thumb-${id}`);
+  if (!img) return;
+  const result = await state.page.api.call("attachments.get", { id });
+  if (result.ok) img.src = `data:${result.data.mime};base64,${result.data.base64}`;
 }
 
 /* What to say when a signature no longer covers the answers. The server sends the list of facts
@@ -381,9 +433,11 @@ function renderStep() {
   $("step-title").textContent = model.title;
   $("app-no").textContent = state.app.appNo;
   renderTicks(model.number);
-  const ctx = { t, today: today(), view, readOnly: state.readOnly, errorText, onAnswer };
+  const attachments = (state.app.attachments || []).reduce((map, a) => { map[a.id] = a; return map; }, {});
+  const ctx = { t, today: today(), view, readOnly: state.readOnly, errorText, onAnswer, attachments };
   $("fields").replaceChildren(...model.fields.map((field) => renderQuestion(field, ctx)));
   model.fields.filter((f) => f.type === "signature").forEach(wireSignaturePad);
+  model.fields.filter((f) => f.type === "file").forEach(wireFileQuestion);
   drawPrimary(model);
   renderBanner();
   renderFileActions();
@@ -471,6 +525,19 @@ function askToResend() {
   state.sheet.open({
     title: t("confirm.sendTitle"),
     body,
+    yes: t("confirm.yesSend"),
+    yesClass: "btn-primary",
+    onYes: resend,
+  }, $("next-btn"));
+}
+
+/* Sending a fresh draft on (M7b spec §3.6). Same send as resend(), with the draft's wording: a fresh
+   draft has no Therapy Head on its slip yet, so the sheet says what happens without naming one. */
+function askToSubmit() {
+  const { t } = state.page;
+  state.sheet.open({
+    title: t("confirm.sendTitle"),
+    body: t("confirm.sendDraft"),
     yes: t("confirm.yesSend"),
     yesClass: "btn-primary",
     onYes: resend,
@@ -588,6 +655,10 @@ function wireButtons() {
   $("next-btn").addEventListener("click", () => {
     if (state.resend) {
       askToResend();
+      return;
+    }
+    if (state.app.status === "DRAFT" && !stepAt(1)) {
+      askToSubmit();
       return;
     }
     saveThen(() => (stepAt(1) ? show("step", stepAt(1)) : show("overview")));

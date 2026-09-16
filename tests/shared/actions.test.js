@@ -23,7 +23,7 @@ test("the contract covers the POC spec §5 action list", () => {
     "applications.list", "applications.create", "applications.get", "applications.save",
     "applications.submit", "applications.review", "applications.decide", "applications.reopen",
     "applications.withdraw", "attachments.upload", "attachments.get", "attachments.delete",
-    "signature.upload", "reports.get", "admin.backups.list", "admin.backups.runNow", "admin.audit.list",
+    "signature.upload", "signature.get", "reports.get", "admin.backups.list", "admin.backups.runNow", "admin.audit.list",
   ];
   assert.deepEqual(Object.keys(A.ACTIONS).sort(), expected.sort());
 });

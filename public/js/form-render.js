@@ -122,14 +122,53 @@ function signaturePad(field, ctx) {
   return box;
 }
 
+/* A file question (photo, UDID certificate, diagnosis report). The picker and the thumbnails are
+   wired by the page module, which owns the upload and the remove calls; this only builds the
+   structure they attach to, exactly as signaturePad does. A photo shows as a thumbnail and a PDF
+   as a filename chip, each with a remove button; the pickers are the page module's to open. */
+function fileInput(field, ctx) {
+  const box = el("div", { class: "files" });
+  const list = el("ul", { class: "files-list", id: `${field.id}-list` });
+  const ids = Array.isArray(field.value) ? field.value : [];
+  ids.forEach((id) => {
+    const file = (ctx.attachments && ctx.attachments[id]) || { id, filename: "…", mime: "" };
+    const item = el("li", { class: "file", "data-attachment": id });
+    if (file.mime && file.mime.indexOf("image/") === 0) {
+      item.append(el("img", { class: "thumb", id: `${field.id}-thumb-${id}`, alt: file.filename }));
+    } else {
+      const chip = el("span", { class: "file-chip" });
+      chip.append(el("span", { class: "file-glyph" }, "▤"), el("span", {}, file.filename));
+      item.append(chip);
+    }
+    if (!ctx.readOnly) {
+      item.append(el("button", {
+        type: "button", class: "file-remove", id: `${field.id}-remove-${id}`,
+        "aria-label": ctx.t("file.remove"),
+      }, "✕"));
+    }
+    list.append(item);
+  });
+  box.append(list);
+
+  if (!ctx.readOnly) {
+    const pick = el("div", { class: "file-pick" });
+    if (field.kind === "PHOTO") {
+      pick.append(el("button", { type: "button", class: "btn btn-ghost", id: `${field.id}-camera` }, ctx.t("file.takePhoto")));
+    }
+    pick.append(el("button", { type: "button", class: "btn btn-ghost", id: `${field.id}-choose` }, ctx.t("file.chooseFile")));
+    box.append(pick);
+  }
+  return box;
+}
+
 export function renderQuestion(field, ctx) {
   const q = el("div", { class: "q", "data-field": field.id });
   if (field.type === "consent") {
     q.append(...consentInput(field, ctx));
   } else if (field.type === "signature") {
     q.append(labelFor(field, ctx), signaturePad(field, ctx));
-  } else if (field.waitsForUploads) {
-    q.append(labelFor(field, ctx), el("p", { class: "note" }, ctx.t("form.waitsForUploads")));
+  } else if (field.type === "file") {
+    q.append(labelFor(field, ctx), fileInput(field, ctx));
   } else if (field.type === "choice" || field.type === "multi") {
     q.append(labelFor(field, ctx), choiceGroup(field, ctx));
   } else if (field.type === "date") {

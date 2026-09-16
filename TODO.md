@@ -9,21 +9,21 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 
 ## ▶ Start here (updated 2026-09-16)
 
-**M7a (the parent's consent signature) is done and merged** — PR #9, 326 tests, checked in a browser. The milestone section below records what carried forward.
+**M7b (photos, PDFs and the Director's signature) is done** — PR #10, 342 tests, checked in a browser (therapist file pickers + fresh-draft submit, Director signature in Settings). Awaiting merge into `main`.
 
-**Next action:** start **M7b** (photos, PDFs and the Director's signature) from `main`'s tip. M7b widens `M7A_KINDS` in `Attachments.gs` and adds `s2_udid_file` to the schema.
+**Next action:** start **M8** (reports, Excel, print) from `main`'s tip after M7b is merged.
 
 Run tasks **inline, not with subagents** (token cost).
 
 | | |
 |---|---|
-| Spec (the *why*) | `docs/superpowers/specs/2026-09-16-m7a-consent-signature-design.md` |
-| Plan (the *how*) | `docs/superpowers/plans/2026-09-16-m7a-consent-signature.md` — all 48 boxes ticked |
-| Tests now | **326 pass, 0 fail** — `npm test` (runs the scope check, then `node --test`) |
-| M7a PR | **#9**, merged into `main` |
+| Spec (the *why*) | `docs/superpowers/specs/2026-09-16-m7b-photos-pdfs-director-signature-design.md` |
+| Plan (the *how*) | `docs/superpowers/plans/2026-09-16-m7b-photos-pdfs-director-signature.md` |
+| Tests now | **342 pass, 0 fail** — `npm test` (runs the scope check, then `node --test`) |
+| M7b PR | **#10**, awaiting merge into `main` |
 | Dev server | `node poc/scripts/dev-server.mjs` → http://127.0.0.1:8787 · sign in `priya@example.com` / `demo-pass-2026` (all demo staff share it; see `poc/seed/demo-data.mjs`) |
 
-**M7a closed the one thing worth knowing:** `s11_signature` is `required: true` (`shared/form-schema.js:184`) and nothing could produce one, so no application had ever passed the submit check — M5 seeded past it and M6 built the approval chain on files that never went through it. The remaining gap is the fresh-draft *submit* button, recorded under the M7a heading.
+**M7b closed the two M7a carry-forwards:** the UDID file question that `attachments.kind` promised but nothing created, and the fresh-draft *submit* button — the final button on a new draft now reads *"Send to the Therapy Head"* and submits, reusing `resend()`'s flush-then-submit body.
 
 ---
 
@@ -99,11 +99,12 @@ Run tasks **inline, not with subagents** (token cost).
 > and call `applications.submit`, reusing the confirmation sheet and the flush-then-submit body of
 > `resend()` in `pages/application.js`.
 
-#### M7b: Photos, PDFs and the Director's signature
-- [ ] `[SHARED]` `image-compress.js` (canvas, ≤1600 px, ~300 KB), file pickers (camera and gallery)
-- [ ] `[POC]` `Attachments.gs` widened: `PHOTO`, `DIAGNOSIS`, `UDID`; view, soft delete; the 10-file cap and the 5 MB PDF limit
-- [ ] `[SHARED]` `s2_udid_file` (`kind: UDID`, showIf status = `HAVE`) — `attachments.kind` promises a UDID file that no question creates (M7a spec §9)
-- [ ] `[POC]` Director signature upload: `Signatures` tab, `signature.upload`
+#### M7b: Photos, PDFs and the Director's signature · ✅ **done (342 tests; checked in a browser)** · spec: `docs/superpowers/specs/2026-09-16-m7b-photos-pdfs-director-signature-design.md` · plan: `docs/superpowers/plans/2026-09-16-m7b-photos-pdfs-director-signature.md`
+- [x] `[SHARED]` `image-compress.js` (canvas, ≤1600 px, ~300 KB), file pickers (camera and gallery)
+- [x] `[POC]` `Attachments.gs` widened: `PHOTO`, `DIAGNOSIS`, `UDID`; view, soft delete; the 10-file cap and the 5 MB PDF limit
+- [x] `[SHARED]` `s2_udid_file` (`kind: UDID`, showIf status = `HAVE`) — `attachments.kind` promises a UDID file that no question creates (M7a spec §9)
+- [x] `[POC]` Director signature upload: `Signatures` tab, `signature.upload`
+- [x] `[SHARED]` Director signature Settings UI (`signature-image.js` shared `strokesToPng`; Director-only pad) and the fresh-draft *submit* button (M7a carry-forward)
 
 ### M8: Reports, Excel, print
 - [ ] `[SHARED]` `shared/reports.js`: queue counts, register rows, by-centre totals, waitlist, turnaround, demographics (moved from M2)

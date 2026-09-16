@@ -93,6 +93,7 @@ var SC_FormSchema = (function () {
       q("s2_udid_status", "choice", "UDID / disability card", "UDID / மாற்றுத்திறனாளி அட்டை", { options: "UDID" }),
       q("s2_udid_number", "text", "UDID number", "UDID எண்", { showIf: HAVE_UDID }),
       q("s2_udid_percent", "number", "Disability percentage", "மாற்றுத்திறன் சதவீதம்", { min: 0, max: 100, showIf: HAVE_UDID }),
+      q("s2_udid_file", "file", "UDID / disability certificate", "UDID / மாற்றுத்திறனாளி சான்றிதழ்", { kind: "UDID", maxFiles: 1, showIf: HAVE_UDID }),
       q("s2_aadhaar_available", "choice", "Aadhaar card available?", "ஆதார் அட்டை உள்ளதா?", { options: "YES_NO" }),
     ] },
     { id: "s3", en: "Parent / guardian", ta: "பெற்றோர் / பாதுகாவலர் விவரங்கள்", fields: [

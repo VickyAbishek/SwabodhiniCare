@@ -12,8 +12,17 @@ var SC_Attachments = (function () {
   var fail = SC_Actions.fail;
 
   var MAX_BYTES = 5 * 1024 * 1024;       // main spec §10.3
+  var MAX_FILES = 10;                    // main spec §10.3: live attachments per application
   var ROOT_FOLDER = "SwabodhiniCare POC";
-  var M7A_KINDS = ["CONSENT_SIGNATURE"]; // widened in M7b
+
+  // The file's type is read from its bytes, then checked against the kind's allowed list here
+  // (M7b spec §3.3). PHOTO is an image only; a diagnosis report or certificate may also be a PDF.
+  var KINDS = {
+    PHOTO: ["image/png", "image/jpeg"],
+    DIAGNOSIS: ["image/png", "image/jpeg", "application/pdf"],
+    UDID: ["image/png", "image/jpeg", "application/pdf"],
+    CONSENT_SIGNATURE: ["image/png", "image/jpeg"],
+  };
 
   var MAGIC = [
     { mime: "image/png", bytes: [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a] },
@@ -46,17 +55,22 @@ var SC_Attachments = (function () {
     return folderNamed(folderNamed(root, "attachments"), appNo);
   }
 
+  // Every attachment of an application that has not been deleted, newest first.
+  function liveList(applicationId) {
+    return SC_Store.filter("Attachments", function (row) {
+      return row.application_id === applicationId && !row.deleted_at;
+    }).sort(function (a, b) { return String(a.created_at) < String(b.created_at) ? 1 : -1; });
+  }
+
   // The newest attachment of a kind that has not been deleted.
   function liveFor(applicationId, kind) {
-    var rows = SC_Store.all("Attachments").filter(function (row) {
-      return row.application_id === applicationId && row.kind === kind && !row.deleted_at;
-    });
-    rows.sort(function (a, b) { return String(a.created_at) < String(b.created_at) ? 1 : -1; });
+    var rows = liveList(applicationId).filter(function (row) { return row.kind === kind; });
     return rows.length > 0 ? rows[0] : null;
   }
 
   function upload(data, session) {
-    if (M7A_KINDS.indexOf(data.kind) === -1) return fail("INVALID_REQUEST");
+    var allowed = KINDS[data.kind];
+    if (!allowed) return fail("INVALID_REQUEST");
     if (typeof data.base64 !== "string" || !data.base64) return fail("INVALID_REQUEST");
 
     var app = SC_Applications.loadVisible(data.applicationId, session);
@@ -65,7 +79,12 @@ var SC_Attachments = (function () {
     var bytes = Utilities.base64Decode(data.base64);
     if (bytes.length > MAX_BYTES) return fail("FILE_TOO_LARGE");
     var mime = sniff(bytes);
-    if (!mime) return fail("FILE_TYPE_NOT_ALLOWED");
+    if (!mime || allowed.indexOf(mime) === -1) return fail("FILE_TYPE_NOT_ALLOWED");
+
+    // The 10-file cap (main spec §10.3). A re-sign replaces its own previous mark, so that one
+    // does not count against the incoming upload; every other kind is additive.
+    var previous = data.kind === "CONSENT_SIGNATURE" ? liveFor(app.row.id, data.kind) : null;
+    if (liveList(app.row.id).length - (previous ? 1 : 0) + 1 > MAX_FILES) return fail("TOO_MANY_FILES");
 
     var name = typeof data.filename === "string" && data.filename ? data.filename : "file";
     var blob = Utilities.newBlob(bytes, mime, name);
@@ -92,8 +111,8 @@ var SC_Attachments = (function () {
       consent_payload: consentPayload,
     };
     // Signing again supersedes the previous mark rather than erasing it (POC spec §9, M7a spec
-    // §5.1): what was consented to, and when, has to stay answerable.
-    var previous = liveFor(app.row.id, data.kind);
+    // §5.1): what was consented to, and when, has to stay answerable. The other kinds are additive
+    // — a second diagnosis report must not erase the first — so this runs for the signature alone.
     if (previous) SC_Store.update("Attachments", previous.id, { deleted_at: SC_Store.nowIso() });
 
     SC_Store.insert("Attachments", row);
@@ -116,8 +135,25 @@ var SC_Attachments = (function () {
     });
   }
 
-  return Object.freeze({ upload: upload, get: get, sniff: sniff, liveFor: liveFor });
+  function remove(data, session) {
+    if (typeof data.id !== "string" || !data.id) return fail("INVALID_REQUEST");
+    var row = SC_Store.find("Attachments", "id", data.id);
+    if (!row || row.deleted_at) return fail("NOT_FOUND");
+    // The permission lives on the application, so ask about that — as get() does. The edit check is
+    // the one save() uses (Applications.gs:162): the owner, on a file they may still change.
+    var app = SC_Applications.loadVisible(row.application_id, session);
+    if (app.error) return app.error;
+    if (app.row.created_by !== session.user.id || !SC_Workflow.isEditable(app.row.status)) {
+      return fail("NOT_ALLOWED");
+    }
+    SC_Store.update("Attachments", row.id, { deleted_at: SC_Store.nowIso() });
+    SC_Audit.log(session.user.id, "attachments.deleted", "Attachments", row.id, { kind: row.kind });
+    return ok({ id: row.id });
+  }
+
+  return Object.freeze({ upload: upload, get: get, remove: remove, sniff: sniff, liveFor: liveFor, liveList: liveList });
 })();
 
 SC_Api.register("attachments.upload", SC_Attachments.upload);
 SC_Api.register("attachments.get", SC_Attachments.get);
+SC_Api.register("attachments.delete", SC_Attachments.remove);

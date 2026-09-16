@@ -1,7 +1,6 @@
 // scope: shared
 // Turns the form definition into what one step's screen shows, and screen input back into answers.
 // Pure (no DOM): the schema, rules and date helpers are passed in (globals SC_* in the browser).
-const UPLOAD_TYPES = ["file"]; // photos and PDFs arrive in M7b; the signature pad landed in M7a
 
 function isBlank(value) {
   return value === null || value === undefined || value === "" || (Array.isArray(value) && value.length === 0);
@@ -25,7 +24,8 @@ export function createFormView({ schema, rules, dates }) {
       required: Boolean(field.required),
       value: values[field.id] === undefined ? null : values[field.id],
       options: optionsFor(field, values[field.id], lang),
-      waitsForUploads: UPLOAD_TYPES.includes(field.type),
+      kind: field.kind,
+      maxFiles: field.maxFiles,
       min: field.min,
       max: field.max,
       decimals: Boolean(field.decimals),
