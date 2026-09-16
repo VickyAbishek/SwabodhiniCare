@@ -9,21 +9,16 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 
 ## ▶ Start here (updated 2026-09-16)
 
-**M7b (photos, PDFs and the Director's signature) is done** — PR #10, 342 tests, checked in a browser (therapist file pickers + fresh-draft submit, Director signature in Settings). Awaiting merge into `main`.
-
-**Next action:** start **M8** (reports, Excel, print) from `main`'s tip after M7b is merged.
+**M7b is done and merged** (PR #10, 342 tests). **M8 (reports, Excel, print) is in progress** — spec committed, plan is the next step.
 
 Run tasks **inline, not with subagents** (token cost).
 
 | | |
 |---|---|
-| Spec (the *why*) | `docs/superpowers/specs/2026-09-16-m7b-photos-pdfs-director-signature-design.md` |
-| Plan (the *how*) | `docs/superpowers/plans/2026-09-16-m7b-photos-pdfs-director-signature.md` |
+| M8 spec (the *why*) | `docs/superpowers/specs/2026-09-16-m8-reports-excel-print-design.md` |
+| M8 plan (the *how*) | **next** — `docs/superpowers/plans/2026-09-16-m8-reports-excel-print.md` |
 | Tests now | **342 pass, 0 fail** — `npm test` (runs the scope check, then `node --test`) |
-| M7b PR | **#10**, awaiting merge into `main` |
 | Dev server | `node poc/scripts/dev-server.mjs` → http://127.0.0.1:8787 · sign in `priya@example.com` / `demo-pass-2026` (all demo staff share it; see `poc/seed/demo-data.mjs`) |
-
-**M7b closed the two M7a carry-forwards:** the UDID file question that `attachments.kind` promised but nothing created, and the fresh-draft *submit* button — the final button on a new draft now reads *"Send to the Therapy Head"* and submits, reusing `resend()`'s flush-then-submit body.
 
 ---
 
@@ -106,7 +101,7 @@ Run tasks **inline, not with subagents** (token cost).
 - [x] `[POC]` Director signature upload: `Signatures` tab, `signature.upload`
 - [x] `[SHARED]` Director signature Settings UI (`signature-image.js` shared `strokesToPng`; Director-only pad) and the fresh-draft *submit* button (M7a carry-forward)
 
-### M8: Reports, Excel, print
+### M8: Reports, Excel, print · spec: `docs/superpowers/specs/2026-09-16-m8-reports-excel-print-design.md` · ⏳ in progress (plan next)
 - [ ] `[SHARED]` `shared/reports.js`: queue counts, register rows, by-centre totals, waitlist, turnaround, demographics (moved from M2)
 - [ ] `[SHARED]` Reports screens (R1–R7) with filters and CSS bar charts
 - [ ] `[SHARED]` `xlsx.js`: Excel built in the browser (UTF-8, Tamil-safe)

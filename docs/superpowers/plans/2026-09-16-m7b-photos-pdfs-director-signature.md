@@ -34,7 +34,7 @@
 - Consumes: `q(id, type, en, ta, extra)` and `HAVE_UDID` already in `form-schema.js`.
 - Produces: `s2_udid_file` — a `file` field, `kind: "UDID"`, `maxFiles: 1`, `showIf: HAVE_UDID`. Task 6's UI and Task 3's upload both key off `kind === "UDID"`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Append to `tests/shared/form-schema.test.js`:
 
@@ -51,12 +51,12 @@ test("the UDID certificate is a file question shown only when the family has one
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `node --test tests/shared/form-schema.test.js`
 Expected: FAIL — `fieldById("s2_udid_file")` is `null`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 In `shared/form-schema.js`, insert after the `s2_udid_percent` line (line 95):
 
@@ -64,12 +64,12 @@ In `shared/form-schema.js`, insert after the `s2_udid_percent` line (line 95):
       q("s2_udid_file", "file", "UDID / disability certificate", "UDID / மாற்றுத்திறனாளி சான்றிதழ்", { kind: "UDID", maxFiles: 1, showIf: HAVE_UDID }),
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `node --test tests/shared/form-schema.test.js`
 Expected: PASS (the new test, plus the existing "every question uses a known type" test which asserts `file` fields carry `kind`/`maxFiles`).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add shared/form-schema.js tests/shared/form-schema.test.js
@@ -88,7 +88,7 @@ git commit -m "feat: add the UDID certificate file question"
 - Consumes: nothing (pure + a canvas half).
 - Produces: `fitInside(width, height, maxDim) -> { width, height }`; `qualityFor(sizes, target) -> quality`; `compress(file, { maxDim, target }) -> Promise<Blob>`; `blobToBase64(blob) -> Promise<string>`. Task 6's `uploadFile` uses `compress` and `blobToBase64`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `tests/public/image-compress.test.mjs`:
 
@@ -113,12 +113,12 @@ test("qualityFor steps down to the first size under the target, else the floor",
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `node --test tests/public/image-compress.test.mjs`
 Expected: FAIL — module not found / `fitInside` undefined.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Create `public/js/image-compress.js`:
 
@@ -188,12 +188,12 @@ function toBlob(canvas, quality) {
 }
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `node --test tests/public/image-compress.test.mjs`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add public/js/image-compress.js tests/public/image-compress.test.mjs
@@ -213,7 +213,7 @@ git commit -m "feat: compress photos before upload"
 - Consumes: `sniff`, `liveFor`, `SC_Applications.loadVisible`, `SC_Store`, `SC_Actions.ok/fail`.
 - Produces: `SC_Attachments.liveList(applicationId)` (live rows, newest first); the upload cap. Task 4's `applications.get` metadata and `attachments.delete` both reuse `liveList`.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 In `tests/poc/attachments.test.js`, replace the test `"M7a stores signatures only"` (lines 83-91) with:
 
@@ -280,12 +280,12 @@ test("re-signing does not count the signature it replaces against the cap", () =
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `node --test tests/poc/attachments.test.js`
 Expected: FAIL — PHOTO/DIAGNOSIS/UDID uploads return `INVALID_REQUEST`; the cap test's eleventh upload succeeds.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 In `poc/apps-script/Attachments.gs`, replace line 16 (`var M7A_KINDS = ...`) with a KINDS map and add `MAX_FILES`:
 
@@ -379,12 +379,12 @@ In `shared/actions.js`, add a message to `MESSAGES` (after `FILE_TOO_LARGE`):
     TOO_MANY_FILES: ["Too many files. Remove one first.", "கோப்புகள் அதிகம். முதலில் ஒன்றை நீக்கவும்."],
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `node --test tests/poc/attachments.test.js tests/shared/actions.test.js`
 Expected: PASS (the replaced suite, and the existing signature tests still pass).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add poc/apps-script/Attachments.gs shared/actions.js tests/poc/attachments.test.js
@@ -404,7 +404,7 @@ git commit -m "feat: accept photos, diagnosis reports and the UDID certificate w
 - Consumes: `liveList` (Task 3), `SC_Applications.loadVisible`, `SC_Workflow.isEditable`, `SC_Audit.log`.
 - Produces: `attachments.delete` action; `applications.get` response gains `attachments` (`[{ id, kind, filename, mime, size, uploadedAt }]`). Task 6's `removeFile` calls `attachments.delete` and reads `state.app.attachments`.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Append to `tests/poc/attachments.test.js`:
 
@@ -449,12 +449,12 @@ test("applications.get ships attachment metadata, not bytes", () => {
 });
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `node --test tests/poc/attachments.test.js`
 Expected: FAIL — `attachments.delete` is `UNKNOWN_ACTION`; `applications.get` has no `attachments` key.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 In `poc/apps-script/Attachments.gs`, add `remove` after `get`:
 
@@ -499,12 +499,12 @@ In `poc/apps-script/Applications.gs`, add to `get()` after `shown.approvedThisRo
     });
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `node --test tests/poc/attachments.test.js`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add poc/apps-script/Attachments.gs poc/apps-script/Applications.gs tests/poc/attachments.test.js
@@ -525,7 +525,7 @@ git commit -m "feat: delete attachments and list them on applications.get"
 - Consumes: `SC_Attachments.sniff` (PNG check), `SC_Store` (Signatures tab already defined in `Store.gs`), `SC_Actions`.
 - Produces: `signature.upload` (Director-only, replaces the row) and `signature.get` (base64 + `uploadedAt`, or `{ base64: null }`). Task 7's Settings UI calls both.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `tests/poc/signatures.test.js`:
 
@@ -584,12 +584,12 @@ test("signature.get is empty before anything is stored", () => {
 
 In `tests/shared/actions.test.js`, add `"signature.get"` to the `expected` array in the test `"the contract covers the POC spec §5 action list"` (insert after `"signature.upload"`).
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `node --test tests/poc/signatures.test.js tests/shared/actions.test.js`
 Expected: FAIL — `signature.upload`/`signature.get` are `UNKNOWN_ACTION`; the contract-list test sees a missing `signature.get`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 In `shared/actions.js`, add to `CONTRACT` after `signature.upload`:
 
@@ -654,12 +654,12 @@ SC_Api.register("signature.upload", SC_Signatures.upload);
 SC_Api.register("signature.get", SC_Signatures.get);
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [x] **Step 4: Run tests to verify they pass**
 
 Run: `node --test tests/poc/signatures.test.js tests/shared/actions.test.js`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add poc/apps-script/Signatures.gs shared/actions.js tests/shared/actions.test.js tests/poc/signatures.test.js
@@ -680,7 +680,7 @@ git commit -m "feat: store the Director's signature"
 - Consumes: `compress`, `blobToBase64` (Task 2); `attachments.upload`/`attachments.delete`/`applications.get` (Tasks 3-4); `s2_udid_file` etc. (Task 1).
 - Produces: the file questions are fillable on the application screen. Nothing later depends on this task's internals except the `ctx.attachments` shape.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 The browser page modules are untested by convention (see `signature-pad.js`'s header); the pure parts of this task are already covered by Tasks 1-2. Add one shared rule test to pin the model shape, in `tests/public/form-view.test.mjs`:
 
@@ -697,12 +697,12 @@ test("file fields carry their kind and maxFiles to the renderer", () => {
 
 > The exact harness import in this file varies; match the existing `tests/public/form-view.test.mjs` top matter rather than the skeleton above.
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `node --test tests/public/form-view.test.mjs`
 Expected: FAIL — `photo.kind` is `undefined`.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 In `public/js/form-view.js`, add to `fieldModel`'s returned object (after `safety`):
 
@@ -858,12 +858,12 @@ In `public/i18n/en.json`, add (after `form.waitsForUploads`):
   "file.remove": "Remove",
 ```
 
-- [ ] **Step 4: Run the full test suite**
+- [x] **Step 4: Run the full test suite**
 
 Run: `npm test`
 Expected: PASS — the browser page module changes are checked only for scope/imports, and the form-view model test passes.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add public/js/form-render.js public/js/form-view.js public/js/pages/application.js public/i18n/en.json tests/public/form-view.test.mjs
@@ -884,16 +884,16 @@ git commit -m "feat: pick, compress and remove photos and documents in the form"
 - Consumes: `signature.upload`/`signature.get` (Task 5), `isBlank`/`fitTo`/`trimToInk` from `signature-pad.js`.
 - Produces: `strokesToPng(strokes) -> base64` in `public/js/signature-image.js`; Settings shows the Director-only "Your signature" pad.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `strokesToPng` touches the DOM and is untested by convention (like the old `signaturePng`). No new unit test; the behaviour is exercised by hand in the browser. Verification here is the scope check and the suite still passing.
 
-- [ ] **Step 2: Run test to verify the baseline**
+- [x] **Step 2: Run test to verify the baseline**
 
 Run: `npm test`
 Expected: PASS before the edits (baseline).
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 Create `public/js/signature-image.js`:
 
@@ -1030,12 +1030,12 @@ In `public/i18n/en.json`, add (after `settings.signOut`):
   "sign.directorHint": "Your signature is stamped on the reports you sign.",
 ```
 
-- [ ] **Step 4: Run the full test suite**
+- [x] **Step 4: Run the full test suite**
 
 Run: `npm test`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add public/js/signature-image.js public/js/pages/application.js public/js/pages/settings.js public/settings.html public/i18n/en.json
@@ -1054,16 +1054,16 @@ git commit -m "feat: let the Director store a signature from Settings"
 - Consumes: `resend()` already in the file (flush → `applications.submit` → home), `confirm.sendTitle`/`confirm.yesSend`.
 - Produces: a fresh `DRAFT` on its last step shows "Send to the Therapy Head" and submits. Nothing later depends on it.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Page modules are untested by convention; the change is behavioural and checked by hand. Verification is the suite still passing plus a manual browser pass.
 
-- [ ] **Step 2: Run test to verify the baseline**
+- [x] **Step 2: Run test to verify the baseline**
 
 Run: `npm test`
 Expected: PASS before the edits.
 
-- [ ] **Step 3: Write minimal implementation**
+- [x] **Step 3: Write minimal implementation**
 
 In `public/js/pages/application.js`, change `drawPrimary`:
 
@@ -1123,12 +1123,12 @@ and after `confirm.sendBody`:
   "confirm.sendDraft": "The Therapy Head will review this application. You can't edit it after sending, unless it is sent back to you.",
 ```
 
-- [ ] **Step 4: Run the full test suite**
+- [x] **Step 4: Run the full test suite**
 
 Run: `npm test`
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add public/js/pages/application.js public/i18n/en.json
@@ -1139,7 +1139,7 @@ git commit -m "feat: send a fresh draft to the Therapy Head from the last step"
 
 ## After all tasks
 
-- [ ] Run `npm test` once more; the scope check and every suite must be green.
-- [ ] Browser-check the flow against the dev server (`poc/scripts/dev-server.mjs`): fill a draft, add a photo and a diagnosis PDF, remove one, sign the consent, and press "Send to the Therapy Head" on the last step.
-- [ ] Update `TODO.md` (mark M7b merged; note the Director-signature and fresh-draft-submit items as done) and commit it.
-- [ ] Open the PR from `feat/m7b-photos-pdfs-director-signature` against `main`, with a summary and test plan; end the description with `🤖 Generated with [Claude Code](https://claude.com/claude-code)`.
+- [x] Run `npm test` once more; the scope check and every suite must be green.
+- [x] Browser-check the flow against the dev server (`poc/scripts/dev-server.mjs`): fill a draft, add a photo and a diagnosis PDF, remove one, sign the consent, and press "Send to the Therapy Head" on the last step.
+- [x] Update `TODO.md` (mark M7b done — PR #10, awaiting merge; note the Director-signature and fresh-draft-submit items as done) and commit it.
+- [x] Open the PR from `feat/m7b-photos-pdfs-director-signature` against `main`, with a summary and test plan; end the description with `🤖 Generated with [Claude Code](https://claude.com/claude-code)`.
