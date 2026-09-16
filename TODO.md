@@ -9,7 +9,7 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 
 ## ▶ Start here (updated 2026-09-16)
 
-**M8 (reports, Excel, print) is done and merged** (PR #12, 360 tests). **M9 (backups, alerts, admin) is done** (364 tests; checked in a browser) — runbook written, PR pending. **Next: M10 (installable app, hosting, end-to-end).**
+**M8 (reports, Excel, print) is done and merged** (PR #12, 360 tests). **M9 (backups, alerts, admin) is done** (365 tests; checked in a browser) — runbook written, PR #13 open. **Next: M10 (installable app, hosting, end-to-end).**
 
 Run tasks **inline, not with subagents** (token cost).
 
@@ -18,7 +18,7 @@ Run tasks **inline, not with subagents** (token cost).
 | M9 spec (the *why*) | `docs/superpowers/specs/2026-09-16-m9-backups-alerts-admin-design.md` |
 | M9 plan (the *how*) | ✅ done — `docs/superpowers/plans/2026-09-16-m9-backups-alerts-admin.md` |
 | Runbook | `docs/runbook.md` |
-| Tests now | **364 pass, 0 fail** — `npm test` (runs the scope check, then `node --test`) |
+| Tests now | **365 pass, 0 fail** — `npm test` (runs the scope check, then `node --test`) |
 | Dev server | `node poc/scripts/dev-server.mjs` → http://127.0.0.1:8787 · sign in `priya@example.com` / `demo-pass-2026` (all demo staff share it; see `poc/seed/demo-data.mjs`) |
 
 ---
@@ -110,7 +110,7 @@ Run tasks **inline, not with subagents** (token cost).
 - [x] `[SHARED]` Pending & Turnaround (R5): take a rejection's date from its `Approvals` row, not from `decided_at`, which no rejection writes (M6 plan, carry-forward 2)
 - [x] `[POC]` `Reports.gs`: reads rows, filters, pages of 50
 
-### M9: Backups, alerts, admin · spec: `docs/superpowers/specs/2026-09-16-m9-backups-alerts-admin-design.md` · plan: `docs/superpowers/plans/2026-09-16-m9-backups-alerts-admin.md` · ✅ done (364 tests; checked in a browser)
+### M9: Backups, alerts, admin · spec: `docs/superpowers/specs/2026-09-16-m9-backups-alerts-admin-design.md` · plan: `docs/superpowers/plans/2026-09-16-m9-backups-alerts-admin.md` · ✅ done (365 tests; checked in a browser)
 - [x] `[POC]` `Backup.gs`: monthly trigger → Sheet copy + `.xlsx` to Drive, keep 24 months, `BackupLog`, email result
 - [x] `[SHARED]` Admin screens: staff list, add staff (temporary password shown once), backups list + Backup now, audit log
 - [x] `[POC]` Restore steps in `docs/runbook.md` + one practice restore
