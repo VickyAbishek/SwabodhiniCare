@@ -59,6 +59,8 @@
   "settings.email": "Email",
   "settings.changePassword": "Change password",
   "settings.signOut": "Sign out",
+  "sign.directorTitle": "Your signature",
+  "sign.directorHint": "Your signature is stamped on the reports you sign.",
   "role.ADMIN": "Admin",
   "role.THERAPIST": "Therapist",
   "role.THERAPY_HEAD": "Therapy Head",

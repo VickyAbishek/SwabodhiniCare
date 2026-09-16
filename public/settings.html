@@ -48,6 +48,19 @@
       <a class="btn btn-outline btn-block" href="password.html" data-i18n="settings.changePassword">Change password</a>
     </section>
 
+    <section class="panel" aria-labelledby="signature-title" id="signature-section" hidden>
+      <h2 id="signature-title" data-i18n="sign.directorTitle">Your signature</h2>
+      <p class="hint" data-i18n="sign.directorHint">Your signature is stamped on the reports you sign.</p>
+      <div class="sign">
+        <canvas class="sign-pad" id="director-pad" width="600" height="200" role="img" aria-label="Your signature"></canvas>
+        <div class="sign-actions">
+          <button type="button" class="btn btn-ghost" id="director-clear" data-i18n="sign.clear">Clear</button>
+          <button type="button" class="btn" id="director-save" data-i18n="sign.save">Save signature</button>
+        </div>
+        <p class="sign-state" id="director-state" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
     <button type="button" class="btn btn-bad btn-block" id="sign-out" data-i18n="settings.signOut">Sign out</button>
   </main>
   <nav class="bottom-nav" aria-label="Main">

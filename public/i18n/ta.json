@@ -59,6 +59,8 @@
   "settings.email": "மின்னஞ்சல்",
   "settings.changePassword": "கடவுச்சொல்லை மாற்று",
   "settings.signOut": "வெளியேறு",
+  "sign.directorTitle": "உங்கள் கையொப்பம்",
+  "sign.directorHint": "நீங்கள் கையொப்பமிடும் அறிக்கைகளில் உங்கள் கையொப்பம் முத்திரையிடப்படும்.",
   "role.ADMIN": "நிர்வாகி",
   "role.THERAPIST": "சிகிச்சையாளர்",
   "role.THERAPY_HEAD": "சிகிச்சைத் தலைவர்",

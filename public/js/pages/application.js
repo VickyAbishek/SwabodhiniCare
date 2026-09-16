@@ -13,7 +13,8 @@ import { createFormView } from "../form-view.js";
 import { createAutosave, saveStatusKey } from "../autosave.js";
 import { createConfirmSheet } from "../confirm-sheet.js";
 import { renderQuestion } from "../form-render.js";
-import { isBlank, trimToInk, fitTo } from "../signature-pad.js";
+import { isBlank } from "../signature-pad.js";
+import { strokesToPng } from "../signature-image.js";
 import { compress, blobToBase64 } from "../image-compress.js";
 import { joinNames } from "../i18n.js";
 
@@ -239,8 +240,6 @@ function renderTicks(current) {
 
    The parent signs with a finger, so touch-action: none on the canvas and preventDefault here
    both matter — without them the page scrolls under their hand instead of drawing. */
-const SIGN_BOX = { width: 560, height: 180 };
-
 function wireSignaturePad(field) {
   const { t } = state.page;
   const pad = $(`${field.id}-pad`);
@@ -321,7 +320,7 @@ function wireSignaturePad(field) {
         applicationId: state.app.id,
         kind: "CONSENT_SIGNATURE",
         filename: "signature.png",
-        base64: signaturePng(strokes),
+        base64: strokesToPng(strokes),
       });
       if (!result.ok) {
         state$.textContent = state.page.errorMessage(result.error);
@@ -339,27 +338,6 @@ function wireSignaturePad(field) {
       state$.textContent = t("sign.failed");
     }
   });
-}
-
-// Trimmed of its empty margin and scaled to one size, so every stored signature prints alike.
-function signaturePng(strokes) {
-  const fitted = fitTo(trimToInk(strokes, 0), SIGN_BOX);
-  const out = document.createElement("canvas");
-  out.width = SIGN_BOX.width + 16;
-  out.height = SIGN_BOX.height + 16;
-  const pen = out.getContext("2d");
-  pen.lineWidth = 2.5;
-  pen.lineCap = "round";
-  pen.lineJoin = "round";
-  pen.strokeStyle = "#111";
-  for (const stroke of fitted) {
-    if (stroke.length < 2) continue;
-    pen.beginPath();
-    pen.moveTo(stroke[0].x + 8, stroke[0].y + 8);
-    for (const point of stroke.slice(1)) pen.lineTo(point.x + 8, point.y + 8);
-    pen.stroke();
-  }
-  return out.toDataURL("image/png").split(",")[1];
 }
 
 /* A file question's browser half: the pickers and the remove buttons, plus loading image bytes for
