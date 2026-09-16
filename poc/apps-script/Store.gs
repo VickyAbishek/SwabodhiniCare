@@ -17,7 +17,7 @@ var SC_Store = (function () {
       "created_at", "updated_at"],
     Approvals: ["id", "application_id", "stage", "action", "comment", "user_id", "form_hash", "created_at"],
     Attachments: ["id", "application_id", "kind", "drive_file_id", "filename", "mime", "size:number",
-      "uploaded_by", "created_at", "deleted_at"],
+      "uploaded_by", "created_at", "deleted_at", "consent_hash", "consent_payload"],
     Signatures: ["user_id", "drive_file_id", "uploaded_at"],
     Audit: ["id", "user_id", "action", "entity", "entity_id", "details:json", "created_at"],
     Config: ["key", "value"],

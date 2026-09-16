@@ -101,10 +101,33 @@ function consentInput(field, ctx) {
   return [el("p", { class: "consent" }, field.label), check];
 }
 
+/* The pad the parent signs on. The canvas is wired by the page module, which owns the pointer
+   events and the upload; this only builds what they attach to. A stored signature shows as
+   "Signed ✓" rather than redrawing the mark: the file lives in Drive and fetching it to prove
+   it exists would cost a round trip on every render of the step. */
+function signaturePad(field, ctx) {
+  const pad = el("canvas", { class: "sign-pad", id: `${field.id}-pad`, width: "600", height: "200" });
+  pad.setAttribute("role", "img");
+  pad.setAttribute("aria-label", field.label);
+  const state = el("p", { class: "sign-state", id: `${field.id}-state` }, field.value ? ctx.t("sign.saved") : "");
+  state.setAttribute("role", "status");
+  state.setAttribute("aria-live", "polite");
+  const actions = el("div", { class: "sign-actions" });
+  actions.append(
+    el("button", { type: "button", class: "btn btn-ghost", id: `${field.id}-clear` }, ctx.t("sign.clear")),
+    el("button", { type: "button", class: "btn", id: `${field.id}-save` }, ctx.t("sign.save")),
+  );
+  const box = el("div", { class: "sign" });
+  box.append(el("p", { class: "sign-hint" }, ctx.t("sign.hint")), pad, actions, state);
+  return box;
+}
+
 export function renderQuestion(field, ctx) {
   const q = el("div", { class: "q", "data-field": field.id });
   if (field.type === "consent") {
     q.append(...consentInput(field, ctx));
+  } else if (field.type === "signature") {
+    q.append(labelFor(field, ctx), signaturePad(field, ctx));
   } else if (field.waitsForUploads) {
     q.append(labelFor(field, ctx), el("p", { class: "note" }, ctx.t("form.waitsForUploads")));
   } else if (field.type === "choice" || field.type === "multi") {

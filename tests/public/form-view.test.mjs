@@ -37,9 +37,10 @@ test("choice questions list their answers with the current one marked", () => {
   assert.equal(programs.options.find((o) => o.value === "YOGA").selected, true);
 });
 
-test("photo and signature questions wait for uploads (M7)", () => {
+test("photo questions still wait for uploads (M7b); the signature no longer does", () => {
   assert.equal(field(view.stepModel("s2", {}, TODAY, "en"), "s2_photo").waitsForUploads, true);
-  assert.equal(field(view.stepModel("s11", {}, TODAY, "en"), "s11_signature").waitsForUploads, true);
+  // M7a built the pad, so the consent step must stop telling people to come back later.
+  assert.equal(field(view.stepModel("s11", {}, TODAY, "en"), "s11_signature").waitsForUploads, false);
   assert.equal(field(view.stepModel("s2", {}, TODAY, "en"), "s2_full_name").waitsForUploads, false);
 });
 

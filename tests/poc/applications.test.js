@@ -10,9 +10,21 @@ function draftFor(as, name, values) {
   return as(name)("applications.create", { values }).data;
 }
 
-// An application already waiting for the Therapy Head.
+// A signature the server will accept: a real PNG, stored as a real attachment.
+const SIG_PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]).toString("base64");
+
+function signConsent(as, who, id) {
+  return as(who)("attachments.upload", {
+    applicationId: id, kind: "CONSENT_SIGNATURE", filename: "signature.png", base64: SIG_PNG,
+  });
+}
+
+// An application already waiting for the Therapy Head. It signs before submitting, because that
+// is what the real flow does: SAMPLE's s11_signature is only a string, and a string is not a
+// signature anybody gave.
 function submitReady(as, who) {
   const created = draftFor(as, who, SAMPLE);
+  signConsent(as, who, created.id);
   as(who)("applications.submit", { id: created.id });
   return created;
 }
@@ -633,4 +645,71 @@ test("the Director cannot admit after approving a stage of the same round", () =
   const admit = asVasan("applications.decide", { id, action: "ADMIT", key });
   assert.equal(admit.error.code, "ALREADY_APPROVED_STAGE");
   assert.equal(as("priya")("applications.get", { id }).data.status, "PENDING_DIRECTOR");
+});
+
+
+test("a signature stands until a consented fact changes", () => {
+  const { as } = setupPeople();
+  const app = draftFor(as, "priya", { s2_full_name: "Kavya Selvam", s11_parent_name: "Selvam R" });
+  const read = () => as("priya")("applications.get", { id: app.id }).data;
+
+  assert.equal(read().consentSigned, false);
+  assert.equal(read().consentStale, false);
+
+  signConsent(as, "priya", app.id);
+  assert.equal(read().consentSigned, true);
+  assert.equal(read().consentStale, false);
+  assert.deepEqual(read().consentChanged, []);
+
+  // A medicine is not something the parent agreed to.
+  as("priya")("applications.save", { id: app.id, version: read().version, values: { s4_current_medicines: "None" } });
+  assert.equal(read().consentStale, false, "an unconsented field must not stale the signature");
+
+  // The applicant's name is.
+  as("priya")("applications.save", { id: app.id, version: read().version, values: { s2_full_name: "Kavya S" } });
+  assert.equal(read().consentStale, true);
+  assert.deepEqual(read().consentChanged, ["s2_full_name"], "the screen must be able to say which fact moved");
+
+  // Signing again settles it.
+  signConsent(as, "priya", app.id);
+  assert.equal(read().consentStale, false);
+  assert.deepEqual(read().consentChanged, []);
+});
+
+test("more than one changed fact is reported, in the consent's own order", () => {
+  const { as } = setupPeople();
+  const app = draftFor(as, "priya", { s2_full_name: "Kavya Selvam", s11_parent_name: "Selvam R" });
+  signConsent(as, "priya", app.id);
+  const read = () => as("priya")("applications.get", { id: app.id }).data;
+  as("priya")("applications.save", {
+    id: app.id, version: read().version,
+    values: { s2_full_name: "Kavya S", s11_parent_name: "Selvam Raman" },
+  });
+  assert.deepEqual(read().consentChanged, ["s11_parent_name", "s2_full_name"]);
+});
+
+test("an application cannot be submitted on a signature that is not really there", () => {
+  const { as } = setupPeople();
+  // SAMPLE carries s11_signature as a plain string, so the answer check passes. Only an
+  // attachment that actually exists may satisfy the consent.
+  const app = draftFor(as, "priya", SAMPLE);
+  const refused = as("priya")("applications.submit", { id: app.id });
+  assert.equal(refused.ok, false);
+  assert.equal(refused.error.code, "VALIDATION_FAILED");
+  assert.deepEqual(refused.error.details, { errors: { s11_signature: "REQUIRED" } });
+
+  signConsent(as, "priya", app.id);
+  assert.equal(as("priya")("applications.submit", { id: app.id }).ok, true);
+});
+
+test("a stale signature stops a submit, and says so as a stale one", () => {
+  const { as } = setupPeople();
+  const app = draftFor(as, "priya", SAMPLE);
+  signConsent(as, "priya", app.id);
+  const read = () => as("priya")("applications.get", { id: app.id }).data;
+  as("priya")("applications.save", { id: app.id, version: read().version, values: { s11_parent_name: "Someone Else" } });
+
+  const refused = as("priya")("applications.submit", { id: app.id });
+  assert.equal(refused.ok, false);
+  assert.deepEqual(refused.error.details, { errors: { s11_signature: "CONSENT_STALE" } });
 });

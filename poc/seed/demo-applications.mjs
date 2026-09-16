@@ -19,6 +19,11 @@ const require = createRequire(import.meta.url);
 const { createContext, plain } = require("../../tests/poc/harness.js");
 const SAMPLE_APPLICANT = require("../../tests/fixtures/sample-application.js");
 
+/* A 1x1 transparent PNG, standing in for a signature a parent drew on screen. Fixed bytes so a
+   restarted server seeds the same files. Demo data, like every other answer in this file. */
+const DEMO_SIGNATURE_PNG =
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==";
+
 const KEY_BYTES = 32;
 const LOGIN_DOMAIN = "example.com";
 
@@ -101,6 +106,12 @@ function walkCase(ctx, people, call, demoCase) {
     return result.data;
   };
   let application = run(demoCase.therapist, "applications.create", { values: answersFor(ctx, demoCase) });
+  // The parent signs before the file is sent, because that is the real path: the answers carry
+  // s11_signature as text, and submit now checks there is a signature actually behind it.
+  run(demoCase.therapist, "attachments.upload", {
+    applicationId: application.id, kind: "CONSENT_SIGNATURE",
+    filename: "signature.png", base64: DEMO_SIGNATURE_PNG,
+  });
   application = run(demoCase.therapist, "applications.submit", { id: application.id });
   for (const step of demoCase.steps) {
     // A save is the owner's own edit, not a decision: no stage is waiting on it, so no role is asked

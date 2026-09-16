@@ -5,7 +5,7 @@ import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 export const SHARED_ORDER = Object.freeze([
-  "dates", "numbers", "permissions", "workflow", "actions", "form-schema", "form-rules",
+  "dates", "numbers", "permissions", "workflow", "actions", "consent", "form-schema", "form-rules",
 ]);
 
 export function sourceFiles(root) {

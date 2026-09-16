@@ -126,3 +126,19 @@ test("only a real network failure blames the network", () => {
   assert.doesNotMatch(EN[saveStatusKey("conflict")], /Wi-Fi/);
   assert.doesNotMatch(TA[saveStatusKey("conflict")], /Wi-Fi/);
 });
+
+test("every consented field can be named to the person in both languages", () => {
+  const SC_Consent = require("../../shared/consent.js");
+  for (const id of SC_Consent.FIELDS) {
+    const key = `sign.field.${id}`;
+    assert.ok(EN[key], `${id} has no English name (${key})`);
+    assert.ok(TA[key], `${id} has no Tamil name (${key})`);
+  }
+});
+
+test("the stale-signature sentences say what changed", () => {
+  assert.match(EN["sign.changedOne"], /\{field\}/);
+  assert.match(EN["sign.changedMany"], /\{fields\}/);
+  assert.match(TA["sign.changedOne"], /\{field\}/);
+  assert.match(TA["sign.changedMany"], /\{fields\}/);
+});

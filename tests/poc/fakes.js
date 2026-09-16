@@ -21,6 +21,11 @@ function makeUtilities() {
     getUuid: () => crypto.randomUUID(),
     base64Encode: (data) => toBuffer(data).toString("base64"),
     base64Decode: (text) => toSigned(Buffer.from(text, "base64")),
+    newBlob: (bytes, mime, name) => Object.freeze({
+      getBytes: () => bytes.slice(),
+      getContentType: () => mime,
+      getName: () => name,
+    }),
     // Supports the patterns the server uses: yyyy MM dd HH mm ss.
     formatDate: (date, timeZone, format) => {
       const parts = Object.fromEntries(
@@ -265,8 +270,64 @@ function makeDate(clock) {
   };
 }
 
+// The slice of DriveApp that Attachments.gs uses. Files live in memory and are handed back by
+// id, so a test can assert what was really written rather than that a method was called.
+function makeDriveApp() {
+  const files = new Map();
+  const folders = new Map();
+  let seq = 0;
+
+  function makeFolder(id, name) {
+    const folder = {
+      getId: () => id,
+      getName: () => name,
+      createFolder(childName) {
+        const child = makeFolder(`folder-${++seq}`, childName);
+        folders.set(`${id}/${childName}`, child);
+        return child;
+      },
+      getFoldersByName(childName) {
+        const found = folders.get(`${id}/${childName}`);
+        let taken = false;
+        return {
+          hasNext: () => Boolean(found) && !taken,
+          next() {
+            if (!found || taken) throw new Error(`no folder named ${childName}`);
+            taken = true;
+            return found;
+          },
+        };
+      },
+      createFile(blob) {
+        const fileId = `file-${++seq}`;
+        const file = {
+          getId: () => fileId,
+          getName: () => blob.getName(),
+          getSize: () => blob.getBytes().length,
+          getBlob: () => blob,
+          setTrashed: () => file,
+        };
+        files.set(fileId, file);
+        return file;
+      },
+    };
+    return folder;
+  }
+
+  const root = makeFolder("root", "root");
+  return Object.freeze({
+    getRootFolder: () => root,
+    getFileById(id) {
+      const file = files.get(id);
+      if (!file) throw new Error(`no file with id ${id}`);
+      return file;
+    },
+  });
+}
+
 module.exports = {
   makeUtilities,
+  makeDriveApp,
   makeSpreadsheetApp,
   makeLockService,
   makeCacheService,

@@ -56,8 +56,35 @@ var SC_Applications = (function () {
     };
   }
 
+  /* Whether the parent's signature still covers what they agreed to (M7a spec §5). The server
+     answers this so the browser never holds a second copy of the rule — the same correction M6
+     made when review.js was recomputing the round rule from the routing slip. */
+  function consentState(row) {
+    var signature = SC_Attachments.liveFor(row.id, "CONSENT_SIGNATURE");
+    if (!signature) return { signed: false, stale: false, changed: [] };
+
+    var values = formValues(row);
+    if (SC_Crypto.sha256Hex(SC_Consent.payload(values)) === signature.consent_hash) {
+      return { signed: true, stale: false, changed: [] };
+    }
+
+    /* Stale. Now name the facts that moved: "please sign again" with no reason is the defect M6
+       closed in the rejection banner — a surface that knows why and will not say. A hash only
+       answers same-or-different, so the comparison is against the payload it was made from.
+       SC_Consent.payload already folded empty and missing together, so both sides read as null. */
+    var then = JSON.parse(signature.consent_payload || "{}");
+    var changed = SC_Consent.FIELDS.filter(function (id) {
+      var before = then[id] === undefined ? null : then[id];
+      var after = values[id] === undefined || values[id] === "" || values[id] === false ? null : values[id];
+      return JSON.stringify(before) !== JSON.stringify(after);
+    });
+    return { signed: true, stale: true, changed: changed };
+  }
+
   function view(row) {
     var values = formValues(row);
+    // Once into a local: each call scans the Attachments tab, and get is on the hot path.
+    var consent = consentState(row);
     return {
       id: row.id, appNo: row.app_no, registrationNo: row.registration_no, status: row.status,
       centre: row.centre, applicantName: row.applicant_name || "", createdBy: row.created_by,
@@ -66,6 +93,9 @@ var SC_Applications = (function () {
       values: values,
       completion: SC_FormRules.completion(values, SC_Store.todayIso()),
       safetyFlags: SC_FormRules.safetyFlags(values),
+      consentSigned: consent.signed,
+      consentStale: consent.stale,
+      consentChanged: consent.changed,
     };
   }
 
@@ -160,6 +190,12 @@ var SC_Applications = (function () {
       var values = formValues(row);
       var check = SC_FormRules.validate(values, { mode: "submit", today: SC_Store.todayIso() });
       if (!check.ok) return fail("VALIDATION_FAILED", { errors: check.errors });
+      /* The answer check only sees that s11_signature holds some text. Whether that text points
+         at a signature that exists, and still covers what the parent agreed to, is this file's
+         to answer. Without it an application submits on a signature nobody ever gave. */
+      var consent = consentState(row);
+      if (!consent.signed) return fail("VALIDATION_FAILED", { errors: { s11_signature: "REQUIRED" } });
+      if (consent.stale) return fail("VALIDATION_FAILED", { errors: { s11_signature: "CONSENT_STALE" } });
       var now = SC_Store.nowIso();
       var saved = SC_Store.update("Applications", row.id, {
         status: move.status, submitted_at: now, updated_at: now, version: row.version + 1,
@@ -394,6 +430,10 @@ var SC_Applications = (function () {
   return Object.freeze({
     create: create, get: get, save: save, submit: submit, withdraw: withdraw, review: review,
     decide: decide, reopen: reopen, list: list, formHash: formHash,
+    // Attachments.gs asks the application for permission, and for the answers to fingerprint.
+    // valuesOf is formValues under a name that says what a caller wants, not how this file
+    // spells it.
+    loadVisible: loadVisible, valuesOf: formValues,
   });
 })();
 

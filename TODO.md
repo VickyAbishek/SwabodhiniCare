@@ -9,23 +9,21 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 
 ## ▶ Start here (updated 2026-09-16)
 
-**Branch:** `feat/m7a-consent-signature` — cut from `feat/m6-workflow-screens` @ `ce08a0a`.
-Milestones branch from the **previous milestone's branch, not from `main`** (M6 branched from M5; `main` only ever fast-forwards behind). Branching M7a off `main` would lose all of M6, which M7a's server work builds on directly.
+**Branch:** `feat/m7a-consent-signature` — the parent's consent signature. **M7a is done** (326 tests, checked in a browser); the milestone section below records what carried forward.
 
-**Next action:** execute `docs/superpowers/plans/2026-09-16-m7a-consent-signature.md`, **Task 1 of 8. Nothing has been executed yet** — the plan and its spec are written and committed, no implementation has started.
+**Next action:** merge M7a's PR, then start **M7b** (photos, PDFs and the Director's signature) from the merged tip. M7b widens `M7A_KINDS` in `Attachments.gs` and adds `s2_udid_file` to the schema.
 
-Run tasks **inline, not with subagents** (token cost). Each task is self-contained: exact files, the test to write first, the code, the commands, and its own commit message. Work them in order — Task 3 needs Task 2's `DriveApp` fake, Task 5 needs Task 3's `consent_payload` column.
+Run tasks **inline, not with subagents** (token cost).
 
 | | |
 |---|---|
 | Spec (the *why*) | `docs/superpowers/specs/2026-09-16-m7a-consent-signature-design.md` |
-| Plan (the *how*) | `docs/superpowers/plans/2026-09-16-m7a-consent-signature.md` |
-| Tests now | **293 pass, 0 fail** — `npm test` (runs the scope check, then `node --test`) |
-| Expected after Task 8 | ~320 passing; each task's step 6-ish states its own count |
-| Open PR | **#6** — M6 workflow screens + the M5 conflict-wording fix. Open, **not merged**. `main` is 16 commits behind |
+| Plan (the *how*) | `docs/superpowers/plans/2026-09-16-m7a-consent-signature.md` — all 48 boxes ticked |
+| Tests now | **326 pass, 0 fail** — `npm test` (runs the scope check, then `node --test`) |
+| Open PR | `feat/m7a-consent-signature` → `main` (merge manually) |
 | Dev server | `node poc/scripts/dev-server.mjs` → http://127.0.0.1:8787 · sign in `priya@example.com` / `demo-pass-2026` (all demo staff share it; see `poc/seed/demo-data.mjs`) |
 
-**The one thing worth knowing before touching the code:** `s11_signature` is `required: true` (`shared/form-schema.js:184`) and nothing can produce one, so **no application in this system has ever passed the submit check.** M5 seeded past that gate and M6 built the whole approval chain on files that never went through it. M7a is what makes fill in → sign → submit real, which is why it comes before photos and PDFs.
+**M7a closed the one thing worth knowing:** `s11_signature` is `required: true` (`shared/form-schema.js:184`) and nothing could produce one, so no application had ever passed the submit check — M5 seeded past it and M6 built the approval chain on files that never went through it. The remaining gap is the fresh-draft *submit* button, recorded under the M7a heading.
 
 ---
 
@@ -83,14 +81,23 @@ Run tasks **inline, not with subagents** (token cost). Each task is self-contain
 
 ### M7: Files · split into M7a (the signature, on the critical path) and M7b (everything else)
 
-#### M7a: The parent's consent signature · 🚧 **planned, not started (0 of 8 tasks)** · spec: `docs/superpowers/specs/2026-09-16-m7a-consent-signature-design.md` · plan: `docs/superpowers/plans/2026-09-16-m7a-consent-signature.md`
+#### M7a: The parent's consent signature · ✅ **done (326 tests; checked in a browser)** · spec: `docs/superpowers/specs/2026-09-16-m7a-consent-signature-design.md` · plan: `docs/superpowers/plans/2026-09-16-m7a-consent-signature.md`
 > Why first: `form-schema.js:184` marks the signature required and nothing can produce one, so **no application can pass the submit check today**. M5 seeded past that gate and M6 built the approval chain on files that never went through it.
-- [ ] `[SHARED]` `shared/consent.js`: the five consented fields + their normalized serialization. No hashing — `check-scope.mjs` bans platform APIs from `shared/`, so each side hashes the one shared payload (M6 plan, carry-forward 3)
-- [ ] `[SHARED]` `public/js/signature-pad.js`: canvas capture, PNG out. Pure geometry (`isBlank`, `trimToInk`, scale to a fixed box) tested apart from the DOM wrapper
-- [ ] `[POC]` `Attachments.gs` (M7a slice): `attachments.upload` / `.get`, `CONSENT_SIGNATURE` only, type checked by first bytes, Drive `attachments/<app_no>/`, new `consent_hash` column
-- [ ] `[POC]` `applications.get` ships `consentSigned` / `consentStale`; `submit` refuses a missing **or** stale signature — the server owns the rule, as M6's I2 fix established
-- [ ] `[SHARED]` The consent step renders the pad, and says **which** of the five facts changed when a signature goes stale
-- [ ] `[SHARED]` Re-signing soft-deletes the old row rather than overwriting it, so what was consented to stays answerable
+- [x] `[SHARED]` `shared/consent.js`: the five consented fields + their normalized serialization. No hashing — `check-scope.mjs` bans platform APIs from `shared/`, so each side hashes the one shared payload (M6 plan, carry-forward 3)
+- [x] `[SHARED]` `public/js/signature-pad.js`: canvas capture, PNG out. Pure geometry (`isBlank`, `trimToInk`, scale to a fixed box) tested apart from the DOM wrapper
+- [x] `[POC]` `Attachments.gs` (M7a slice): `attachments.upload` / `.get`, `CONSENT_SIGNATURE` only, type checked by first bytes, Drive `attachments/<app_no>/`, new `consent_hash` column
+- [x] `[POC]` `applications.get` ships `consentSigned` / `consentStale`; `submit` refuses a missing **or** stale signature — the server owns the rule, as M6's I2 fix established
+- [x] `[SHARED]` The consent step renders the pad, and says **which** of the five facts changed when a signature goes stale
+- [x] `[SHARED]` Re-signing soft-deletes the old row rather than overwriting it, so what was consented to stays answerable
+
+> **Carried forward, not done:** a brand-new draft still has no *submit* button. M6's plan says "the
+> submit button stays hidden while `CONFIG` cannot produce a signature (M7)", but M7a's tasks never
+> picked that button up — the only UI submit is the returned-file **Fix and resend** path, and the
+> seed submits by calling the server directly. So a therapist can fill and sign a new application but
+> not send it from the screen: the last button (`form.finish`) just opens the overview. Wired in M7b,
+> or the smallest follow-up: make the final button on a fresh draft show *"Send to the Therapy Head?"*
+> and call `applications.submit`, reusing the confirmation sheet and the flush-then-submit body of
+> `resend()` in `pages/application.js`.
 
 #### M7b: Photos, PDFs and the Director's signature
 - [ ] `[SHARED]` `image-compress.js` (canvas, ≤1600 px, ~300 KB), file pickers (camera and gallery)

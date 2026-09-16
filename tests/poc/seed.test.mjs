@@ -105,3 +105,14 @@ test("every demo person can sign in from a browser with the printed password", (
     assert.equal(row.password_salt, pre.data.salt);
   }
 });
+
+test("every seeded application carries a signature that really stands", () => {
+  const { call, ids } = seedDemoData();
+  // The seed used to be walked past the submit gate, because no signature could exist. It now
+  // signs each file first, so the demo proves the path it is demonstrating.
+  for (const id of ids) {
+    const app = call("lakshmi", "applications.get", { id }).data;
+    assert.equal(app.consentSigned, true, `${app.appNo} was submitted without a signature`);
+    assert.equal(app.consentStale, false, `${app.appNo} carries a signature that no longer covers it`);
+  }
+});

@@ -13,6 +13,8 @@ import { createFormView } from "../form-view.js";
 import { createAutosave, saveStatusKey } from "../autosave.js";
 import { createConfirmSheet } from "../confirm-sheet.js";
 import { renderQuestion } from "../form-render.js";
+import { isBlank, trimToInk, fitTo } from "../signature-pad.js";
+import { joinNames } from "../i18n.js";
 
 const { SC_FormSchema, SC_FormRules, SC_Dates, SC_Workflow } = window;
 const view = createFormView({ schema: SC_FormSchema, rules: SC_FormRules, dates: SC_Dates });
@@ -231,6 +233,147 @@ function renderTicks(current) {
   }));
 }
 
+/* The pad's browser half: pointer events in, a PNG out. The geometry it leans on is in
+   signature-pad.js, where a test can reach it.
+
+   The parent signs with a finger, so touch-action: none on the canvas and preventDefault here
+   both matter — without them the page scrolls under their hand instead of drawing. */
+const SIGN_BOX = { width: 560, height: 180 };
+
+function wireSignaturePad(field) {
+  const { t } = state.page;
+  const pad = $(`${field.id}-pad`);
+  const state$ = $(`${field.id}-state`);
+  if (!pad) return;
+  const pen = pad.getContext("2d");
+  let strokes = [];
+  let drawing = false;
+
+  // A lapsed signature says which fact moved, not merely that one did.
+  const stale = staleConsentText();
+  if (stale) {
+    state$.textContent = stale;
+    state$.classList.add("is-stale");
+  }
+
+  const paint = () => {
+    pen.clearRect(0, 0, pad.width, pad.height);
+    pen.lineWidth = 2.5;
+    pen.lineCap = "round";
+    pen.lineJoin = "round";
+    pen.strokeStyle = "#111";
+    for (const stroke of strokes) {
+      if (stroke.length < 2) continue;
+      pen.beginPath();
+      pen.moveTo(stroke[0].x, stroke[0].y);
+      for (const point of stroke.slice(1)) pen.lineTo(point.x, point.y);
+      pen.stroke();
+    }
+  };
+
+  // The canvas is 600x200 but is laid out narrower on a phone, so a click at its right edge is
+  // not at x=600. Scale from the box it actually occupies.
+  const at = (event) => {
+    const box = pad.getBoundingClientRect();
+    return {
+      x: (event.clientX - box.left) * (pad.width / box.width),
+      y: (event.clientY - box.top) * (pad.height / box.height),
+    };
+  };
+
+  if (state.readOnly) {
+    pad.classList.add("is-readonly");
+    return;
+  }
+
+  pad.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    drawing = true;
+    pad.setPointerCapture(event.pointerId);
+    strokes = strokes.concat([[at(event)]]);
+  });
+  pad.addEventListener("pointermove", (event) => {
+    if (!drawing) return;
+    event.preventDefault();
+    const last = strokes[strokes.length - 1];
+    strokes = strokes.slice(0, -1).concat([last.concat([at(event)])]);
+    paint();
+  });
+  const stop = () => { drawing = false; };
+  pad.addEventListener("pointerup", stop);
+  pad.addEventListener("pointercancel", stop);
+
+  $(`${field.id}-clear`).addEventListener("click", () => {
+    strokes = [];
+    paint();
+    state$.textContent = "";
+  });
+
+  $(`${field.id}-save`).addEventListener("click", async () => {
+    if (isBlank(strokes)) {
+      state$.textContent = t("sign.blank");
+      return;
+    }
+    state$.textContent = t("sign.saving");
+    try {
+      const result = await state.page.api.call("attachments.upload", {
+        applicationId: state.app.id,
+        kind: "CONSENT_SIGNATURE",
+        filename: "signature.png",
+        base64: signaturePng(strokes),
+      });
+      if (!result.ok) {
+        state$.textContent = state.page.errorMessage(result.error);
+        return;
+      }
+      // The answer holds the attachment id, so autosave carries it like any other answer.
+      onAnswer(field.id, result.data.id, false);
+      state$.classList.remove("is-stale");
+      state$.textContent = t("sign.saved");
+      const fresh = await state.page.api.call("applications.get", { id: state.app.id });
+      if (fresh.ok) state.app = fresh.data;
+      renderBanner();
+    } catch (err) {
+      console.error("The signature could not be uploaded", err);
+      state$.textContent = t("sign.failed");
+    }
+  });
+}
+
+// Trimmed of its empty margin and scaled to one size, so every stored signature prints alike.
+function signaturePng(strokes) {
+  const fitted = fitTo(trimToInk(strokes, 0), SIGN_BOX);
+  const out = document.createElement("canvas");
+  out.width = SIGN_BOX.width + 16;
+  out.height = SIGN_BOX.height + 16;
+  const pen = out.getContext("2d");
+  pen.lineWidth = 2.5;
+  pen.lineCap = "round";
+  pen.lineJoin = "round";
+  pen.strokeStyle = "#111";
+  for (const stroke of fitted) {
+    if (stroke.length < 2) continue;
+    pen.beginPath();
+    pen.moveTo(stroke[0].x + 8, stroke[0].y + 8);
+    for (const point of stroke.slice(1)) pen.lineTo(point.x + 8, point.y + 8);
+    pen.stroke();
+  }
+  return out.toDataURL("image/png").split(",")[1];
+}
+
+/* What to say when a signature no longer covers the answers. The server sends the list of facts
+   that moved; naming them is the whole point. "Please sign again" with no reason is the defect
+   closed in the rejection banner. */
+function staleConsentText() {
+  const { t } = state.page;
+  const changed = (state.app && state.app.consentChanged) || [];
+  if (!state.app || !state.app.consentStale || changed.length === 0) return "";
+  const names = changed.map((id) => t(`sign.field.${id}`));
+  return names.length === 1
+    ? t("sign.changedOne", { field: names[0] })
+    : t("sign.changedMany", { fields: joinNames(names, t) });
+}
+
 function renderStep() {
   const { t } = state.page;
   const model = view.stepModel(state.step, state.values, today(), lang());
@@ -240,6 +383,7 @@ function renderStep() {
   renderTicks(model.number);
   const ctx = { t, today: today(), view, readOnly: state.readOnly, errorText, onAnswer };
   $("fields").replaceChildren(...model.fields.map((field) => renderQuestion(field, ctx)));
+  model.fields.filter((f) => f.type === "signature").forEach(wireSignaturePad);
   drawPrimary(model);
   renderBanner();
   renderFileActions();

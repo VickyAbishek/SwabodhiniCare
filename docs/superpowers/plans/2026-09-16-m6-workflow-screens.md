@@ -1077,3 +1077,9 @@ clock (so no test change was ever owed for it), and an Admin's reopen keeps `sta
 `Approvals` row — that data is right — while the role a screen names comes from the payload's `role`
 field, because the therapist's banner used to read "Anand (Director)" for an Admin who holds no such
 role.
+
+**M7a added fourteen more keys to this list** (`sign.*`, the consent signature): `sign.hint`,
+`sign.clear`, `sign.save`, `sign.saved`, `sign.saving`, `sign.blank`, `sign.failed`, `sign.changedOne`,
+`sign.changedMany`, `sign.field.s11_consent`, `sign.field.s11_parent_name`,
+`sign.field.s11_relationship`, `sign.field.s2_full_name`, `sign.field.s2_dob`. The Tamil is a first
+draft, like every key above; the reviewer should read it against the file.
