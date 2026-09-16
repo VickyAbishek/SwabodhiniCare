@@ -79,11 +79,11 @@ One screen, three sections (Staff / Backups / Audit) each gated by its capabilit
 
 - **Consumes:** the `BackupLog`/Drive layout from Task 1; the admin screen from Task 2.
 
-- [ ] **Step 1: Write `docs/runbook.md`** — the restore procedure: open the latest `BackupLog` row, open the sheet copy from Drive, copy the `Applications`/`Users`/… tabs back over the live sheet (with the lock and the "run `setup()` after" note), the 24-month retention note, and the recorded practice-restore result.
-- [ ] **Step 2: Practice restore** — run a backup, then follow the runbook against the dev server's fake Drive, and record the outcome in the runbook.
-- [ ] **Step 3: Update `TODO.md`** — tick the three M9 lines, point "Start here" at M10, and mark M9 done.
-- [ ] **Step 4: Run the full suite** (`npm test`) and confirm 360 + new tests pass, 0 fail.
-- [ ] **Step 5: Commit** (`docs: runbook + tick off M9`).
+- [x] **Step 1: Write `docs/runbook.md`** — the restore procedure: open the latest `BackupLog` row, open the sheet copy from Drive, copy the `Applications`/`Users`/… tabs back over the live sheet (with the lock and the "run `setup()` after" note), the 24-month retention note, and the recorded practice-restore result.
+- [x] **Step 2: Practice restore** — run a backup, then follow the runbook against the dev server's fake Drive, and record the outcome in the runbook.
+- [x] **Step 3: Update `TODO.md`** — tick the three M9 lines, point "Start here" at M10, and mark M9 done.
+- [x] **Step 4: Run the full suite** (`npm test`) and confirm 360 + new tests pass, 0 fail.
+- [x] **Step 5: Commit** (`docs: runbook + tick off M9`).
 
 ---
 
