@@ -13,14 +13,20 @@ const DEFAULT_START = Date.parse("2026-09-15T10:00:00Z");
 function createContext(options = {}) {
   const clock = options.clock || { ms: DEFAULT_START };
   const logs = { info: [], warns: [], errors: [] };
+  const properties = Object.assign({ SHEET_ID: "test-sheet" }, options.properties);
   const context = vm.createContext({
     Utilities: fakes.makeUtilities(),
     SpreadsheetApp: fakes.makeSpreadsheetApp(),
     LockService: fakes.makeLockService(),
     CacheService: fakes.makeCacheService(clock),
-    PropertiesService: fakes.makePropertiesService(Object.assign({ SHEET_ID: "test-sheet" }, options.properties)),
+    PropertiesService: fakes.makePropertiesService(properties),
     ContentService: fakes.makeContentService(),
-    DriveApp: fakes.makeDriveApp(),
+    // The live Sheet is also a Drive file, so a backup's getFileById(SHEET_ID) finds it.
+    DriveApp: fakes.makeDriveApp({
+      [properties.SHEET_ID]: { blob: fakes.makeUtilities().newBlob("", "application/vnd.google-apps.spreadsheet", "SwabodhiniCare POC data") },
+    }),
+    MailApp: fakes.makeMailApp(),
+    ScriptApp: fakes.makeScriptApp(),
     console: fakes.makeConsole(logs),
     Date: fakes.makeDate(clock),
   });

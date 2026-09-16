@@ -21,11 +21,16 @@ function makeUtilities() {
     getUuid: () => crypto.randomUUID(),
     base64Encode: (data) => toBuffer(data).toString("base64"),
     base64Decode: (text) => toSigned(Buffer.from(text, "base64")),
-    newBlob: (bytes, mime, name) => Object.freeze({
-      getBytes: () => bytes.slice(),
-      getContentType: () => mime,
-      getName: () => name,
-    }),
+    newBlob: (bytes, mime, name) => {
+      const blob = (b, t, n) => Object.freeze({
+        getBytes: () => b.slice(),
+        getContentType: () => t,
+        getName: () => n,
+        getAs: (type) => blob(b, type, n),
+        setName: (newName) => blob(b, t, newName),
+      });
+      return blob(bytes, mime, name);
+    },
     // Supports the patterns the server uses: yyyy MM dd HH mm ss.
     formatDate: (date, timeZone, format) => {
       const parts = Object.fromEntries(
@@ -270,12 +275,40 @@ function makeDate(clock) {
   };
 }
 
-// The slice of DriveApp that Attachments.gs uses. Files live in memory and are handed back by
-// id, so a test can assert what was really written rather than that a method was called.
-function makeDriveApp() {
+// The slice of DriveApp that Attachments.gs and Backup.gs use. Files live in memory and are handed
+// back by id, so a test can assert what was really written rather than that a method was called.
+// An optional seed gives `getFileById` a file to find up front (the live Sheet is also a Drive file),
+// while still throwing for ids that were never created — which fakes.test.js asserts.
+function makeDriveApp(seedFiles = {}) {
   const files = new Map();
   const folders = new Map();
+  const filesInFolder = new Map();
   let seq = 0;
+
+  function addToFolder(folderId, file) {
+    if (!filesInFolder.has(folderId)) filesInFolder.set(folderId, []);
+    filesInFolder.get(folderId).push(file);
+  }
+
+  function makeFile(id, blob, folderId) {
+    let trashed = false;
+    const file = {
+      getId: () => id,
+      getName: () => blob.getName(),
+      getSize: () => blob.getBytes().length,
+      getBlob: () => blob,
+      isTrashed: () => trashed,
+      setTrashed: (value = true) => { trashed = value; return file; },
+      makeCopy: (name, folder) => {
+        const copyId = `file-${++seq}`;
+        const copy = makeFile(copyId, blob.setName(name), folder.getId());
+        files.set(copyId, copy);
+        addToFolder(folder.getId(), copy);
+        return copy;
+      },
+    };
+    return file;
+  }
 
   function makeFolder(id, name) {
     const folder = {
@@ -300,21 +333,33 @@ function makeDriveApp() {
       },
       createFile(blob) {
         const fileId = `file-${++seq}`;
-        const file = {
-          getId: () => fileId,
-          getName: () => blob.getName(),
-          getSize: () => blob.getBytes().length,
-          getBlob: () => blob,
-          setTrashed: () => file,
-        };
+        const file = makeFile(fileId, blob, id);
         files.set(fileId, file);
+        addToFolder(id, file);
         return file;
+      },
+      getFiles() {
+        const list = (filesInFolder.get(id) || []).slice();
+        let i = 0;
+        return {
+          hasNext: () => i < list.length,
+          next() {
+            if (i >= list.length) throw new Error("no more files");
+            return list[i++];
+          },
+        };
       },
     };
     return folder;
   }
 
   const root = makeFolder("root", "root");
+  Object.entries(seedFiles).forEach(([id, seed]) => {
+    const file = makeFile(id, seed.blob, seed.folderId || "root");
+    files.set(id, file);
+    addToFolder(seed.folderId || "root", file);
+  });
+
   return Object.freeze({
     getRootFolder: () => root,
     getFileById(id) {
@@ -323,6 +368,49 @@ function makeDriveApp() {
       return file;
     },
   });
+}
+
+// Records sendEmail calls so a test can assert who got the backup result and what it said.
+function makeMailApp() {
+  const sent = [];
+  return {
+    sent,
+    sendEmail(to, subject, body) {
+      sent.push({ to, subject, body });
+    },
+  };
+}
+
+// Records the time-based triggers setup() installs, so they can be asserted (or safely re-created).
+function makeScriptApp() {
+  const triggers = [];
+  return {
+    triggers,
+    getProjectTriggers: () => triggers.slice(),
+    deleteTrigger(trigger) {
+      const i = triggers.indexOf(trigger);
+      if (i !== -1) triggers.splice(i, 1);
+    },
+    newTrigger(functionName) {
+      return {
+        timeBased() {
+          let monthDay = null;
+          const builder = {
+            onMonthDay(day) { monthDay = day; return builder; },
+            create() {
+              const trigger = {
+                getHandlerFunction: () => functionName,
+                monthDay,
+              };
+              triggers.push(trigger);
+              return trigger;
+            },
+          };
+          return builder;
+        },
+      };
+    },
+  };
 }
 
 module.exports = {
@@ -335,4 +423,6 @@ module.exports = {
   makeContentService,
   makeConsole,
   makeDate,
+  makeMailApp,
+  makeScriptApp,
 };

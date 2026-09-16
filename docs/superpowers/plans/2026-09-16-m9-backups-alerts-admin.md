@@ -36,24 +36,24 @@ Spec: `docs/superpowers/specs/2026-09-16-m9-backups-alerts-admin-design.md`. Bra
   - `SC_Backup.runBackup(period, now)` → the new `BackupLog` row (status `COMPLETE`/`FAILED`, `sheet_copy_id`, `xlsx_file_id`, `rows` = per-table counts, timestamps).
   - `SC_Api` registers `admin.backups.list` (newest-first `BackupLog` rows) and `admin.backups.runNow` (Admin-gated by the contract's `backups.run`), plus `backupMonthly()` (the trigger entry) and `installBackupTrigger()`.
 
-- [ ] **Step 1: Write the failing test (`tests/poc/backup.test.js`)**
+- [x] **Step 1: Write the failing test (`tests/poc/backup.test.js`)**
   - `runNow` as an Admin returns `ok` with a `BackupLog` row whose `period` is the Chennai month (`YYYY-MM`), `status === "COMPLETE"`, both file ids non-empty, and `rows` counting every tab except `Sessions`.
   - `runNow` as a Director fails `NOT_ALLOWED`; `list` as a Director succeeds; `list` as a Therapist fails.
   - `runBackup` with a forced `now` older than 24 months leaves the row COMPLETE but the file names of that run are **not** trashed by a later run (retention only touches files older than the 24-month cutoff).
   - The result email is recorded in the MailApp fake with the Admin recipient.
-- [ ] **Step 2: Run to verify the test fails** (no `Backup.gs`, no `MailApp`/`ScriptApp` fakes).
-- [ ] **Step 3: Extend the fakes and wire the harness**
+- [x] **Step 2: Run to verify the test fails** (no `Backup.gs`, no `MailApp`/`ScriptApp` fakes).
+- [x] **Step 3: Extend the fakes and wire the harness**
   - `makeDriveApp`: file `.makeCopy(name, folder)`, blob `.getAs(mime)` + `.setName(name)`, folder `.getFiles()` (iterator, like `getFoldersByName`).
   - New `makeMailApp()` (records `sendEmail` calls) and `makeScriptApp()` (records `newTrigger(...).timeBased().onMonthDay(n).create()`).
   - `harness.js` `createContext`: add `MailApp` and `ScriptApp`.
-- [ ] **Step 4: Write the implementation (`poc/apps-script/Backup.gs`)**
+- [x] **Step 4: Write the implementation (`poc/apps-script/Backup.gs`)**
   - Constants: `ADMIN_EMAIL`, `RETENTION_MONTHS = 24`, the xlsx MIME, the backup folder name and file-name prefix.
   - `currentPeriod(now)` = `YYYY-MM`; `cutoffPeriod(now)` = the period 24 months back.
   - `runBackup(period, now)`: read every tab except `Sessions`; copy the sheet and export the xlsx into `Backups` (create the folder if missing); insert the `BackupLog` row; prune backup files whose encoded period is older than `cutoffPeriod`; email the result. A thrown error → FAILED row + error email (never a bare `SERVER_ERROR`).
   - `backupMonthly()` (trigger entry) → `runBackup(currentPeriod(now), now)`; `installBackupTrigger()` → `ScriptApp.newTrigger("backupMonthly").timeBased().onMonthDay(1).create()`.
   - Register `admin.backups.list` and `admin.backups.runNow` (the router already enforces the contract capabilities).
-- [ ] **Step 5: Run the tests to verify they pass** (`node --test tests/poc/backup.test.js`).
-- [ ] **Step 6: Run the full suite and commit** (`feat: Backup.gs — monthly sheet+xlsx backup, retention, result email`).
+- [x] **Step 5: Run the tests to verify they pass** (`node --test tests/poc/backup.test.js`).
+- [x] **Step 6: Run the full suite and commit** (`feat: Backup.gs — monthly sheet+xlsx backup, retention, result email`).
 
 ---
 

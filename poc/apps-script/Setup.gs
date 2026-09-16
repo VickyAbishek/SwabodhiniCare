@@ -57,6 +57,7 @@ var SC_Setup = (function () {
     var centresAdded = ensureCentres();
     if (!props().getProperty("HMAC_SECRET")) props().setProperty("HMAC_SECRET", SC_Crypto.newToken());
     var setupCode = ensureSetupCode();
+    installBackupTrigger();
     console.log(setupCode
       ? "First-admin setup code: " + setupCode + " (open the app and choose First-time setup)"
       : "An Admin already exists, so no setup code is needed.");
