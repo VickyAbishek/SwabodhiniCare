@@ -89,3 +89,46 @@ test("M7a stores signatures only", () => {
   assert.equal(result.ok, false);
   assert.equal(result.error.code, "INVALID_REQUEST");
 });
+
+test("a signature can be read back by someone who may see the application", () => {
+  const { as } = setupPeople();
+  const app = draft(as, "priya");
+  const up = sign(as, "priya", app.id);
+  const got = as("priya")("attachments.get", { id: up.data.id });
+  assert.equal(got.ok, true);
+  assert.equal(got.data.mime, "image/png");
+  assert.deepEqual([...Buffer.from(got.data.base64, "base64")], PNG);
+});
+
+test("someone who may not see the application is not told the file exists", () => {
+  const { as } = setupPeople();
+  const app = draft(as, "priya");
+  const up = sign(as, "priya", app.id);
+  const got = as("deepa")("attachments.get", { id: up.data.id });
+  assert.equal(got.ok, false);
+  assert.equal(got.error.code, "NOT_FOUND");
+});
+
+test("signing again keeps the mark it replaced", () => {
+  const { ctx, as } = setupPeople();
+  const app = draft(as, "priya", { s11_parent_name: "Selvam R" });
+  const first = sign(as, "priya", app.id, PNG);
+  ctx.clock.ms += 1000; // so the two rows do not share a created_at
+  const second = sign(as, "priya", app.id, JPEG);
+
+  const rows = ctx.SC_Store.all("Attachments");
+  assert.equal(rows.length, 2, "the old signature is kept, not overwritten");
+  const old = rows.filter(function (r) { return r.id === first.data.id; })[0];
+  assert.ok(old.deleted_at, "the replaced signature is marked deleted");
+  assert.equal(rows.filter(function (r) { return r.id === second.data.id; })[0].deleted_at, null);
+  // And it is still readable, because what was consented to must stay answerable.
+  assert.equal(as("priya")("attachments.get", { id: first.data.id }).ok, true);
+  // liveFor names the survivor, not whichever row happens to sort first.
+  assert.equal(ctx.SC_Attachments.liveFor(app.id, "CONSENT_SIGNATURE").id, second.data.id);
+});
+
+test("an unknown attachment id is not found", () => {
+  const { as } = setupPeople();
+  assert.equal(as("priya")("attachments.get", { id: "no-such-id" }).error.code, "NOT_FOUND");
+  assert.equal(as("priya")("attachments.get", { id: "" }).error.code, "INVALID_REQUEST");
+});

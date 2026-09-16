@@ -91,11 +91,33 @@ var SC_Attachments = (function () {
       consent_hash: consentPayload ? SC_Crypto.sha256Hex(consentPayload) : null,
       consent_payload: consentPayload,
     };
+    // Signing again supersedes the previous mark rather than erasing it (POC spec §9, M7a spec
+    // §5.1): what was consented to, and when, has to stay answerable.
+    var previous = liveFor(app.row.id, data.kind);
+    if (previous) SC_Store.update("Attachments", previous.id, { deleted_at: SC_Store.nowIso() });
+
     SC_Store.insert("Attachments", row);
     return ok({ id: row.id, kind: row.kind, filename: row.filename, mime: row.mime, size: row.size });
   }
 
-  return Object.freeze({ upload: upload, sniff: sniff, liveFor: liveFor });
+  function get(data, session) {
+    if (typeof data.id !== "string" || !data.id) return fail("INVALID_REQUEST");
+    var row = SC_Store.find("Attachments", "id", data.id);
+    if (!row) return fail("NOT_FOUND");
+    // The permission lives on the application, so ask about that. Someone who may not see the
+    // file is told it does not exist, rather than that it is not theirs.
+    var app = SC_Applications.loadVisible(row.application_id, session);
+    if (app.error) return app.error;
+
+    var blob = DriveApp.getFileById(row.drive_file_id).getBlob();
+    return ok({
+      id: row.id, kind: row.kind, filename: row.filename, mime: row.mime, size: row.size,
+      base64: Utilities.base64Encode(blob.getBytes()),
+    });
+  }
+
+  return Object.freeze({ upload: upload, get: get, sniff: sniff, liveFor: liveFor });
 })();
 
 SC_Api.register("attachments.upload", SC_Attachments.upload);
+SC_Api.register("attachments.get", SC_Attachments.get);
