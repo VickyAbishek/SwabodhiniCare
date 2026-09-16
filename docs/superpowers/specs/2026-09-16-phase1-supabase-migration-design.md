@@ -1,6 +1,6 @@
 # Phase 1: Supabase migration — design (DRAFT)
 
-Status: **draft, in brainstorming.** Section 1 (parts and connections) is presented; sections 2–4 (data model, backup + keep-alive, errors/testing/rollout) are still to come. No implementation starts until this spec is approved.
+Status: **draft, in brainstorming.** Section 1 (parts and connections) is approved (2026-09-17); sections 2–4 (data model, backup + keep-alive, errors/testing/rollout) are still to come. No implementation starts until this spec is approved.
 
 Replaces the original Phase 1 plan (Cloudflare Worker + D1, main spec decision D3). The website stays on Cloudflare Pages.
 
@@ -11,6 +11,22 @@ Replaces the original Phase 1 plan (Cloudflare Worker + D1, main spec decision D
 The POC server (Google Apps Script) is slow: every request takes 1.2–1.7 s, about 1 s of which is Google's redirect before the script runs. Most pages make two requests in a row, and an idle script adds 1–2 s to wake up, so pages take 3–5 s or more. The website files on Cloudflare Pages load in 0.05–0.1 s and are not the problem (measured 2026-09-16).
 
 Goal: pages that load in under about 1 s, without changing the screens, the rules or the login.
+
+Expected timings (typical figures for a Mumbai project, **not yet measured on this app**):
+
+| | Now (Google Apps Script) | Supabase |
+|---|---|---|
+| One request | 1.2–1.7 s | about 0.1–0.4 s |
+| A page with 2 requests | about 3 s | about 0.3–0.8 s |
+| First request after idle | +1–2 s | small, if any |
+| As data grows | slower (reads whole tabs) | stays fast |
+
+The weekly backup does not slow the app: it runs on a timer, not when staff open pages.
+
+Two front-end fixes help on either back end and are part of this work:
+
+- **Send a page's requests at the same time** (`me.get` together with the page's data), not one after the other.
+- **Remember the signed-in user's roles in the browser**, so the Admin and Reports links show at once instead of appearing after `me.get` returns (today they start `hidden` in the HTML — `home.html`, `admin.html` — and are revealed in `home.js`/`admin.js`). The links only control what is shown; the server still checks permissions on every action, and the stored roles are refreshed from `me.get` on each page.
 
 ## 2. Decisions so far
 
@@ -25,7 +41,22 @@ Goal: pages that load in under about 1 s, without changing the screens, the rule
 | S7 | Region | **Mumbai (ap-south-1)** | Closest to the school; most of the speed gain depends on it. |
 | S8 | Website hosting | **Stay on Cloudflare Pages** (classic Pages, `swabodhinicare.pages.dev`) | Static files are already fast; Vercel would not help and its free plan is for non-commercial use. |
 
-## 3. Parts and how they connect (section 1 — presented, awaiting approval)
+### Free-plan pausing (S6 in detail)
+
+- **What happens:** Supabase pauses a free project after about 7 days with no activity. The data is kept, but the app stops working until someone opens the Supabase dashboard and clicks **Restore**.
+- **The fix:** a daily "ping" — a Google Apps Script timer calls the api's `health.ping` action, which runs one tiny database query, so the project always has recent activity.
+- **Where the ping runs, compared:**
+
+  | Option | Verdict |
+  |---|---|
+  | Google Apps Script timer (same project as the weekly backup) | **Chosen.** No new platform; free; reliable. |
+  | Cloudflare cron | Works, but is a Cloudflare Worker, which we avoid so non-technical staff see one simple setup. |
+  | GitHub Actions schedule | GitHub switches off scheduled jobs after 60 days with no repository activity — it would stop silently. |
+  | `pg_cron` inside Supabase | Activity inside the database may not count, and it cannot run while the project is paused. |
+
+- **Caveat:** Supabase decides what counts as activity and can change it. Implementation must confirm a request through the api function keeps the project awake. A failed ping emails the Admin. Only the Pro plan (~$25/month) guarantees no pausing.
+
+## 3. Parts and how they connect (section 1 — approved 2026-09-17)
 
 ```
 Staff browser

@@ -9,7 +9,7 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 
 ## ▶ Start here (updated 2026-09-16)
 
-**M10 (installable app, hosting, end-to-end) is done** (377 tests) — prepare-only: the Cloudflare/Apps Script deploy is written up but not run. **Next: POC close-out** — staffing, staff testing, feedback, and the decide-Sheets-vs-production step before Phase 1.
+**M10 (installable app, hosting, end-to-end) is done** (377 tests). **The POC is deployed** (2026-09-16): website at https://swabodhinicare.pages.dev (classic Cloudflare Pages), server on Google Apps Script. **In design: Phase 1 on Supabase** (see Phase 1 below) — pages take 3–5 s on Apps Script. **Also open: POC close-out** — staffing, staff testing, feedback, and the decide-Sheets-vs-production step before Phase 1.
 
 Run tasks **inline, not with subagents** (token cost).
 
@@ -132,17 +132,17 @@ Run tasks **inline, not with subagents** (token cost).
 
 ---
 
-## Phase 1: Production on Cloudflare (only if the POC review decides to move)
+## Phase 1: Production on Supabase · spec: `docs/superpowers/specs/2026-09-16-phase1-supabase-migration-design.md` · 🟡 designing (branch `feat/phase1-supabase-migration`)
 
-- [ ] `[PROD]` `prod/worker/`: Worker router with REST `/api/*`, same `shared/` modules
-- [ ] `[PROD]` D1 migration `0001_init.sql` (same columns as the Sheet tabs). The fingerprint must hash the same normalized serialization the POC hashes, or an approval taken before the port cannot be compared with a change made after it (M6 plan, carry-forward 3)
-- [ ] `[PROD]` `public/js/backends/prod.js`: REST calls, `HttpOnly` cookie session
-- [ ] `[PROD]` Per-IP login rate limit
-- [ ] `[PROD]` R2 uploads (streamed) + usage guard + Usage page
-- [ ] `[PROD]` Chunked monthly backup cron + daily usage check
-- [ ] `[PROD]` Apps Script mail relay for alerts
-- [ ] `[PROD]` `prod/import/`: one-time Sheet → D1 and Drive → R2 import
-- [ ] `[PROD]` Remove `poc/`, `public/js/backends/poc.js` and `IS_DEMO` UI; set `BACKEND = "prod"`
+**Direction changed (2026-09-16):** Supabase (Postgres + Storage + one Edge Function "api", Mumbai, free plan) replaces the Cloudflare Worker + D1 plan. The website stays on Cloudflare Pages. Start fresh (no Sheet import), keep the current login, weekly backup of data + files to Admin-only Google Drive, daily Apps Script ping so the free project doesn't pause. The task list is written from the spec once it is approved; **no implementation before approval.**
+
+- [x] Decisions S1–S8 + section 1 (parts and connections)
+- [ ] Section 2: data model (tables, row `version`, counters, fingerprint must hash the same normalized serialization as the POC — M6 plan, carry-forward 3 — Storage bucket, no direct browser access to the database)
+- [ ] Section 3: backup + keep-alive (`backup.export`, `health.ping`, retention, restore script + practice restore)
+- [ ] Section 4: errors, testing, rollout (remove `poc/`, `public/js/backends/poc.js` and `IS_DEMO` UI; set `BACKEND = "prod"`)
+- [ ] Spec approved → implementation plan in `docs/superpowers/plans/`
+
+Superseded by this change: `prod/worker/` router, D1 migration, R2 uploads + usage guard, D1 per-IP counter, chunked D1 backup cron, `prod/import/` (start fresh). Carried forward into the spec: `backends/prod.js`, login rate limiting, removing the POC.
 
 ---
 
