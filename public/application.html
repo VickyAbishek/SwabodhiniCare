@@ -30,6 +30,21 @@
       <div class="ticks" id="ticks" aria-hidden="true"></div>
     </div>
     <p class="app-ref mono" id="app-no"></p>
+
+    <!-- A file that was sent back opens with why (main spec §5): who sent it, when, and what they
+         said, above the questions. Everything with data in it is filled in by the screen; only the
+         fixed wording stands here. -->
+    <section class="sent-back" id="sent-back" aria-labelledby="sent-back-stamp" hidden>
+      <span class="stamp" id="sent-back-stamp" data-status="RETURNED"></span>
+      <div class="banner">
+        <p class="banner-title" id="sent-back-by"></p>
+        <p class="banner-comment" id="sent-back-comment"></p>
+      </div>
+      <h2 id="fix-title" data-i18n="sentBack.stepsToFix">Steps to fix</h2>
+      <ol class="sec-list" id="fix-list"></ol>
+      <p class="note" data-i18n="sentBack.resendNote">When you resend, it goes to the Therapy Head again.</p>
+    </section>
+
     <button type="button" class="btn btn-outline btn-small demo-fill" id="fill-sample" data-i18n="form.fillSample" hidden>Fill with sample data</button>
     <h1 id="step-title"></h1>
     <p class="alert alert-bad" id="message" role="alert" hidden></p>
@@ -47,6 +62,21 @@
   <div class="action-bar" id="action-bar" hidden>
     <button type="button" class="btn btn-outline" id="back-btn" data-i18n="common.back">Back</button>
     <button type="button" class="btn btn-primary" id="next-btn" data-i18n="form.saveNext">Save &amp; Next</button>
+  </div>
+
+  <!-- Sending a returned file again is confirmed in plain words first (main spec §12). The sheet is
+       js/confirm-sheet.js, shared with the review and decision screens. -->
+  <div class="scrim" id="confirm" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+      <h3 id="confirm-title"></h3>
+      <p class="muted" id="confirm-comment-label" hidden></p>
+      <p class="slip-note" id="confirm-comment" hidden></p>
+      <p id="confirm-body" hidden></p>
+      <div class="btns">
+        <button type="button" class="btn btn-primary" id="confirm-yes"></button>
+        <button type="button" class="btn btn-outline" id="confirm-no" data-i18n="confirm.noGoBack">No, go back</button>
+      </div>
+    </div>
   </div>
 </div>
 </body>

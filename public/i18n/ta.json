@@ -179,6 +179,8 @@
   "sentBack.stepsToFix": "சரிசெய்ய வேண்டிய படிகள்",
   "sentBack.resendNote": "மீண்டும் அனுப்பும்போது, இது மீண்டும் சிகிச்சைத் தலைவரிடம் செல்லும்.",
   "sentBack.fixAndResend": "சரிசெய்து மீண்டும் அனுப்பு",
+  "sentBack.by": "{name} ({role}) · {date}",
+  "sentBack.fix": "சரிசெய்",
   "reopen.title": "இந்த விண்ணப்பத்தை மீண்டும் திற",
   "reopen.reason": "காரணம்",
   "withdraw.title": "இந்த விண்ணப்பத்தைத் திரும்பப் பெறு",

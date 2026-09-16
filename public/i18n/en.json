@@ -179,6 +179,8 @@
   "sentBack.stepsToFix": "Steps to fix",
   "sentBack.resendNote": "When you resend, it goes to the Therapy Head again.",
   "sentBack.fixAndResend": "Fix and resend",
+  "sentBack.by": "{name} ({role}) · {date}",
+  "sentBack.fix": "Fix",
   "reopen.title": "Reopen this application",
   "reopen.reason": "Reason",
   "withdraw.title": "Withdraw this application",
