@@ -23,6 +23,12 @@ export const DEMO_PEOPLE = Object.freeze([
 // One application per case. `steps` are walked in order through the real actions, and each action is
 // taken by whichever person's role the application is waiting on at that moment. The comment on each
 // case is the stage it must end at; tests/poc/seed.test.mjs holds the seed to it.
+//
+// `clear` names whole sections left unanswered on that case. Only sections with nothing required in
+// them can be left out — submit checks the required answers, so leaving one of those blank would stop
+// the seed at the very action that follows it. A file the reviewer sent back for a gap is a file with
+// a gap in it, which is what the therapist's screen reads; with every answer filled in, the "Steps to
+// fix" list is empty and that part of the screen is never seen.
 export const DEMO_CASES = Object.freeze([
   // Waiting: Therapy Head
   { applicant: "Nila M", nameTa: "நிலா", centre: "TVM", therapist: "priya",
@@ -33,11 +39,12 @@ export const DEMO_CASES = Object.freeze([
   // Waiting: Director
   { applicant: "Vishal S", nameTa: "விஷால்", centre: "TDP", therapist: "priya",
     parents: { father: "Sekar V", mother: "Kalaiselvi S" }, steps: [{ action: "APPROVE" }, { action: "APPROVE" }] },
-  // Sent back to the family, with the reason on the routing slip
+  // Sent back to the family, with the reason on the routing slip and the development history still
+  // blank — the gap the reviewer sent it back for, and the work the therapist's screen lists.
   { applicant: "Meena R", nameTa: "மீனா", centre: "SLR", therapist: "deepa",
-    parents: { father: "Ravi K", mother: "Deepa R" },
+    parents: { father: "Ravi K", mother: "Deepa R" }, clear: ["s5"],
     steps: [{ action: "APPROVE" },
-      { action: "SEND_BACK", comment: "The diagnosis report is missing its last page. Please attach the full report and submit again." }] },
+      { action: "SEND_BACK", comment: "The development history is not filled in. Please complete it and submit again." }] },
   // Admitted, so the registration number exists and the reports have a row with a number
   { applicant: "Kavya S", nameTa: "காவ்யா", centre: "TVM", therapist: "priya",
     parents: { father: "Selvam M", mother: "Lakshmi S" },

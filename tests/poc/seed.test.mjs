@@ -40,6 +40,17 @@ test("the admitted demo application has a registration number", () => {
   assert.match(admitted.registrationNo, /^SWB\/[A-Z]{3}\/20\d\d\/\d{4}$/);
 });
 
+test("the sent-back demo application still has a step to fix", () => {
+  const { call, ids } = seedDemoData();
+  const app = call("lakshmi", "applications.get", { id: ids[3] }).data;
+  assert.equal(app.status, "RETURNED");
+  // The therapist's screen lists the sections the form itself would not accept. A demo case with
+  // every answer in place has nothing to list, so the screen's "Steps to fix" is never seen.
+  const toFix = Object.keys(app.completion.steps).filter((step) => app.completion.steps[step] !== "done");
+  assert.ok(toFix.length > 0, "the therapist should have something to fix on the sent-back case");
+  assert.ok(!app.values.s5_birth_term, "the section the reviewer asked for should be the one left blank");
+});
+
 test("a sent-back application carries the reason on its routing slip", () => {
   const { call, ids } = seedDemoData();
   const slip = call("lakshmi", "applications.get", { id: ids[3] }).data.approvals;

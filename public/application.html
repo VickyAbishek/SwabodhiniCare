@@ -8,6 +8,7 @@
 <script src="js/theme-boot.js"></script>
 <script src="shared/dates.js"></script>
 <script src="shared/actions.js"></script>
+<script src="shared/workflow.js"></script>
 <script src="shared/form-schema.js"></script>
 <script src="shared/form-rules.js"></script>
 <link rel="stylesheet" href="css/app.css">
@@ -51,6 +52,15 @@
     <form id="step-form" novalidate>
       <div id="fields" class="questions"></div>
     </form>
+
+    <!-- The two moves that are not part of filling the form in (main spec §5): a draft or a file sent
+         back can be withdrawn by its owner or the Admin, and an admitted file can be reopened by the
+         Director or the Admin. Each is drawn only for the person the workflow would let take it, and
+         never both: no file is in both states at once. -->
+    <div class="file-actions" id="file-actions" hidden>
+      <button type="button" class="link-btn" id="withdraw-btn" data-i18n="withdraw.title" hidden>Withdraw this application</button>
+      <a class="link-btn" id="reopen-link" href="reopen.html" data-i18n="reopen.title" hidden>Reopen this application</a>
+    </div>
   </main>
 
   <main class="screen" id="overview-screen" hidden>

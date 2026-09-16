@@ -78,6 +78,9 @@
       <div class="field" id="done-regno-field">
         <span class="label" data-i18n="decide.registrationNumber">Registration number</span>
         <span class="mono reg-no" id="done-regno"></span>
+        <!-- Shown only when the number was already on the file before this signing, so it is never
+             read as one this decision minted. -->
+        <span class="hint" id="done-regno-note" data-i18n="decide.regNoKept" hidden>This number was already issued. It is not issued again.</span>
       </div>
       <div class="sig-box">
         <p class="note" data-i18n="form.waitsForUploads">Photos, documents and signatures can be added in the next update.</p>

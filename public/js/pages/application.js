@@ -2,7 +2,9 @@
 // The 11-step application form: one step per screen, big tap answers, automatic saving and the
 // all-steps overview. The server checks every answer; the same shared rules run here for progress.
 // A file that was sent back opens with the reviewer's comment above the questions and, in place of
-// Save & Next, the button that sends it to the Therapy Head again (main spec §5).
+// Save & Next, the button that sends it to the Therapy Head again (main spec §5). A draft or a file
+// sent back can also be withdrawn from here and an admitted one reopened, each offered only to the
+// people the workflow would let take it (main spec §5).
 // Uses the SC_* shared scripts loaded by application.html.
 import { startPage, showMessage, setBusy, goTo, PAGES } from "../page.js";
 import { CONFIG } from "../config.js";
@@ -11,7 +13,7 @@ import { createAutosave } from "../autosave.js";
 import { createConfirmSheet } from "../confirm-sheet.js";
 import { renderQuestion } from "../form-render.js";
 
-const { SC_FormSchema, SC_FormRules, SC_Dates } = window;
+const { SC_FormSchema, SC_FormRules, SC_Dates, SC_Workflow } = window;
 const view = createFormView({ schema: SC_FormSchema, rules: SC_FormRules, dates: SC_Dates });
 const $ = (id) => document.getElementById(id);
 const EDITABLE = ["DRAFT", "RETURNED"];
@@ -23,7 +25,7 @@ const RETURN_ACTIONS = ["SEND_BACK", "REOPEN"];
 const SHOW_IF_SOURCES = new Set(SC_FormSchema.allFields().filter((f) => f.showIf && f.showIf.field).map((f) => f.showIf.field));
 
 const state = {
-  page: null, app: null, values: {}, errors: {}, step: "s1", mode: "step",
+  page: null, me: null, app: null, values: {}, errors: {}, step: "s1", mode: "step",
   readOnly: false, resend: false, sentBack: null, autosave: null, sheet: null, status: null,
 };
 // Reloading after a clash is the fix the message asks for, so leaving is meant and not warned about.
@@ -178,6 +180,24 @@ function drawPrimary(model) {
   $("next-btn").disabled = state.readOnly;
 }
 
+/* The two moves that are not part of filling the form in: withdrawing a file the family has dropped,
+   and reopening one that was signed and needs a correction. Both are asked of the workflow — the same
+   call Applications.gs makes — so a control is drawn only for the person the server would not refuse
+   it to: the owner or an Admin on a draft or a file sent back, the Director or an Admin on an admitted
+   one. Nobody else sees either, and no file is in both states at once. */
+function renderFileActions() {
+  const offered = SC_Workflow.availableActions(state.app.status, {
+    actorId: state.me.id, actorRoles: state.me.roles, createdBy: state.app.createdBy,
+  });
+  const withdraw = offered.indexOf("WITHDRAW") !== -1;
+  const reopen = offered.indexOf("REOPEN") !== -1;
+  const id = encodeURIComponent(state.app.id);
+  $("withdraw-btn").hidden = !withdraw;
+  $("reopen-link").hidden = !reopen;
+  $("file-actions").hidden = !withdraw && !reopen;
+  if (reopen) $("reopen-link").href = `reopen.html?id=${id}`;
+}
+
 function renderTicks(current) {
   const steps = SC_FormRules.completion(state.values, today()).steps;
   $("ticks").replaceChildren(...view.stepIds.map((id, i) => {
@@ -199,6 +219,7 @@ function renderStep() {
   $("fields").replaceChildren(...model.fields.map((field) => renderQuestion(field, ctx)));
   drawPrimary(model);
   renderSentBack();
+  renderFileActions();
   if (state.status) showStatus(state.status);
 }
 
@@ -335,6 +356,55 @@ function firstErrorStep() {
   return step ? step.id : null;
 }
 
+/* Withdrawing (main spec §5): the family has decided not to continue, so the therapist — or an Admin
+   acting for them — marks the file withdrawn. Nothing is deleted: the record and its routing slip
+   stay, which is what the shared sheet says before it is sent and what the sentence afterwards
+   repeats. The screen's own sheet asks the question; this screen sends the answer. */
+function askToWithdraw() {
+  const { t } = state.page;
+  state.sheet.open({
+    title: t("withdraw.title"),
+    body: t("withdraw.confirm"),
+    yes: t("confirm.yesWithdraw"),
+    yesClass: "btn-warn",
+    onYes: withdraw,
+  }, $("withdraw-btn"));
+}
+
+async function withdraw() {
+  const page = state.page;
+  setBusy($("confirm-yes"), page.t("common.working"), true);
+  try {
+    // What is on the screen goes to the server first, as it does before a resend: the file is still
+    // editable until this moment, and an answer typed a moment ago belongs to it.
+    const flushed = await state.autosave.flush();
+    if (!flushed.ok) return refuseWithdraw(flushed);
+    const result = await page.api.call("applications.withdraw", { id: state.app.id });
+    if (!result.ok) return refuseWithdraw(result);
+    // Out of this person's queue and out of the workflow. The screen stays where it is and says so,
+    // read-only from here on: "nothing is deleted" is the one thing the family needs to be sure of,
+    // and the answers still on the screen behind that sentence are what proves it.
+    state.app = result.data;
+    state.readOnly = true;
+    state.resend = false;
+    state.sentBack = returnInfo(state.app);
+    state.sheet.close();
+    show(state.mode);
+    showMessage($("message"), page.t("withdraw.done"), "ok");
+  } catch (err) {
+    console.error("The application could not be withdrawn", err);
+    refuseWithdraw({ error: { code: "NETWORK_ERROR" } });
+  } finally {
+    setBusy($("confirm-yes"), "", false);
+  }
+}
+
+function refuseWithdraw(result) {
+  state.sheet.close();
+  showMessage($("message"), state.page.errorMessage(result.error));
+  $("message").scrollIntoView({ block: "start" });
+}
+
 // Demo only [POC]: fills every step with invented answers, then saves through the usual autosave.
 // The path comes from config, so this screen never has to know where the POC code lives.
 async function fillWithSample() {
@@ -357,6 +427,7 @@ function wireButtons() {
   });
   $("back-btn").addEventListener("click", () => saveThen(() => (stepAt(-1) ? show("step", stepAt(-1)) : goTo(PAGES.home))));
   $("overview-btn").addEventListener("click", () => saveThen(() => show("overview")));
+  $("withdraw-btn").addEventListener("click", askToWithdraw);
   $("fill-sample").addEventListener("click", () => {
     fillWithSample().catch((err) => {
       console.error("The sample answers could not be loaded", err);
@@ -395,6 +466,7 @@ async function main() {
   state.page = page;
   const [me, loaded] = [await page.api.call("me.get"), await load(page)];
   if (!loaded || !me.ok) return;
+  state.me = me.data;
   state.app = loaded.app;
   state.values = Object.assign({}, loaded.app.values);
   state.step = loaded.step;

@@ -303,6 +303,12 @@ form { display: flex; flex-direction: column; gap: 18px; }
 /* Demo aid: fills the whole form, so it sits apart from the questions and stays easy to ignore. */
 .demo-fill { margin: 6px 0 14px; border-style: dashed; color: var(--ink-2); }
 
+/* The moves that are not part of filling the form in (application.html, main spec §5): withdrawing a
+   draft the family has dropped, and reopening an admitted file. Quiet links below the questions, so
+   neither is a thumb's width from Save & Next; only one of them is ever drawn, and only for somebody
+   the workflow would let take it. */
+.file-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
+
 .questions { display: flex; flex-direction: column; gap: 20px; }
 .q { display: grid; gap: 10px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
 .q:last-child { border-bottom: 0; padding-bottom: 0; }

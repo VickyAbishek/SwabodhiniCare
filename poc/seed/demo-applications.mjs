@@ -59,9 +59,12 @@ function signIn(ctx, person) {
 }
 
 // The answers for one case: the shared sample, renamed and moved to that case's centre, so the list
-// and the reports are not five identical rows.
-function answersFor(demoCase) {
-  return Object.assign({}, SAMPLE_APPLICANT, {
+// and the reports are not five identical rows — minus whatever sections the case leaves blank (see
+// `clear` in demo-data.mjs). Taken out here rather than saved away later: answers can only be added
+// through applications.save, never emptied, and a case that must not have an answer must never be
+// created with one.
+function answersFor(ctx, demoCase) {
+  const answers = Object.assign({}, SAMPLE_APPLICANT, {
     s1_centre: demoCase.centre,
     s10_suggested_centre: demoCase.centre,
     s2_full_name: demoCase.applicant,
@@ -70,6 +73,15 @@ function answersFor(demoCase) {
     s3_mother_name: demoCase.parents.mother,
     s11_parent_name: demoCase.parents.mother,
   });
+  const dropped = {};
+  (demoCase.clear || []).forEach((stepId) => {
+    const step = ctx.SC_FormSchema.STEPS.find((s) => s.id === stepId);
+    if (!step) throw new Error(`The demo case leaves ${stepId} blank, which is not a section of the form`);
+    step.fields.forEach((field) => { dropped[field.id] = true; });
+  });
+  const kept = {};
+  Object.keys(answers).forEach((id) => { if (!dropped[id]) kept[id] = answers[id]; });
+  return kept;
 }
 
 // Whichever person holds the role this stage waits on. Taken from the workflow itself, so the seed
@@ -89,7 +101,7 @@ function walkCase(ctx, people, call, demoCase) {
     if (!result.ok) throw new Error(`${action} failed for ${who}: ${result.error.code}`);
     return result.data;
   };
-  let application = run(demoCase.therapist, "applications.create", { values: answersFor(demoCase) });
+  let application = run(demoCase.therapist, "applications.create", { values: answersFor(ctx, demoCase) });
   application = run(demoCase.therapist, "applications.submit", { id: application.id });
   for (const step of demoCase.steps) {
     const actor = actorFor(ctx, people, application.status);

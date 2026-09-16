@@ -29,7 +29,7 @@ const DECISIONS = Object.freeze({
 // neither of those is a signature, so neither happens here: the form links to that screen instead.
 const REVIEW_ACTIONS = Object.freeze(["APPROVE", "SEND_BACK", "REJECT"]);
 
-const state = { page: null, me: null, app: null, sheet: null, regPreview: null, number: null, actions: [], choice: null, decided: null };
+const state = { page: null, me: null, app: null, sheet: null, regPreview: null, number: null, keptNumber: false, actions: [], choice: null, decided: null };
 
 const today = () => new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
 const locale = () => (state.page.prefs().lang === "en" ? "en-IN" : "ta-IN");
@@ -154,6 +154,12 @@ function drawDone() {
   // Whatever the server issued, and only what it issued: a preview never reaches this line.
   $("done-regno").textContent = decided.registrationNo || "";
   $("done-regno-field").hidden = !decided.registrationNo;
+  // A number the file already carried is not issued again (decision #5), so when the one above is
+  // that number the screen says so. Two signings reach here: a reopened file signed a second time,
+  // which keeps its number, and a waitlisted one — which is never issued a number at all — showing
+  // the one it was given when it was admitted, the only path where a waitlist carries a number.
+  const kept = Boolean(decided.registrationNo && state.keptNumber);
+  $("done-regno-note").hidden = !kept;
   $("done-signed").textContent = t("decide.signedBy", { date: stampOf(decided.decidedAt) });
   // A waitlisted application is read-only but is not called locked (decision #4), and only an
   // admitted one is: so the sentence about who can see the decision is said for an admit alone.
@@ -270,6 +276,9 @@ async function main() {
   }
   state.app = result.data;
   state.number = state.regPreview.show(state.app); // null when there is no honest preview to show
+  // Whether this file arrived here with a number already, which is what tells D1 below whether the
+  // number it shows was minted by this signing or kept from before it.
+  state.keptNumber = Boolean(state.app.registrationNo);
   wire();
   page.onRender(draw); // drawn in code, so a language change redraws the whole form
 }
