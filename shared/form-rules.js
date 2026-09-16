@@ -17,6 +17,7 @@ var SC_FormRules = (function () {
     REQUIRED: Object.freeze({ en: "Please answer this question.", ta: "இந்தக் கேள்விக்குப் பதிலளிக்கவும்." }),
     TOO_LONG: Object.freeze({ en: "This answer is too long. Please shorten it.", ta: "இந்தப் பதில் மிக நீளமாக உள்ளது. சுருக்கவும்." }),
     INVALID_VALUE: Object.freeze({ en: "This answer isn't in the right form. Please enter it again.", ta: "இந்தப் பதில் சரியான வடிவில் இல்லை. மீண்டும் உள்ளிடவும்." }),
+    CONSENT_STALE: Object.freeze({ en: "The details changed after the parent signed. Please take the signature again.", ta: "பெற்றோர் கையொப்பமிட்ட பிறகு விவரங்கள் மாறியுள்ளன. கையொப்பத்தை மீண்டும் பெறவும்." }),
     INVALID_PHONE: Object.freeze({ en: "Enter the phone number with 10 digits.", ta: "10 இலக்கத் தொலைபேசி எண்ணை உள்ளிடவும்." }),
     INVALID_PINCODE: Object.freeze({ en: "Enter the 6-digit pincode.", ta: "6 இலக்க அஞ்சல் குறியீட்டை உள்ளிடவும்." }),
     INVALID_DATE: Object.freeze({ en: "Choose a real date.", ta: "சரியான தேதியைத் தேர்ந்தெடுக்கவும்." }),
