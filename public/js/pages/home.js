@@ -232,6 +232,7 @@ async function main() {
   // Drawn in code, so a language change redraws the count, the cards and the track with it.
   page.onRender(draw);
   $("new-application").hidden = !SC_Permissions.can(user.roles, "application.create");
+  $("nav-reports").hidden = !SC_Permissions.can(user.roles, "reports.view");
   $("refresh").addEventListener("click", () => refresh());
   keepFresh();
   await load();

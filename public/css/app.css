@@ -552,3 +552,27 @@ textarea.input { min-height: 120px; resize: vertical; }
 .sign-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 .sign-state { font-weight: 700; color: var(--ok); margin: 0; }
 .sign-state.is-stale { color: var(--bad); }
+
+/* Reports screen (main spec §7): the filter grid and the table/bar-chart output. */
+.report-filters { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.report-filters .field:last-child:nth-child(odd) { grid-column: 1 / -1; }
+.report-out { margin-top: 16px; }
+.report-out-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; }
+.report-out-head h2 { margin: 0; font-size: 1.05rem; }
+.report-summary { color: var(--ink-2); font-size: 0.95rem; margin: 0 0 10px; }
+.report-out h3 { margin: 0 0 8px; font-size: 0.95rem; }
+.table-wrap { overflow-x: auto; }
+.report-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.report-table th, .report-table td { text-align: left; padding: 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.report-table th { color: var(--ink-2); font-weight: 700; background: var(--surface-2); }
+.report-table td { color: var(--ink); }
+.bar-chart { display: grid; gap: 8px; margin-bottom: 16px; }
+.bar-row { display: grid; grid-template-columns: 7rem 1fr 2rem; align-items: center; gap: 8px; }
+.bar-label { color: var(--ink-2); font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-track { height: 14px; background: var(--primary-soft); border-radius: 7px; overflow: hidden; }
+.bar-fill { height: 100%; background: var(--primary); border-radius: 7px; min-width: 2px; }
+.bar-count { color: var(--ink); font-size: 0.85rem; text-align: right; }
+@media (max-width: 480px) {
+  .report-filters { grid-template-columns: 1fr; }
+  .bar-row { grid-template-columns: 6rem 1fr 2rem; }
+}
