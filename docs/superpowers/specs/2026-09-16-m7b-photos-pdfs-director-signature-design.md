@@ -74,7 +74,7 @@ allowed-mime list:
 | PHOTO | image/png, image/jpeg |
 | DIAGNOSIS | image/png, image/jpeg, application/pdf |
 | UDID | image/png, image/jpeg, application/pdf |
-| CONSENT_SIGNATURE | image/png |
+| CONSENT_SIGNATURE | image/png, image/jpeg |
 
 `attachments.upload` gains the **10-file cap** (main spec §10.3): it counts the application's live
 attachments and refuses `TOO_MANY_FILES` when the new one would be the eleventh. The 5 MB cap
