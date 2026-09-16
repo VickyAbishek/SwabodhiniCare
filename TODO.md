@@ -9,9 +9,9 @@ Status: `[x]` done · `[~]` in progress · `[ ]` not started. Each milestone get
 
 ## ▶ Start here (updated 2026-09-16)
 
-**Branch:** `feat/m7a-consent-signature` — the parent's consent signature. **M7a is done** (326 tests, checked in a browser); the milestone section below records what carried forward.
+**M7a (the parent's consent signature) is done and merged** — PR #9, 326 tests, checked in a browser. The milestone section below records what carried forward.
 
-**Next action:** merge M7a's PR, then start **M7b** (photos, PDFs and the Director's signature) from the merged tip. M7b widens `M7A_KINDS` in `Attachments.gs` and adds `s2_udid_file` to the schema.
+**Next action:** start **M7b** (photos, PDFs and the Director's signature) from `main`'s tip. M7b widens `M7A_KINDS` in `Attachments.gs` and adds `s2_udid_file` to the schema.
 
 Run tasks **inline, not with subagents** (token cost).
 
@@ -20,7 +20,7 @@ Run tasks **inline, not with subagents** (token cost).
 | Spec (the *why*) | `docs/superpowers/specs/2026-09-16-m7a-consent-signature-design.md` |
 | Plan (the *how*) | `docs/superpowers/plans/2026-09-16-m7a-consent-signature.md` — all 48 boxes ticked |
 | Tests now | **326 pass, 0 fail** — `npm test` (runs the scope check, then `node --test`) |
-| Open PR | `feat/m7a-consent-signature` → `main` (merge manually) |
+| M7a PR | **#9**, merged into `main` |
 | Dev server | `node poc/scripts/dev-server.mjs` → http://127.0.0.1:8787 · sign in `priya@example.com` / `demo-pass-2026` (all demo staff share it; see `poc/seed/demo-data.mjs`) |
 
 **M7a closed the one thing worth knowing:** `s11_signature` is `required: true` (`shared/form-schema.js:184`) and nothing could produce one, so no application had ever passed the submit check — M5 seeded past it and M6 built the approval chain on files that never went through it. The remaining gap is the fresh-draft *submit* button, recorded under the M7a heading.
