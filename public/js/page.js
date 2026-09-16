@@ -6,6 +6,7 @@ import { CONFIG } from "./config.js";
 import { loadTransport, createApi } from "./api.js";
 import { createI18n, applyTranslations, loadDictionaries, errorText } from "./i18n.js";
 import { readPrefs, savePrefs, applyPrefs } from "./prefs.js";
+import { registerServiceWorker } from "./sw-register.js";
 
 export const PAGES = Object.freeze({
   signIn: "index.html",
@@ -55,6 +56,7 @@ function wirePasswordToggles(state) {
 
 // Starts a screen. With requireSignIn, people without a session are sent to the sign-in screen.
 export async function startPage({ requireSignIn = false } = {}) {
+  registerServiceWorker(); // no-op on localhost and in tests (guarded inside)
   const storage = deviceStorage();
   const fetchImpl = window.fetch.bind(window);
   const state = { prefs: readPrefs(storage), i18n: null };
