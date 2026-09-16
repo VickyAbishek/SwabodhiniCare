@@ -79,6 +79,17 @@ test("show-if rules point at an earlier, always-shown question", () => {
   }
 });
 
+test("the UDID certificate is a file question shown only when the family has one", () => {
+  const udid = F.fieldById("s2_udid_file");
+  assert.ok(udid, "s2_udid_file exists");
+  assert.equal(udid.type, "file");
+  assert.equal(udid.kind, "UDID");
+  assert.equal(udid.maxFiles, 1);
+  assert.equal(udid.required, false);
+  assert.deepEqual(udid.showIf, { field: "s2_udid_status", equals: "HAVE" });
+  assert.equal(F.stepById("s2").fields.some((f) => f.id === "s2_udid_file"), true);
+});
+
 test("there is no Aadhaar number question", () => {
   assert.ok(!F.allFields().some((f) => /aadhaar/.test(f.id) && f.type !== "choice"));
 });
