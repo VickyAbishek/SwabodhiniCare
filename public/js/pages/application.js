@@ -14,6 +14,7 @@ import { createAutosave, saveStatusKey } from "../autosave.js";
 import { createConfirmSheet } from "../confirm-sheet.js";
 import { renderQuestion } from "../form-render.js";
 import { isBlank, trimToInk, fitTo } from "../signature-pad.js";
+import { compress, blobToBase64 } from "../image-compress.js";
 import { joinNames } from "../i18n.js";
 
 const { SC_FormSchema, SC_FormRules, SC_Dates, SC_Workflow } = window;
@@ -361,6 +362,76 @@ function signaturePng(strokes) {
   return out.toDataURL("image/png").split(",")[1];
 }
 
+/* A file question's browser half: the pickers and the remove buttons, plus loading image bytes for
+   thumbnails. The pure geometry is in image-compress.js; this owns the upload and the calls. */
+function wireFileQuestion(field) {
+  const makePicker = (accept, capture) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = accept;
+    if (capture) input.setAttribute("capture", "environment");
+    input.hidden = true;
+    input.addEventListener("change", () => {
+      const file = input.files && input.files[0];
+      if (file) uploadFile(field, file);
+      input.value = "";
+    });
+    document.body.append(input);
+    return input;
+  };
+  const accept = field.kind === "PHOTO" ? "image/*" : "image/*,application/pdf";
+  const camera = $(`${field.id}-camera`);
+  if (camera) camera.addEventListener("click", () => makePicker("image/*", true).click());
+  const choose = $(`${field.id}-choose`);
+  if (choose) choose.addEventListener("click", () => makePicker(accept, false).click());
+  const ids = Array.isArray(field.value) ? field.value : [];
+  ids.forEach((id) => {
+    const remove = $(`${field.id}-remove-${id}`);
+    if (remove) remove.addEventListener("click", () => removeFile(field, id));
+    loadThumb(field, id);
+  });
+}
+
+async function uploadFile(field, file) {
+  const page = state.page;
+  let blob = file;
+  if (file.type.indexOf("image/") === 0) {
+    try { blob = await compress(file, { maxDim: 1600, target: 300 * 1024 }); }
+    catch (err) { console.error("The photo could not be compressed", err); }
+  }
+  const base64 = await blobToBase64(blob);
+  const result = await page.api.call("attachments.upload", {
+    applicationId: state.app.id, kind: field.kind, filename: file.name || "file", base64,
+  });
+  if (!result.ok) { showMessage($("message"), page.errorMessage(result.error)); return; }
+  const current = Array.isArray(state.values[field.id]) ? state.values[field.id] : [];
+  // Replacing (maxFiles 1) removes the old file explicitly, so it does not linger on the cap.
+  if (field.maxFiles === 1 && current.length > 0) {
+    await page.api.call("attachments.delete", { id: current[0] });
+  }
+  const next = field.maxFiles === 1 ? [result.data.id] : current.concat(result.data.id);
+  const fresh = await page.api.call("applications.get", { id: state.app.id });
+  if (fresh.ok) state.app = fresh.data;
+  onAnswer(field.id, next, true);
+}
+
+async function removeFile(field, id) {
+  const page = state.page;
+  const result = await page.api.call("attachments.delete", { id });
+  if (!result.ok) { showMessage($("message"), page.errorMessage(result.error)); return; }
+  const next = (state.values[field.id] || []).filter((x) => x !== id);
+  const fresh = await page.api.call("applications.get", { id: state.app.id });
+  if (fresh.ok) state.app = fresh.data;
+  onAnswer(field.id, next, true);
+}
+
+async function loadThumb(field, id) {
+  const img = $(`${field.id}-thumb-${id}`);
+  if (!img) return;
+  const result = await state.page.api.call("attachments.get", { id });
+  if (result.ok) img.src = `data:${result.data.mime};base64,${result.data.base64}`;
+}
+
 /* What to say when a signature no longer covers the answers. The server sends the list of facts
    that moved; naming them is the whole point. "Please sign again" with no reason is the defect
    closed in the rejection banner. */
@@ -381,9 +452,11 @@ function renderStep() {
   $("step-title").textContent = model.title;
   $("app-no").textContent = state.app.appNo;
   renderTicks(model.number);
-  const ctx = { t, today: today(), view, readOnly: state.readOnly, errorText, onAnswer };
+  const attachments = (state.app.attachments || []).reduce((map, a) => { map[a.id] = a; return map; }, {});
+  const ctx = { t, today: today(), view, readOnly: state.readOnly, errorText, onAnswer, attachments };
   $("fields").replaceChildren(...model.fields.map((field) => renderQuestion(field, ctx)));
   model.fields.filter((f) => f.type === "signature").forEach(wireSignaturePad);
+  model.fields.filter((f) => f.type === "file").forEach(wireFileQuestion);
   drawPrimary(model);
   renderBanner();
   renderFileActions();

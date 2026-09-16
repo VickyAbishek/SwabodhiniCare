@@ -37,11 +37,16 @@ test("choice questions list their answers with the current one marked", () => {
   assert.equal(programs.options.find((o) => o.value === "YOGA").selected, true);
 });
 
-test("photo questions still wait for uploads (M7b); the signature no longer does", () => {
-  assert.equal(field(view.stepModel("s2", {}, TODAY, "en"), "s2_photo").waitsForUploads, true);
-  // M7a built the pad, so the consent step must stop telling people to come back later.
-  assert.equal(field(view.stepModel("s11", {}, TODAY, "en"), "s11_signature").waitsForUploads, false);
-  assert.equal(field(view.stepModel("s2", {}, TODAY, "en"), "s2_full_name").waitsForUploads, false);
+test("file questions carry their kind and maxFiles to the renderer", () => {
+  const photo = field(view.stepModel("s2", {}, TODAY, "en"), "s2_photo");
+  assert.equal(photo.kind, "PHOTO");
+  assert.equal(photo.maxFiles, 1);
+  const report = field(view.stepModel("s4", {}, TODAY, "en"), "s4_diagnosis_report");
+  assert.equal(report.kind, "DIAGNOSIS");
+  assert.equal(report.maxFiles, 3);
+  const udid = field(view.stepModel("s2", { s2_udid_status: "HAVE" }, TODAY, "en"), "s2_udid_file");
+  assert.equal(udid.kind, "UDID");
+  assert.equal(udid.maxFiles, 1);
 });
 
 test("typed input becomes an answer of the right type", () => {
