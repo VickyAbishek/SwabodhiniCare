@@ -1,0 +1,82 @@
+<!-- scope: shared -->
+<!doctype html>
+<html lang="ta" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SwabodhiniCare</title>
+<script src="js/theme-boot.js"></script>
+<script src="shared/dates.js"></script>
+<script src="shared/actions.js"></script>
+<script src="shared/permissions.js"></script>
+<script src="shared/workflow.js"></script>
+<script src="shared/form-schema.js"></script>
+<script src="shared/reports.js"></script>
+<link rel="stylesheet" href="css/app.css">
+<script type="module" src="js/pages/reports.js"></script>
+</head>
+<body>
+<div class="app">
+  <header class="app-bar">
+    <span class="wordmark">Swabodhini<b>Care</b></span>
+    <button type="button" class="btn btn-outline btn-small" data-lang-toggle>தமிழ் / English</button>
+  </header>
+  <main class="screen">
+    <div class="brand">
+      <h1 data-i18n="reports.title">Reports</h1>
+      <p class="muted" data-i18n="reports.subtitle">Summaries and lists for the whole centre</p>
+    </div>
+    <p class="alert alert-bad" id="message" role="alert" hidden></p>
+
+    <section class="panel" aria-labelledby="filters-title">
+      <div class="field">
+        <label for="report" data-i18n="reports.report">Report</label>
+        <select id="report" class="select"></select>
+      </div>
+      <div class="report-filters">
+        <div class="field" id="centre-field">
+          <label for="f-centre" data-i18n="reports.centre">Centre</label>
+          <select id="f-centre" class="select"></select>
+        </div>
+        <div class="field" id="status-field">
+          <label for="f-status" data-i18n="reports.status">Status</label>
+          <select id="f-status" class="select"></select>
+        </div>
+        <div class="field" id="program-field">
+          <label for="f-program" data-i18n="reports.program">Program</label>
+          <select id="f-program" class="select"></select>
+        </div>
+        <div class="field" id="age-field">
+          <label for="f-age" data-i18n="reports.ageBand">Age band</label>
+          <select id="f-age" class="select"></select>
+        </div>
+        <div class="field" id="from-field">
+          <label for="f-from" data-i18n="reports.from">From</label>
+          <input type="date" id="f-from" class="input">
+        </div>
+        <div class="field" id="to-field">
+          <label for="f-to" data-i18n="reports.to">To</label>
+          <input type="date" id="f-to" class="input">
+        </div>
+      </div>
+      <button type="button" class="btn btn-primary" id="apply" data-i18n="reports.apply">Apply</button>
+    </section>
+
+    <section class="report-out" aria-live="polite">
+      <div class="report-out-head">
+        <h2 data-i18n="reports.output">Results</h2>
+        <button type="button" class="btn btn-outline btn-small" id="download" data-i18n="reports.download" hidden>Download Excel</button>
+      </div>
+      <p id="summary" class="report-summary" hidden></p>
+      <p class="muted" id="empty" data-i18n="reports.empty" hidden>No rows match these filters.</p>
+      <div id="output"></div>
+    </section>
+  </main>
+  <nav class="bottom-nav" aria-label="Main">
+    <a href="home.html" data-i18n="nav.home">Home</a>
+    <a href="reports.html" aria-current="page" id="nav-reports" data-i18n="nav.reports">Reports</a>
+    <a href="settings.html" data-i18n="nav.settings">Settings</a>
+  </nav>
+</div>
+</body>
+</html>
