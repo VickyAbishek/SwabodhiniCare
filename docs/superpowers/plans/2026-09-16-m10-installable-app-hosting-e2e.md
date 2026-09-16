@@ -50,11 +50,11 @@ Closes the deploy gap: Cloudflare Pages serves only `public/`, but the HTML load
 - **Consumes:** `node:fs`/`node:path` (dev script — `check-scope.mjs` itself does the same).
 - **Produces:** `copyShared(root)` → copies every `shared/*.js` into `public/shared/`; `checkReferences(root)` → walks `public/*.html`, returns the list of `shared/…` `src`s whose file is missing from `shared/`; `run(root)` → both, failing with a non-zero exit on any missing reference.
 
-- [ ] **Step 1: Write the failing test** (`tests/scripts/deploy-check.test.mjs`, on a temp dir): `copyShared` copies `a.js`/`b.js` into `public/shared/`; `checkReferences` reports a missing `shared/missing.js` and passes a present one; `run` exits non-zero when a reference is missing.
-- [ ] **Step 2: Run to verify it fails** (no `deploy-check.mjs`).
-- [ ] **Step 3: Implement** `scripts/deploy-check.mjs` (`// scope: shared`, the `isMain` pattern from `dev-server.mjs` so it runs when invoked and exports when imported).
-- [ ] **Step 4: Add `public/shared/` to `.gitignore`.**
-- [ ] **Step 5: Run the suite and commit** (`feat: deploy-check — copy shared/ into public/shared/ for Pages`).
+- [x] **Step 1: Write the failing test** (`tests/scripts/deploy-check.test.mjs`, on a temp dir): `copyShared` copies `a.js`/`b.js` into `public/shared/`; `checkReferences` reports a missing `shared/missing.js` and passes a present one; `run` exits non-zero when a reference is missing.
+- [x] **Step 2: Run to verify it fails** (no `deploy-check.mjs`).
+- [x] **Step 3: Implement** `scripts/deploy-check.mjs` (`// scope: shared`, the `isMain` pattern from `dev-server.mjs` so it runs when invoked and exports when imported).
+- [x] **Step 4: Add `public/shared/` to `.gitignore`.**
+- [x] **Step 5: Run the suite and commit** (`feat: deploy-check — copy shared/ into public/shared/ for Pages`).
 
 ### Task 2: PWA — manifest, service worker, offline page, registration, icon
 
