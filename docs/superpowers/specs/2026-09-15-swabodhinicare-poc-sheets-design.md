@@ -102,6 +102,13 @@ const { ok, data, error } = await res.json();
 | `attachments.upload`, `.get`, `.delete`, `signature.upload` | attachments, `/api/me/signature` |
 | `reports.get` | `/api/reports/:name` |
 | `admin.backups.list`, `admin.backups.runNow`, `admin.audit.list` | `/api/admin/*` |
+| `setup.firstAdmin` `[POC]` | none (production creates the first Admin with a one-time script) |
+
+**First Admin (bootstrap).** No password or key is ever committed; the repository is public.
+1. The developer runs `setup()` once in the Apps Script editor. It creates the data Sheet (if `SHEET_ID` is empty), the tabs, the 4 centres and `HMAC_SECRET`. While no active Admin exists, it also creates a **one-time 12-character setup code** in Script Properties and prints it in the execution log.
+2. The first Admin opens the app, enters the setup code, their email and name, and chooses a password. The phone derives the key as usual, and `setup.firstAdmin` creates the account.
+3. The code is deleted as soon as it's used. Five wrong codes also delete it, and `setup()` must be run again for a new one. Once an Admin exists, `setup.firstAdmin` always answers `NOT_ALLOWED`.
+4. All other staff, including one test account per role, are then created by the Admin in the app.
 
 ## 6. Google Sheet layout
 
@@ -128,7 +135,7 @@ const { ok, data, error } = await res.json();
 - **Session token:** 32 random bytes, returned at login and sent in the body of every request. Because the API runs on Google's domain, a cookie wouldn't be sent, so the token is kept in `localStorage`.
   - Risk: a script injected into the page could read the token. Mitigations: the strict CSP from main spec §10.2, no `innerHTML`, and a 12-hour idle / 7-day maximum expiry checked on the server.
   - Production goes back to `HttpOnly` cookies.
-- Tokens are looked up through `CacheService` (10-minute cache) to avoid reading the `Sessions` tab on every call.
+- Each signed-in request reads the `Sessions` tab. "Last seen" is written at most every 5 minutes, to save Sheet writes. If requests feel slow, a `CacheService` layer can be added (values last up to 6 hours, 100 KB each).
 - **Lockout:** 5 failed attempts locks the account for 15 minutes. Apps Script can't see the caller's IP address, so lockout is per account only.
 - **Permissions** are checked on the server for every action, using the same role rules as main spec §4.
 
@@ -196,12 +203,17 @@ monthlyBackup():
 > The full folder rules (`shared/` vs `poc/` vs `prod/`) are in `docs/architecture/scope-map.md` §1. The POC server lives in `poc/apps-script/`.
 
 ```
-poc/apps-script/             # Deployed to Google with clasp (dev-only tool) or pasted into the editor
+poc/apps-script/             # Bundled by poc/scripts/build.mjs into one Code.js, pushed with clasp (dev-only)
   appsscript.json            # V8 runtime, timezone Asia/Kolkata, web app: execute as owner, access anyone
-  Api.gs                     # doPost router, envelope, token check, permission check
-  Auth.gs  Users.gs  Applications.gs  Attachments.gs  Reports.gs  Backup.gs
-  Sheets.gs                  # tab ↔ object mapping, adding columns from the form schema, locks, counters
-  Setup.gs                   # one-time: create tabs, fill Centres, create the monthly trigger
+  Api.gs                     # doPost router, envelope, sign-in, capability and temporary-password checks
+  Store.gs                   # tab ↔ object mapping, columns from the form schema, readable encodings, lock, counters
+  Crypto.gs  Auth.gs         # hashing, tokens, constant-time compare; prelogin, login, sessions, password change
+  Users.gs  Audit.gs         # profile + staff accounts; audit log
+  Setup.gs                   # one-time: data Sheet, tabs, centres, HMAC_SECRET, first-Admin setup code
+  Applications.gs  Attachments.gs  Reports.gs  Backup.gs    # later milestones (M5–M9)
+poc/scripts/
+  source-order.mjs           # load order (shared scripts first), used by the build and the tests
+  build.mjs                  # writes build/apps-script/Code.js + appsscript.json (git-ignored)
 shared/
   form-schema.js             # plain script (global FORM_SCHEMA): used by browser, Apps Script, Node tests
   workflow.js                # pure state machine (main spec §5): same file in browser, Apps Script, later Worker

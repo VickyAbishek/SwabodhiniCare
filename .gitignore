@@ -1,5 +1,10 @@
 # Local browser-automation output (screenshots, logs)
 .playwright-mcp/
 
+# POC build output and Google clasp credentials/config (per developer, never commit)
+build/
+.clasp.json
+.clasprc.json
+
 # OS / editor
 .DS_Store
